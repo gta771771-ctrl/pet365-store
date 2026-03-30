@@ -23,6 +23,8 @@ app.use('/api/orders', require('./server/routes/orders'));
 app.use('/api/content', require('./server/routes/content'));
 app.use('/api/files', require('./server/routes/files'));
 app.use('/api/admin', require('./server/routes/admin'));
+app.use('/api/pets', require('./server/routes/pets'));
+app.use('/api/vet', require('./server/routes/vet'));
 
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
@@ -36,6 +38,10 @@ app.get('/cart', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/c
 app.get('/orders', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/orders.html')));
 app.get('/team', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/team.html')));
 app.get('/upload', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/upload.html')));
+app.get('/pets', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/pets.html')));
+app.get('/vet-discount', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/vet-discount.html')));
+app.get('/wellness', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/wellness.html')));
+app.get('/reimbursements', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/reimbursements.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 
