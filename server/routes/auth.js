@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 const db = require('../database');
 
 const router = express.Router();
@@ -34,7 +35,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Check existing user
-    const existingUser = db.get("SELECT id FROM users WHERE username = ? OR email = ? OR phone = ?", 
+    const existingUser = db.get("SELECT id FROM users WHERE username = ? OR email = ? OR phone = ?",
       [username, email || '', phone || '']);
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User already exists' });
@@ -97,7 +98,7 @@ router.post('/register', async (req, res) => {
     });
   } catch (e) {
     console.error('Register error:', e);
-    res.status(500).json({ success: false, message: 'Registration failed' });
+    res.status(500).json({ success: false, message: 'Registration failed: ' + e.message });
   }
 });
 
@@ -139,7 +140,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (e) {
     console.error('Login error:', e);
-    res.status(500).json({ success: false, message: 'Login failed' });
+    res.status(500).json({ success: false, message: 'Login failed: ' + e.message });
   }
 });
 
