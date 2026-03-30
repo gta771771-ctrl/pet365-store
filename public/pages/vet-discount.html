@@ -331,7 +331,7 @@
         const res = await fetch('/api/vet/enroll-discount', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan_id: selectedPlanId })
+          body: JSON.stringify({ plan_id: selectedPlanId, pet_ids: selectedPets.map(p => p.id) })
         });
         const data = await res.json();
         if (data.success) {
