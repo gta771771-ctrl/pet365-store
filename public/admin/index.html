@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.sidebar-link{transition:all .2s}.sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:#0ea5e9}</style>
+</head>
+<body class="bg-gray-100">
+
+<!-- Login Page -->
+<div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-paw text-white text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold">Admin Login</h1>
+    </div>
+    <form id="admin-login-form" class="space-y-4">
+      <input type="text" id="admin-username" placeholder="Username" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+      <input type="password" id="admin-password" placeholder="Password" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+      <div id="login-error" class="hidden text-red-500 text-sm bg-red-50 px-4 py-2 rounded-lg"></div>
+      <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90">Sign In</button>
+    </form>
+    <div class="mt-4 text-center text-gray-500 text-sm">Default: admin / 123456</div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="main-app" class="hidden">
+  <div class="flex h-screen">
+    <aside class="w-64 bg-white shadow-lg flex-shrink-0">
+      <div class="p-6 border-b">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white"></i>
+          </div>
+          <span class="text-xl font-bold">PetPaw</span>
+        </a>
+      </div>
+      <nav class="p-4">
+        <div class="space-y-1" id="sidebar-menu">
+          <a href="#" data-page="dashboard" class="sidebar-link active flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-home w-5 mr-3"></i>Dashboard</a>
+          <a href="#" data-page="users" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-users w-5 mr-3"></i>Users</a>
+          <a href="#" data-page="products" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-box w-5 mr-3"></i>Products</a>
+          <a href="#" data-page="orders" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-shopping-bag w-5 mr-3"></i>Orders</a>
+          <a href="#" data-page="articles" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-newspaper w-5 mr-3"></i>Articles</a>
+          <a href="#" data-page="balance" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-wallet w-5 mr-3"></i>Balance Logs</a>
+          <a href="#" data-page="files" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-file-alt w-5 mr-3"></i>File Review</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto">
+      <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+        <h1 id="page-title" class="text-xl font-bold text-gray-900">Dashboard</h1>
+        <div class="flex items-center gap-4">
+          <span class="text-gray-600">Welcome, <span id="admin-name">Admin</span></span>
+          <button onclick="adminLogout()" class="text-red-500 hover:text-red-600"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+        </div>
+      </header>
+      <div id="page-content" class="p-6"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+let adminToken = null;
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review' };
+
+function checkAdminLogin() {
+  adminToken = localStorage.getItem('adminToken');
+  if (adminToken) {
+    document.getElementById('login-page').classList.add('hidden');
+    document.getElementById('main-app').classList.remove('hidden');
+    loadPage('dashboard');
+  }
+}
+
+document.getElementById('admin-login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const err = document.getElementById('login-error');
+  const btn = this.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Signing in...';
+
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('admin-username').value.trim(),
+        password: document.getElementById('admin-password').value
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      localStorage.setItem('adminToken', data.data.token);
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('main-app').classList.remove('hidden');
+      loadPage('dashboard');
+    } else {
+      err.textContent = data.message;
+      err.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  } catch (e) {
+    err.textContent = 'Network error';
+    err.classList.remove('hidden');
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+});
+
+function adminLogout() {
+  localStorage.removeItem('adminToken');
+  location.reload();
+}
+
+function getAdminHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (adminToken || localStorage.getItem('adminToken')) };
+}
+
+async function loadPage(page) {
+  document.querySelectorAll('.sidebar-link').forEach(l => {
+    l.classList.remove('active');
+    if (l.dataset.page === page) l.classList.add('active');
+  });
+  document.getElementById('page-title').textContent = pageTitles[page] || 'Dashboard';
+  const content = document.getElementById('page-content');
+  content.innerHTML = '<div class="text-center py-12"><i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i></div>';
+
+  switch (page) {
+    case 'dashboard': await loadDashboard(); break;
+    case 'users': await loadUsersPage(); break;
+    case 'products': await loadProductsPage(); break;
+    case 'orders': await loadOrdersPage(); break;
+    case 'articles': await loadArticlesPage(); break;
+    case 'balance': await loadBalancePage(); break;
+    case 'files': await loadFilesPage(); break;
+  }
+}
+
+async function loadDashboard() {
+  const res = await fetch('/api/admin/stats', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+  const s = data.data;
+
+  document.getElementById('page-content').innerHTML = `
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between"><div><div class="text-gray-500 text-sm">Total Users</div><div class="text-3xl font-bold">${s.totalUsers}</div></div><div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-users text-blue-500 text-xl"></i></div></div></div>
+      <div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between"><div><div class="text-gray-500 text-sm">Total Orders</div><div class="text-3xl font-bold">${s.totalOrders}</div></div><div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-shopping-bag text-green-500 text-xl"></i></div></div></div>
+      <div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between"><div><div class="text-gray-500 text-sm">Total Revenue</div><div class="text-3xl font-bold">$${s.totalRevenue}</div></div><div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-dollar-sign text-yellow-500 text-xl"></i></div></div></div>
+      <div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between"><div><div class="text-gray-500 text-sm">Products</div><div class="text-3xl font-bold">${s.totalProducts}</div></div><div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center"><i class="fas fa-box text-purple-500 text-xl"></i></div></div></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <h3 class="text-lg font-bold mb-4">Recent Orders</h3>
+      <div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Order #</th><th class="px-4 py-3 text-left text-gray-500">Amount</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Date</th></tr></thead>
+        <tbody>${s.recentOrders.map(o => `<tr class="border-b hover:bg-gray-50"><td class="px-4 py-3">${o.order_no}</td><td class="px-4 py-3">$${o.pay_amount}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${o.status === 4 ? 'bg-green-100 text-green-600' : o.status === 5 ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'}">${getOrderStatusText(o.status)}</span></td><td class="px-4 py-3">${new Date(o.created_at).toLocaleString()}</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+
+async function loadUsersPage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><input type="text" id="user-search" placeholder="Search users..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">ID</th><th class="px-4 py-3 text-left text-gray-500">Username</th><th class="px-4 py-3 text-left text-gray-500">Phone</th><th class="px-4 py-3 text-left text-gray-500">Balance</th><th class="px-4 py-3 text-left text-gray-500">Referrer</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="users-tbody"></tbody></table></div></div>`;
+  await loadUsers();
+  document.getElementById('user-search').addEventListener('input', function() { loadUsers(1, this.value); });
+}
+
+async function loadUsers(page = 1, keyword = '') {
+  const params = new URLSearchParams({ page, limit: 20 });
+  if (keyword) params.append('keyword', keyword);
+  const res = await fetch('/api/admin/users?' + params, { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  document.getElementById('users-tbody').innerHTML = data.data.map(u => `
+    <tr class="border-b hover:bg-gray-50">
+      <td class="px-4 py-3">${u.id}</td>
+      <td class="px-4 py-3 font-medium">${u.username}</td>
+      <td class="px-4 py-3">${u.phone || '-'}</td>
+      <td class="px-4 py-3 text-green-600 font-medium">$${u.balance.toFixed(2)}</td>
+      <td class="px-4 py-3">${u.parent_name || '-'}</td>
+      <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${u.status === 1 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${u.status === 1 ? 'Active' : 'Disabled'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick="showBalanceModal(${u.id}, '${u.username}', ${u.balance})" class="text-sky-500 hover:underline mr-2">Edit Balance</button>
+        <button onclick="toggleUserStatus(${u.id}, ${u.status})" class="text-${u.status === 1 ? 'red' : 'green'}-500 hover:underline">${u.status === 1 ? 'Disable' : 'Enable'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleUserStatus(id, status) {
+  if (!confirm(`${status === 1 ? 'Disable' : 'Enable'} this user?`)) return;
+  const res = await fetch(`/api/admin/users/${id}/status`, { method: 'PUT', headers: getAdminHeaders(), body: JSON.stringify({ status: status === 1 ? 0 : 1 }) });
+  const data = await res.json();
+  if (data.success) loadUsers();
+  else alert(data.message);
+}
+
+function showBalanceModal(id, name, balance) {
+  const html = `<div id="balance-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:white;border-radius:1rem;padding:1.5rem;width:100%;max-width:24rem">
+      <h3 style="font-size:1.125rem;font-weight:700;margin-bottom:1rem">Edit Balance - ${name}</h3>
+      <p style="color:#6b7280;margin-bottom:.5rem">Current: <span style="font-weight:700;color:#059669">$${balance.toFixed(2)}</span></p>
+      <select id="balance-type" style="width:100%;padding:.75rem;border:1px solid #e5e7eb;border-radius:.75rem;margin-bottom:.75rem">
+        <option value="add">Add Balance</option>
+        <option value="deduct">Deduct Balance</option>
+        <option value="set">Set Balance</option>
+      </select>
+      <input type="number" id="balance-amount" step="0.01" min="0" placeholder="Amount" style="width:100%;padding:.75rem;border:1px solid #e5e7eb;border-radius:.75rem;margin-bottom:.75rem">
+      <input type="text" id="balance-reason" placeholder="Reason (optional)" style="width:100%;padding:.75rem;border:1px solid #e5e7eb;border-radius:.75rem;margin-bottom:1rem">
+      <div style="display:flex;gap:1rem">
+        <button onclick="document.getElementById('balance-modal').remove()" style="flex:1;padding:.75rem;border:1px solid #e5e7eb;border-radius:.75rem">Cancel</button>
+        <button onclick="submitBalance(${id})" style="flex:1;padding:.75rem;background:linear-gradient(135deg,#0ea5e9,#10b981);color:white;border-radius:.75rem">Confirm</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function submitBalance(id) {
+  const type = document.getElementById('balance-type').value;
+  const amount = parseFloat(document.getElementById('balance-amount').value);
+  const reason = document.getElementById('balance-reason').value;
+
+  if (!amount || amount <= 0) { alert('Enter a valid amount'); return; }
+
+  const res = await fetch(`/api/admin/users/${id}/balance`, {
+    method: 'POST',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ type, amount, reason })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('balance-modal').remove();
+    loadUsers();
+  } else {
+    alert(data.message);
+  }
+}
+
+async function loadProductsPage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><input type="text" id="product-search" placeholder="Search products..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Image</th><th class="px-4 py-3 text-left text-gray-500">Name</th><th class="px-4 py-3 text-left text-gray-500">Price</th><th class="px-4 py-3 text-left text-gray-500">Stock</th><th class="px-4 py-3 text-left text-gray-500">Sales</th><th class="px-4 py-3 text-left text-gray-500">Status</th></tr></thead><tbody id="products-tbody"></tbody></table></div></div>`;
+  await loadProducts();
+  document.getElementById('product-search').addEventListener('input', function() { loadProducts(1, this.value); });
+}
+
+async function loadProducts(page = 1, keyword = '') {
+  const params = new URLSearchParams({ page, limit: 20 });
+  if (keyword) params.append('keyword', keyword);
+  const res = await fetch('/api/admin/products?' + params, { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  document.getElementById('products-tbody').innerHTML = data.data.map(p => `
+    <tr class="border-b hover:bg-gray-50">
+      <td class="px-4 py-3"><img src="${p.image}" class="w-12 h-12 object-cover rounded"></td>
+      <td class="px-4 py-3 font-medium">${p.name}</td>
+      <td class="px-4 py-3 text-sky-500 font-medium">$${p.price}</td>
+      <td class="px-4 py-3">${p.stock}</td>
+      <td class="px-4 py-3">${p.sales}</td>
+      <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${p.status === 1 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}">${p.status === 1 ? 'Active' : 'Inactive'}</span></td>
+    </tr>
+  `).join('');
+}
+
+async function loadOrdersPage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center gap-4 mb-6"><input type="text" id="order-search" placeholder="Search orders..." class="px-4 py-2 border rounded-lg w-64"><select id="order-status" class="px-4 py-2 border rounded-lg"><option value="">All Status</option><option value="1">Pending</option><option value="3">Shipped</option><option value="4">Completed</option><option value="5">Cancelled</option></select></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Order #</th><th class="px-4 py-3 text-left text-gray-500">User</th><th class="px-4 py-3 text-left text-gray-500">Amount</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Date</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="orders-tbody"></tbody></table></div></div>`;
+  await loadOrders();
+  document.getElementById('order-search').addEventListener('input', function() { loadOrders(1, this.value); });
+  document.getElementById('order-status').addEventListener('change', function() { loadOrders(1, '', this.value); });
+}
+
+async function loadOrders(page = 1, keyword = '', status = '') {
+  const params = new URLSearchParams({ page, limit: 20 });
+  if (keyword) params.append('keyword', keyword);
+  if (status) params.append('status', status);
+  const res = await fetch('/api/admin/orders?' + params, { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  document.getElementById('orders-tbody').innerHTML = data.data.map(o => `
+    <tr class="border-b hover:bg-gray-50">
+      <td class="px-4 py-3 font-mono text-xs">${o.order_no}</td>
+      <td class="px-4 py-3">${o.username}</td>
+      <td class="px-4 py-3 text-sky-500 font-medium">$${o.pay_amount.toFixed(2)}</td>
+      <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${o.status === 4 ? 'bg-green-100 text-green-600' : o.status === 5 ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'}">${getOrderStatusText(o.status)}</span></td>
+      <td class="px-4 py-3 text-xs">${new Date(o.created_at).toLocaleString()}</td>
+      <td class="px-4 py-3">${o.status === 1 ? `<button onclick="shipOrder(${o.id})" class="text-green-500 hover:underline">Ship</button>` : ''}</td>
+    </tr>
+  `).join('');
+}
+
+async function shipOrder(id) {
+  if (!confirm('Mark as shipped?')) return;
+  const res = await fetch(`/api/admin/orders/${id}/status`, { method: 'PUT', headers: getAdminHeaders(), body: JSON.stringify({ status: 3 }) });
+  const data = await res.json();
+  if (data.success) loadOrders();
+  else alert(data.message);
+}
+
+async function loadArticlesPage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-bold mb-4">Articles</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">ID</th><th class="px-4 py-3 text-left text-gray-500">Title</th><th class="px-4 py-3 text-left text-gray-500">Category</th><th class="px-4 py-3 text-left text-gray-500">Views</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="articles-tbody"></tbody></table></div></div>`;
+  await loadArticles();
+}
+
+async function loadArticles() {
+  const res = await fetch('/api/admin/articles', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  document.getElementById('articles-tbody').innerHTML = data.data.map(a => `
+    <tr class="border-b hover:bg-gray-50">
+      <td class="px-4 py-3">${a.id}</td>
+      <td class="px-4 py-3 font-medium">${a.title}</td>
+      <td class="px-4 py-3">${a.category || '-'}</td>
+      <td class="px-4 py-3">${a.views}</td>
+      <td class="px-4 py-3"><button onclick="deleteArticle(${a.id})" class="text-red-500 hover:underline">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+async function deleteArticle(id) {
+  if (!confirm('Delete this article?')) return;
+  const res = await fetch(`/api/admin/articles/${id}`, { method: 'DELETE', headers: getAdminHeaders() });
+  const data = await res.json();
+  if (data.success) loadArticles();
+  else alert(data.message);
+}
+
+async function loadBalancePage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-bold mb-4">Balance Logs</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">ID</th><th class="px-4 py-3 text-left text-gray-500">User</th><th class="px-4 py-3 text-left text-gray-500">Type</th><th class="px-4 py-3 text-left text-gray-500">Amount</th><th class="px-4 py-3 text-left text-gray-500">Before</th><th class="px-4 py-3 text-left text-gray-500">After</th><th class="px-4 py-3 text-left text-gray-500">Reason</th><th class="px-4 py-3 text-left text-gray-500">Date</th></tr></thead><tbody id="balance-tbody"></tbody></table></div></div>`;
+  const res = await fetch('/api/admin/balance-logs', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  document.getElementById('balance-tbody').innerHTML = data.data.map(l => `
+    <tr class="border-b hover:bg-gray-50">
+      <td class="px-4 py-3">${l.id}</td>
+      <td class="px-4 py-3">${l.username}</td>
+      <td class="px-4 py-3">${l.type === 'add' ? 'Add' : l.type === 'deduct' ? 'Deduct' : l.type === 'set' ? 'Set' : 'Refund'}</td>
+      <td class="px-4 py-3 font-medium ${l.type === 'add' || l.type === 'refund' ? 'text-green-600' : 'text-red-600'}">${l.type === 'add' || l.type === 'refund' ? '+' : '-'}$${l.amount.toFixed(2)}</td>
+      <td class="px-4 py-3">$${l.before_balance.toFixed(2)}</td>
+      <td class="px-4 py-3">$${l.after_balance.toFixed(2)}</td>
+      <td class="px-4 py-3">${l.reason || '-'}</td>
+      <td class="px-4 py-3 text-xs">${new Date(l.created_at).toLocaleString()}</td>
+    </tr>
+  `).join('');
+}
+
+async function loadFilesPage() {
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center gap-4 mb-6"><select id="file-status" class="px-4 py-2 border rounded-lg"><option value="">All Status</option><option value="0">Pending</option><option value="1">Approved</option><option value="2">Rejected</option></select></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">User</th><th class="px-4 py-3 text-left text-gray-500">Filename</th><th class="px-4 py-3 text-left text-gray-500">Type</th><th class="px-4 py-3 text-left text-gray-500">Size</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Date</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="files-tbody"></tbody></table></div></div>`;
+  await loadFiles();
+  document.getElementById('file-status').addEventListener('change', function() { loadFiles(this.value); });
+}
+
+async function loadFiles(status = '') {
+  const params = new URLSearchParams({ limit: 50 });
+  if (status !== '') params.append('status', status);
+  const res = await fetch('/api/admin/files?' + params, { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (!data.success) return;
+
+  const statusMap = { 0: 'Pending', 1: 'Approved', 2: 'Rejected' };
+  const statusClass = { 0: 'bg-yellow-100 text-yellow-700', 1: 'bg-green-100 text-green-700', 2: 'bg-red-100 text-red-700' };
+
+  document.getElementById('files-tbody').innerHTML = data.data.length === 0
+    ? '<tr><td colspan="7" class="text-center py-8 text-gray-400">No files</td></tr>'
+    : data.data.map(f => `
+      <tr class="border-b hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium">${f.username}</td>
+        <td class="px-4 py-3 max-w-[160px] truncate">${f.original_name}</td>
+        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${f.file_type === 'pdf' ? 'bg-red-100 text-red-600' : 'bg-sky-100 text-sky-600'}">${f.file_type === 'pdf' ? 'PDF' : 'Image'}</span></td>
+        <td class="px-4 py-3">${formatSize(f.file_size)}</td>
+        <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${statusClass[f.status]}">${statusMap[f.status]}</span>${f.admin_remark ? `<div class="text-xs text-gray-400">${f.admin_remark}</div>` : ''}</td>
+        <td class="px-4 py-3 text-xs">${new Date(f.created_at).toLocaleString()}</td>
+        <td class="px-4 py-3">
+          <div class="flex flex-col gap-1">
+            <a href="${f.file_path}" target="_blank" class="text-sky-500 hover:underline text-xs"><i class="fas fa-eye mr-1"></i>View</a>
+            ${f.status === 0 ? `<button onclick="reviewFile(${f.id}, 1)" class="text-green-500 hover:underline text-xs text-left"><i class="fas fa-check mr-1"></i>Approve</button><button onclick="reviewFile(${f.id}, 2)" class="text-red-500 hover:underline text-xs text-left"><i class="fas fa-times mr-1"></i>Reject</button>` : ''}
+            <button onclick="deleteFile(${f.id})" class="text-gray-400 hover:text-red-500 hover:underline text-xs text-left"><i class="fas fa-trash mr-1"></i>Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+async function reviewFile(id, status) {
+  const remark = prompt('Review note (optional):');
+  if (remark === null) return;
+  const res = await fetch(`/api/admin/files/${id}/review`, { method: 'PUT', headers: getAdminHeaders(), body: JSON.stringify({ status, admin_remark: remark || '' }) });
+  const data = await res.json();
+  if (data.success) loadFiles(document.getElementById('file-status').value);
+  else alert(data.message);
+}
+
+async function deleteFile(id) {
+  if (!confirm('Delete this file?')) return;
+  const res = await fetch(`/api/admin/files/${id}`, { method: 'DELETE', headers: getAdminHeaders() });
+  const data = await res.json();
+  if (data.success) loadFiles(document.getElementById('file-status').value);
+  else alert(data.message);
+}
+
+function getOrderStatusText(status) {
+  const map = { 1: 'Pending', 2: 'Paid', 3: 'Shipped', 4: 'Completed', 5: 'Cancelled' };
+  return map[status] || 'Unknown';
+}
+
+document.getElementById('sidebar-menu').addEventListener('click', function(e) {
+  const link = e.target.closest('.sidebar-link');
+  if (link) { e.preventDefault(); loadPage(link.dataset.page); }
+});
+
+document.addEventListener('DOMContentLoaded', checkAdminLogin);
+</script>
+</body>
+</html>
