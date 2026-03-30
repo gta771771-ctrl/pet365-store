@@ -192,6 +192,7 @@ async function init() {
       status TEXT DEFAULT 'active',
       start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
       end_date DATETIME,
+      pets TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -209,6 +210,7 @@ async function init() {
       reimbursement_used REAL DEFAULT 0,
       start_date DATETIME DEFAULT CURRENT_TIMESTAMP,
       end_date DATETIME,
+      pets TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
