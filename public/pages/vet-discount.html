@@ -7,9 +7,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
-  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);} .card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);} .card{transition:all .3s ease;}</style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
   <nav class="bg-white shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
@@ -22,7 +23,7 @@
           <a href="/vet-discount" class="text-sky-500 font-medium">Vet Discount</a>
           <a href="/wellness" class="text-gray-600 hover:text-sky-500">Wellness</a>
           <a href="/shop" class="text-gray-600 hover:text-sky-500">Shop</a>
-          <a href="/blog" class="text-gray-600 hover:text-sky-500">Blog</a>
+          <a href="/profile" class="text-gray-600 hover:text-sky-500">My Account</a>
         </div>
         <div class="flex items-center space-x-4" id="nav-auth"></div>
       </div>
@@ -37,110 +38,171 @@
     </div>
   </section>
 
-  <!-- My Enrollment Status -->
-  <section id="my-enrollment-section" class="py-8 bg-white hidden">
-    <div class="max-w-4xl mx-auto px-4">
-      <div class="bg-green-50 border border-green-200 rounded-xl p-6 flex items-center justify-between">
+  <!-- Active Plan Banner -->
+  <section id="active-banner" class="py-6 bg-white border-b hidden">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="gradient-bg rounded-2xl p-6 text-white flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h3 class="font-bold text-green-800 text-lg"><i class="fas fa-check-circle mr-2"></i>Active Plan</h3>
-          <p class="text-green-600" id="my-plan-name">-</p>
+          <div class="flex items-center gap-3 mb-1">
+            <i class="fas fa-check-circle text-xl"></i>
+            <h3 class="text-xl font-bold" id="active-plan-name">-</h3>
+          </div>
+          <p class="opacity-90 text-sm" id="active-plan-desc">Active membership</p>
         </div>
         <div class="text-right">
-          <div class="text-2xl font-bold text-green-600" id="my-discount-pct">-</div>
-          <div class="text-sm text-green-500">discount</div>
+          <div class="text-3xl font-bold" id="active-discount">-</div>
+          <div class="text-sm opacity-80">Your discount</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Discount Plans -->
+  <!-- Plan Selection -->
   <section class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-4">Choose Your Plan</h2>
-      <p class="text-center text-gray-600 mb-12 max-w-xl mx-auto">All plans include instant discounts at participating vet clinics. No waiting period, no claim forms.</p>
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-3">Choose Your Vet Discount Plan</h2>
+        <p class="text-gray-500 max-w-xl mx-auto">Select a plan that fits your needs. All plans include instant discounts at participating vet clinics. <strong class="text-primary">Pet registration required.</strong></p>
+      </div>
       <div class="grid md:grid-cols-3 gap-8" id="plans-container">
-        <div class="text-center text-gray-400 py-12 col-span-3">Loading plans...</div>
+        <div class="col-span-3 text-center text-gray-400 py-16"><i class="fas fa-spinner fa-spin text-3xl"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Enroll -->
+  <section class="py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8">Why Choose Vet Discount?</h2>
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-bolt"></i></div><h3 class="font-bold mb-2">Instant Savings</h3><p class="text-gray-500 text-sm">Discount applied at checkout, no waiting</p></div>
+        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-file-alt"></i></div><h3 class="font-bold mb-2">No Claims</h3><p class="text-gray-500 text-sm">Just show your card, no paperwork</p></div>
+        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-paw"></i></div><h3 class="font-bold mb-2">All Pets Covered</h3><p class="text-gray-500 text-sm">Dogs, cats, birds & more</p></div>
+        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-clock"></i></div><h3 class="font-bold mb-2">No Waiting</h3><p class="text-gray-500 text-sm">Use your plan immediately</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vet Clinics -->
+  <section class="py-16">
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8"><i class="fas fa-hospital text-primary mr-2"></i>Participating Vet Clinics</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="clinics-container">
+        <div class="col-span-3 text-center text-gray-400 py-12"><i class="fas fa-spinner fa-spin text-2xl"></i></div>
       </div>
     </div>
   </section>
 
   <!-- How It Works -->
   <section class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl">1</div><h3 class="font-bold text-lg mb-2">Enroll in a Plan</h3><p class="text-gray-600">Choose a plan that fits your needs and enroll instantly online.</p></div>
-        <div class="text-center"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl">2</div><h3 class="font-bold text-lg mb-2">Visit a Partner Vet</h3><p class="text-gray-600">Show your PetPaw membership card at any participating clinic.</p></div>
-        <div class="text-center"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl">3</div><h3 class="font-bold text-lg mb-2">Get Instant Discount</h3><p class="text-gray-600">Your discount is applied immediately. No forms, no waiting.</p></div>
+    <div class="max-w-6xl mx-auto px-4">
+      <h2 class="text-3xl font-bold text-center mb-8">How It Works</h2>
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">1</div><h3 class="font-bold mb-1">Register Pet</h3><p class="text-gray-500 text-sm">Add your pet's info</p></div>
+        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">2</div><h3 class="font-bold mb-1">Choose Plan</h3><p class="text-gray-500 text-sm">Pick the right coverage</p></div>
+        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">3</div><h3 class="font-bold mb-1">Visit Vet</h3><p class="text-gray-500 text-sm">Show your membership</p></div>
+        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">4</div><h3 class="font-bold mb-1">Save Money</h3><p class="text-gray-500 text-sm">Instant discount applied</p></div>
       </div>
     </div>
   </section>
 
-  <!-- Vet Clinics Map -->
-  <section class="py-16">
-    <div class="max-w-7xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-4">Participating Vet Clinics</h2>
-      <p class="text-center text-gray-600 mb-12">Find a participating vet clinic near you.</p>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="clinics-container">
-        <div class="text-center text-gray-400 py-12 col-span-3">Loading clinics...</div>
+  <!-- Enroll Modal (with pet selection) -->
+  <div id="enrollModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <h3 class="text-xl font-bold mb-4"><i class="fas fa-paw text-primary mr-2"></i>Enroll in <span id="enroll-plan-name" class="text-primary"></span></h3>
+      
+      <!-- Step indicator -->
+      <div class="flex items-center mb-6" id="enroll-steps">
+        <div class="flex-1 text-center"><div class="w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold" id="step1-indicator">1</div><div class="text-xs mt-1 text-gray-500">Pet Info</div></div>
+        <div class="w-8 h-0.5 bg-gray-200"><div class="h-full bg-primary w-0 transition-all" id="step-line1"></div></div>
+        <div class="flex-1 text-center"><div class="w-8 h-8 bg-gray-200 rounded-full text-gray-400 text-sm flex items-center justify-center mx-auto font-bold" id="step2-indicator">2</div><div class="text-xs mt-1 text-gray-500">Confirm</div></div>
+      </div>
+
+      <!-- Step 1: Pet selection -->
+      <div id="enroll-step1">
+        <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 mb-4 text-sm text-sky-700"><i class="fas fa-info-circle mr-1"></i> Please select the pet(s) to be covered by this plan</div>
+        
+        <div id="pets-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
+          <div class="text-center text-gray-400 py-8"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+        
+        <div id="no-pets-warning" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <p class="text-yellow-700 text-sm mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>You need to register at least one pet before enrolling.</p>
+          <a href="/pets" class="block w-full bg-yellow-500 text-white text-center py-2 rounded-lg font-semibold hover:bg-yellow-600">→ Register a Pet First</a>
+        </div>
+        
+        <button onclick="goToStep2()" id="btn-next-step2" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50" disabled><i class="fas fa-arrow-right mr-2"></i>Next: Confirm</button>
+      </div>
+
+      <!-- Step 2: Confirm -->
+      <div id="enroll-step2" class="hidden">
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <div class="flex justify-between mb-2"><span class="text-gray-500">Plan:</span><span class="font-semibold" id="confirm-plan-name">-</span></div>
+          <div class="flex justify-between mb-2"><span class="text-gray-500">Discount:</span><span class="font-bold text-green-600" id="confirm-discount">-</span></div>
+          <div class="flex justify-between mb-2"><span class="text-gray-500">Monthly Fee:</span><span class="font-semibold" id="confirm-fee">-</span></div>
+          <div class="flex justify-between border-t pt-2 mt-2"><span class="text-gray-500">Pets:</span><span class="font-semibold" id="confirm-pets">-</span></div>
+        </div>
+        <div class="flex space-x-3">
+          <button onclick="goToStep1()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300"><i class="fas fa-arrow-left mr-2"></i>Back</button>
+          <button onclick="confirmEnroll()" id="btn-confirm-enroll" class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90"><i class="fas fa-check mr-2"></i>Confirm Enrollment</button>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- Record Transaction Modal -->
-  <div id="transModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-lg mx-4">
+  <!-- Record Visit Modal -->
+  <div id="transModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-lg">
       <h3 class="text-xl font-bold mb-4"><i class="fas fa-receipt text-primary mr-2"></i>Record Vet Visit</h3>
       <form id="transForm" onsubmit="saveTransaction(event)">
         <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Original Amount ($) *</label>
-            <input type="number" step="0.01" id="trans-amount" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
+          <div id="trans-pet-select-wrapper">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Pet *</label>
+            <select id="trans-pet" required class="w-full px-4 py-2 border rounded-lg"><option value="">Loading...</option></select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Clinic</label>
-            <select id="trans-clinic" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
-              <option value="">Select clinic (optional)</option>
-            </select>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Vet Clinic</label>
+            <select id="trans-clinic" class="w-full px-4 py-2 border rounded-lg"><option value="">Select clinic</option></select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
-            <select id="trans-service" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary">
-              <option value="">Select service</option>
-              <option value="Routine Checkup">Routine Checkup</option>
-              <option value="Vaccination">Vaccination</option>
-              <option value="Dental">Dental Care</option>
-              <option value="Surgery">Surgery</option>
-              <option value="Emergency">Emergency</option>
-              <option value="Lab Test">Lab Test</option>
-              <option value="Prescription">Prescription</option>
-              <option value="Grooming">Grooming</option>
-              <option value="Other">Other</option>
-            </select>
+            <select id="trans-service" class="w-full px-4 py-2 border rounded-lg"><option value="">Select</option><option>Routine Checkup</option><option>Vaccination</option><option>Dental</option><option>Surgery</option><option>Emergency</option><option>Lab Test</option><option>Prescription</option><option>Grooming</option><option>Other</option></select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea id="trans-desc" rows="2" class="w-full px-4 py-2 border rounded-lg" placeholder="Optional notes"></textarea>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Bill Amount ($) *</label>
+            <input type="number" step="0.01" id="trans-amount" required class="w-full px-4 py-2 border rounded-lg" placeholder="0.00">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <textarea id="trans-desc" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
           </div>
         </div>
         <div class="flex space-x-3 mt-6">
-          <button type="submit" class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90">Save Transaction</button>
+          <button type="submit" class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold">Save Visit</button>
           <button type="button" onclick="closeTransModal()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- Quick Record FAB -->
+  <button onclick="showTransModal()" id="record-fab" class="fixed bottom-6 right-6 w-14 h-14 gradient-bg rounded-full shadow-lg flex items-center justify-center text-white text-xl hover:shadow-xl transition z-40 hidden">
+    <i class="fas fa-plus"></i>
+  </button>
+
   <script src="/js/main.js"></script>
   <script>
     const token = localStorage.getItem('token');
-    let plans = [], clinics = [], myEnrollments = { discount: [], wellness: [] };
+    let plans = [], clinics = [], pets = [], selectedPlanId = null, selectedPets = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       checkLoginStatus();
       loadPlans();
       loadClinics();
-      if (token) { loadMyEnrollments(); }
+      if (token) {
+        loadMyEnrollments();
+        loadPetsForTrans();
+      }
     });
 
     async function loadPlans() {
@@ -158,6 +220,9 @@
         const data = await res.json();
         clinics = data.data || [];
         renderClinics();
+        // populate clinic select in trans modal
+        const sel = document.getElementById('trans-clinic');
+        sel.innerHTML = '<option value="">Select clinic</option>' + clinics.map(c => '<option value="'+c.id+'">'+c.name+'</option>').join('');
       } catch (e) { console.error(e); }
     }
 
@@ -165,40 +230,164 @@
       try {
         const res = await fetch('/api/vet/my-enrollments', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json();
-        myEnrollments = data.data || { discount: [], wellness: [] };
-        const active = myEnrollments.discount.find(e => e.status === 'active');
+        const enrollments = data.data || { discount: [], wellness: [] };
+        const active = enrollments.discount.find(e => e.status === 'active');
         if (active) {
-          document.getElementById('my-enrollment-section').classList.remove('hidden');
-          document.getElementById('my-plan-name').textContent = active.plan_name;
-          document.getElementById('my-discount-pct').textContent = active.discount_percent + '%';
+          document.getElementById('active-banner').classList.remove('hidden');
+          document.getElementById('active-plan-name').textContent = active.plan_name;
+          document.getElementById('active-discount').textContent = active.discount_percent + '%';
+          document.getElementById('active-plan-desc').textContent = 'Covering up to ' + active.max_pets + ' pet(s) | Active since ' + new Date(active.start_date).toLocaleDateString();
+          document.getElementById('record-fab').classList.remove('hidden');
         }
+        renderPlans(enrollments);
       } catch (e) { console.error(e); }
     }
 
-    function renderPlans() {
+    function renderPlans(enrollments) {
+      enrollments = enrollments || { discount: [], wellness: [] };
       const container = document.getElementById('plans-container');
-      container.innerHTML = plans.map((plan, i) => {
+      container.innerHTML = plans.map(plan => {
         let features = [];
         try { features = JSON.parse(plan.features); } catch(e) {}
-        const isActive = myEnrollments.discount.find(e => e.plan_id === plan.id && e.status === 'active');
-        return '<div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition relative"><div class="bg-gradient-to-r from-sky-500 to-emerald-500 p-6 text-white text-center"><div class="text-4xl font-bold">'+plan.discount_percent+'%</div><div class="text-lg opacity-90">DISCOUNT</div><h3 class="text-xl font-bold mt-2">'+plan.name+'</h3></div><div class="p-6"><p class="text-gray-600 mb-4">'+ (plan.description || '') +'</p><ul class="space-y-2 mb-6">'+ features.map(f => '<li class="text-sm text-gray-600"><i class="fas fa-check text-green-500 mr-2"></i>'+f+'</li>').join('') +'</ul><div class="text-center text-2xl font-bold text-gray-900 mb-4">$'+plan.monthly_fee.toFixed(2)+'<span class="text-sm font-normal text-gray-500">/month</span></div><div class="text-center text-xs text-gray-400 mb-2">Up to '+plan.max_pets+' pet'+(plan.max_pets > 1 ? 's' : '')+'</div>'+ (isActive ? '<button class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold cursor-default"><i class="fas fa-check-circle mr-2"></i>Active</button>' : '<button onclick="enrollPlan('+plan.id+')" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90"><i class="fas fa-sign-in-alt mr-2"></i>Enroll Now</button>') +'</div></div>';
+        const isActive = enrollments.discount.find(e => e.plan_id === plan.id && e.status === 'active');
+        return '<div class="card bg-white rounded-2xl shadow-lg overflow-hidden"><div class="gradient-bg p-6 text-white text-center"><div class="text-5xl font-bold">'+plan.discount_percent+'%</div><div class="text-sm opacity-90 mt-1">DISCOUNT</div><h3 class="text-xl font-bold mt-2">'+plan.name+'</h3></div><div class="p-6"><ul class="space-y-2 mb-5">'+features.map(f => '<li class="text-sm text-gray-600"><i class="fas fa-check text-green-500 mr-2"></i>'+f+'</li>').join('')+'</ul><div class="border-t pt-4 mb-4"><div class="flex justify-between items-center"><span class="text-gray-500">Monthly Fee:</span><span class="text-2xl font-bold text-gray-900">$'+plan.monthly_fee.toFixed(2)+'</span></div><div class="text-xs text-gray-400 mt-1">Covers up to '+plan.max_pets+' pet'+(plan.max_pets>1?'s':'')+'</div></div>'+ (isActive ? '<div class="bg-green-500 text-white text-center py-3 rounded-lg font-semibold"><i class="fas fa-check-circle mr-2"></i>Active - Enrolled</div>' : '<button onclick="openEnrollModal('+plan.id+')" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-sky-600 transition"><i class="fas fa-paw mr-2"></i>Enroll Now</button>') +'</div></div>';
       }).join('');
     }
 
     function renderClinics() {
       const container = document.getElementById('clinics-container');
-      container.innerHTML = clinics.map(c => '<div class="bg-white rounded-xl shadow p-5 hover:shadow-md transition"><div class="flex items-start justify-between mb-3"><h3 class="font-bold text-lg">'+c.name+'</h3><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Active</span></div><div class="space-y-2 text-sm text-gray-600">'+ (c.address ? '<div><i class="fas fa-map-marker-alt text-red-400 mr-2 w-4"></i>'+c.address+', '+c.city+', '+c.state+' '+c.zip+'</div>' : '') + (c.phone ? '<div><i class="fas fa-phone text-blue-400 mr-2 w-4"></i><a href="tel:'+c.phone+'" class="hover:text-primary">'+c.phone+'</a></div>' : '') + (c.email ? '<div><i class="fas fa-envelope text-gray-400 mr-2 w-4"></i><a href="mailto:'+c.email+'" class="hover:text-primary">'+c.email+'</a></div>' : '') + (c.hours ? '<div><i class="fas fa-clock text-yellow-400 mr-2 w-4"></i>'+c.hours+'</div>' : '') + (c.services ? '<div class="pt-2"><div class="text-xs text-gray-400 mb-1">Services:</div><div class="flex flex-wrap gap-1">'+c.services.split('|').map(s => '<span class="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">'+s+'</span>').join('')+'</div></div>' : '') +'</div></div>').join('');
+      if (!clinics.length) { container.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-12"><i class="fas fa-hospital text-4xl mb-3 opacity-50"></i><p>No clinics registered yet</p></div>'; return; }
+      container.innerHTML = clinics.map(c => '<div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition"><div class="flex items-start justify-between mb-3"><h3 class="font-bold text-gray-800">'+c.name+'</h3><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Active</span></div><div class="space-y-1.5 text-sm text-gray-500">'+ (c.address?'<div><i class="fas fa-map-marker-alt text-red-400 mr-2 w-4"></i>'+c.address+', '+c.city+', '+c.state+'</div>':'') + (c.phone?'<div><i class="fas fa-phone text-blue-400 mr-2 w-4"></i><a href="tel:'+c.phone+'" class="hover:text-primary">'+c.phone+'</a></div>':'') + (c.hours?'<div><i class="fas fa-clock text-yellow-400 mr-2 w-4"></i>'+c.hours+'</div>':'') + (c.services?'<div class="flex flex-wrap gap-1 mt-2">'+c.services.split('|').map(s=>'<span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded">'+s+'</span>').join('')+'</div>':'') +'</div></div>').join('');
     }
 
-    async function enrollPlan(planId) {
+    async function openEnrollModal(planId) {
       if (!token) { window.location.href = '/login'; return; }
-      if (!confirm('Enroll in this plan now?')) return;
+      selectedPlanId = planId;
+      const plan = plans.find(p => p.id === planId);
+      document.getElementById('enroll-plan-name').textContent = plan.name;
+      document.getElementById('confirm-plan-name').textContent = plan.name;
+      document.getElementById('confirm-discount').textContent = plan.discount_percent + '%';
+      document.getElementById('confirm-fee').textContent = '$' + plan.monthly_fee.toFixed(2) + '/month';
+      selectedPets = [];
+      
+      // Load pets
       try {
-        const res = await fetch('/api/vet/enroll-discount', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify({ plan_id: planId }) });
+        const r = await fetch('/api/pets', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        pets = d.data || [];
+      } catch(e) { pets = []; }
+      
+      renderPetsForEnroll(plan);
+      goToStep1();
+      document.getElementById('enrollModal').classList.remove('hidden');
+    }
+
+    function renderPetsForEnroll(plan) {
+      const container = document.getElementById('pets-list');
+      const warning = document.getElementById('no-pets-warning');
+      const btn = document.getElementById('btn-next-step2');
+      
+      if (pets.length === 0) {
+        container.innerHTML = '';
+        warning.classList.remove('hidden');
+        btn.disabled = true;
+        return;
+      }
+      
+      warning.classList.add('hidden');
+      container.innerHTML = pets.map(p => {
+        const icon = p.species==='Dog'?'fa-dog':p.species==='Cat'?'fa-cat':'fa-paw';
+        return '<label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition"><input type="checkbox" class="w-5 h-5 text-primary rounded pet-check" value="'+p.id+'" data-pet="'+p.name+'" onchange="updateSelectedPets()"><div class="flex items-center space-x-3 flex-1"><div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center"><i class="fas '+icon+' text-primary text-sm"></i></div><div><div class="font-semibold text-sm">'+p.name+'</div><div class="text-xs text-gray-400">'+p.species+(p.breed?' - '+p.breed:'')+'</div></div></div></label>';
+      }).join('');
+    }
+
+    function updateSelectedPets() {
+      const checks = document.querySelectorAll('.pet-check:checked');
+      selectedPets = Array.from(checks).map(c => ({ id: parseInt(c.value), name: c.dataset.pet }));
+      document.getElementById('btn-next-step2').disabled = selectedPets.length === 0;
+    }
+
+    function goToStep1() {
+      document.getElementById('enroll-step1').classList.remove('hidden');
+      document.getElementById('enroll-step2').classList.add('hidden');
+      document.getElementById('step1-indicator').className = 'w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
+      document.getElementById('step2-indicator').className = 'w-8 h-8 bg-gray-200 rounded-full text-gray-400 text-sm flex items-center justify-center mx-auto font-bold';
+    }
+
+    function goToStep2() {
+      if (selectedPets.length === 0) { alert('Please select at least one pet.'); return; }
+      document.getElementById('enroll-step1').classList.add('hidden');
+      document.getElementById('enroll-step2').classList.remove('hidden');
+      document.getElementById('step1-indicator').className = 'w-8 h-8 bg-green-500 rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
+      document.getElementById('step2-indicator').className = 'w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
+      document.getElementById('confirm-pets').textContent = selectedPets.map(p => p.name).join(', ');
+    }
+
+    async function confirmEnroll() {
+      const btn = document.getElementById('btn-confirm-enroll');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+      try {
+        const res = await fetch('/api/vet/enroll-discount', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan_id: selectedPlanId })
+        });
         const data = await res.json();
-        if (data.success) { alert('Successfully enrolled! Enjoy your discount.'); loadMyEnrollments(); renderPlans(); }
-        else alert(data.message || 'Enrollment failed');
-      } catch (e) { alert('Enrollment failed'); }
+        if (data.success) {
+          document.getElementById('enrollModal').classList.add('hidden');
+          alert('Congratulations! You\'re enrolled in ' + plans.find(p=>p.id===selectedPlanId).name + '!\n\nYour pet(s) are now covered: ' + selectedPets.map(p=>p.name).join(', '));
+          loadMyEnrollments();
+        } else {
+          alert(data.message || 'Enrollment failed');
+        }
+      } catch(e) { alert('Enrollment failed'); }
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Enrollment';
+    }
+
+    // Trans modal
+    async function loadPetsForTrans() {
+      try {
+        const r = await fetch('/api/pets', { headers: { 'Authorization': 'Bearer ' + token } });
+        const d = await r.json();
+        pets = d.data || [];
+        const sel = document.getElementById('trans-pet');
+        sel.innerHTML = '<option value="">Select pet</option>' + pets.map(p => '<option value="'+p.id+'">'+p.name+' ('+p.species+')</option>').join('');
+      } catch(e) {}
+    }
+
+    function showTransModal() {
+      document.getElementById('transModal').classList.remove('hidden');
+      loadPetsForTrans();
+    }
+    function closeTransModal() {
+      document.getElementById('transModal').classList.add('hidden');
+      document.getElementById('transForm').reset();
+    }
+
+    async function saveTransaction(e) {
+      e.preventDefault();
+      const data = {
+        pet_id: parseInt(document.getElementById('trans-pet').value),
+        clinic_id: parseInt(document.getElementById('trans-clinic').value) || null,
+        service_type: document.getElementById('trans-service').value,
+        original_amount: parseFloat(document.getElementById('trans-amount').value),
+        description: document.getElementById('trans-desc').value
+      };
+      if (!data.pet_id) { alert('Please select a pet'); return; }
+      try {
+        const res = await fetch('/api/vet/vet-transaction', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert('Vet visit recorded!\nOriginal: $' + data.original_amount.toFixed(2) + '\nDiscount: -$' + result.data.discount_amount.toFixed(2) + '\nYou pay: $' + result.data.final_amount.toFixed(2));
+          closeTransModal();
+        } else { alert(result.message || 'Failed'); }
+      } catch(e) { alert('Failed'); }
     }
   </script>
 </body>
