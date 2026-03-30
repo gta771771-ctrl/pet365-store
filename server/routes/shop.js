@@ -1,63 +1,161 @@
 const express = require('express');
-const { run, get, all } = require('../database');
-const { authMiddleware } = require('../middleware/auth');
+const db = require('../database');
 
 const router = express.Router();
 
-router.get('/categories', (req, res) => {
-  const cats = all('SELECT * FROM categories WHERE status = 1 ORDER BY sort_order');
-  res.json({ success: true, data: cats });
-});
-
+// Get products
 router.get('/products', (req, res) => {
-  const { category_id, keyword, page = 1, limit = 12 } = req.query;
-  const offset = (page - 1) * limit;
-  let sql = 'SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.status = 1';
-  const params = [];
-  if (category_id) { sql += ' AND p.category_id = ?'; params.push(category_id); }
-  if (keyword) { sql += ' AND (p.name LIKE ? OR p.description LIKE ?)'; params.push(`%${keyword}%`, `%${keyword}%`); }
-  const total = get(sql.replace('SELECT p.*, c.name as category_name', 'SELECT COUNT(*) as total'), params)?.total || 0;
-  sql += ' ORDER BY p.sales DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), offset);
-  const products = all(sql, params);
-  res.json({ success: true, data: products, pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / limit) } });
-});
+  try {
+    const { category, keyword, page = 1, limit = 50 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-router.get('/products/:id', (req, res) => {
-  const product = get('SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?', [req.params.id]);
-  if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
-  res.json({ success: true, data: product });
-});
+    let sql = "SELECT * FROM products WHERE status = 1";
+    let params = [];
 
-router.get('/cart', authMiddleware, (req, res) => {
-  const items = all('SELECT c.*, p.name, p.price, p.image, p.stock, p.status as product_status FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ?', [req.user.id]);
-  const totalAmount = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  res.json({ success: true, data: items, totalAmount });
-});
+    if (category) {
+      sql += " AND category = ?";
+      params.push(category);
+    }
 
-router.post('/cart', authMiddleware, (req, res) => {
-  const { product_id, quantity = 1, specification = '' } = req.body;
-  const existing = get('SELECT * FROM cart WHERE user_id = ? AND product_id = ? AND specification = ?', [req.user.id, product_id, specification]);
-  if (existing) {
-    run('UPDATE cart SET quantity = quantity + ? WHERE id = ?', [quantity, existing.id]);
-  } else {
-    run('INSERT INTO cart (user_id, product_id, quantity, specification) VALUES (?, ?, ?, ?)', [req.user.id, product_id, quantity, specification]);
+    if (keyword) {
+      sql += " AND (name LIKE ? OR description LIKE ?)";
+      params.push(`%${keyword}%`, `%${keyword}%`);
+    }
+
+    sql += " ORDER BY id DESC LIMIT ? OFFSET ?";
+    params.push(parseInt(limit), offset);
+
+    const products = db.all(sql, params);
+
+    res.json({ success: true, data: products });
+  } catch (e) {
+    console.error('Products error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get products' });
   }
-  res.json({ success: true, message: 'Added to cart' });
 });
 
-router.put('/cart/:id', authMiddleware, (req, res) => {
-  const { quantity } = req.body;
-  if (quantity < 1) return res.status(400).json({ success: false, message: 'Invalid quantity' });
-  const item = get('SELECT * FROM cart WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-  if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
-  run('UPDATE cart SET quantity = ? WHERE id = ?', [quantity, req.params.id]);
-  res.json({ success: true });
+// Get categories
+router.get('/categories', (req, res) => {
+  try {
+    const categories = db.all("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND status = 1");
+    res.json({ success: true, data: categories.map(c => c.category) });
+  } catch (e) {
+    console.error('Categories error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get categories' });
+  }
 });
 
-router.delete('/cart/:id', authMiddleware, (req, res) => {
-  run('DELETE FROM cart WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-  res.json({ success: true });
+// Get cart
+router.get('/cart', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const jwt = require('jsonwebtoken');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024');
+
+    const cartItems = db.all(`
+      SELECT c.*, p.name, p.price, p.image, p.stock as product_stock, p.status as product_status
+      FROM cart c
+      JOIN products p ON c.product_id = p.id
+      WHERE c.user_id = ?
+    `, [decoded.id]);
+
+    const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    res.json({ success: true, data: cartItems, totalAmount });
+  } catch (e) {
+    console.error('Cart error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get cart' });
+  }
+});
+
+// Add to cart
+router.post('/cart', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const jwt = require('jsonwebtoken');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024');
+
+    const { product_id, quantity = 1, specification } = req.body;
+
+    if (!product_id) {
+      return res.status(400).json({ success: false, message: 'Product ID required' });
+    }
+
+    // Check if already in cart
+    const existing = db.get("SELECT * FROM cart WHERE user_id = ? AND product_id = ?",
+      [decoded.id, product_id]);
+
+    if (existing) {
+      db.run("UPDATE cart SET quantity = quantity + ? WHERE id = ?", [quantity, existing.id]);
+    } else {
+      db.run("INSERT INTO cart (user_id, product_id, quantity, specification) VALUES (?, ?, ?, ?)",
+        [decoded.id, product_id, quantity, specification || null]);
+    }
+
+    res.json({ success: true, message: 'Added to cart' });
+  } catch (e) {
+    console.error('Add to cart error:', e);
+    res.status(500).json({ success: false, message: 'Failed to add to cart' });
+  }
+});
+
+// Update cart item
+router.put('/cart/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const jwt = require('jsonwebtoken');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024');
+
+    const { quantity } = req.body;
+
+    const cartItem = db.get("SELECT * FROM cart WHERE id = ? AND user_id = ?", [req.params.id, decoded.id]);
+    if (!cartItem) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    if (quantity <= 0) {
+      db.run("DELETE FROM cart WHERE id = ?", [req.params.id]);
+    } else {
+      db.run("UPDATE cart SET quantity = ? WHERE id = ?", [quantity, req.params.id]);
+    }
+
+    res.json({ success: true, message: 'Cart updated' });
+  } catch (e) {
+    console.error('Update cart error:', e);
+    res.status(500).json({ success: false, message: 'Failed to update cart' });
+  }
+});
+
+// Delete cart item
+router.delete('/cart/:id', (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const jwt = require('jsonwebtoken');
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024');
+
+    db.run("DELETE FROM cart WHERE id = ? AND user_id = ?", [req.params.id, decoded.id]);
+
+    res.json({ success: true, message: 'Item removed' });
+  } catch (e) {
+    console.error('Delete cart error:', e);
+    res.status(500).json({ success: false, message: 'Failed to remove item' });
+  }
 });
 
 module.exports = router;
