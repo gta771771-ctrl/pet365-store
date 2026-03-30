@@ -153,7 +153,7 @@ router.put('/orders/:id/status', adminAuth, (req, res) => {
 
 // ===== ARTICLES =====
 router.get('/articles', adminAuth, (req, res) => {
-  try { res.json({ success: true, data: db.all("SELECT * FROM articles ORDER BY created_at DESC") }); } catch (e) { res.status(500).); }
+  try { res.json({ success: true, data: db.all("SELECT * FROM articles ORDER BY created_at DESC") }); } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
 router.post('/articles', adminAuth, (req, res) => {
