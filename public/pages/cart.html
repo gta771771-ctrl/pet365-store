@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+        <a href="/shop" class="text-sky-500 hover:underline">Continue Shopping</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2">
+        <div id="cart-list"><p class="text-center text-gray-400 py-12">Loading...</p></div>
+      </div>
+
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+          <h3 class="text-lg font-bold mb-4">Order Summary</h3>
+          <div id="checkout-items" class="space-y-2 mb-4 max-h-48 overflow-y-auto"></div>
+          <div class="border-t pt-4 space-y-2">
+            <div class="flex justify-between text-gray-600">
+              <span>Subtotal</span>
+              <span id="subtotal">$0.00</span>
+            </div>
+            <div class="flex justify-between text-gray-600">
+              <span>Shipping</span>
+              <span>$0.00</span>
+            </div>
+            <div id="discount-row" class="flex justify-between text-gray-600 hidden">
+              <span>Balance Deduction</span>
+              <span id="discount-amount" class="text-red-500">-$0.00</span>
+            </div>
+            <div id="balance-use" class="flex items-center justify-between">
+              <label class="flex items-center text-gray-600">
+                <input type="checkbox" id="use-balance" class="mr-2 w-4 h-4 text-sky-500 rounded">
+                <span>Use Balance (<span id="user-balance">$0.00</span>)</span>
+              </label>
+            </div>
+            <div class="flex justify-between text-xl font-bold mt-4">
+              <span>Total</span>
+              <span class="text-sky-500" id="total-amount">$0.00</span>
+            </div>
+          </div>
+          <button onclick="openCheckout()" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 mt-6">Checkout</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Confirm Order</h2>
+        <button onclick="closeCheckout()" class="text-gray-400 text-2xl">&times;</button>
+      </div>
+      <form id="checkout-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Receiver Name</label>
+          <input type="text" id="receiver-name" required class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+          <input type="tel" id="receiver-phone" required class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+          <textarea id="receiver-address" required rows="2" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Note (Optional)</label>
+          <input type="text" id="order-remark" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4">
+          <div class="flex justify-between mb-2"><span class="text-gray-600">Items: <span id="checkout-count">0</span></span></div>
+          <div class="flex justify-between font-bold text-lg"><span>Total</span><span class="text-sky-500" id="checkout-total">$0.00</span></div>
+        </div>
+        <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90">Place Order</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let cartItems = [];
+    let totalAmount = 0;
+
+    async function loadCart() {
+      try {
+        const res = await fetch('/api/shop/cart', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!data.success) return;
+        cartItems = data.data;
+        totalAmount = parseFloat(data.totalAmount) || 0;
+        renderCart();
+        updateSummary();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-list');
+      if (cartItems.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg mb-4">Your cart is empty</p>
+            <a href="/shop" class="gradient-bg text-white px-6 py-3 rounded-xl font-semibold">Start Shopping</a>
+          </div>`;
+        document.querySelector('.lg\\:col-span-1').style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = cartItems.map(item => `
+        <div class="bg-white rounded-2xl shadow-lg p-4 flex items-center gap-4 mb-4">
+          <img src="${item.image}" class="w-24 h-24 object-cover rounded-xl">
+          <div class="flex-1">
+            <h3 class="font-semibold text-gray-900">${item.name}</h3>
+            ${item.specification ? `<span class="text-sm text-gray-500">${item.specification}</span>` : ''}
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-lg font-bold text-sky-500">$${item.price}</span>
+              <div class="flex items-center gap-2">
+                <button onclick="updateQty(${item.id}, ${item.quantity - 1})" class="w-8 h-8 border rounded-lg hover:bg-gray-100 ${item.quantity <= 1 ? 'opacity-50' : ''}">-</button>
+                <input type="number" value="${item.quantity}" min="1" class="w-12 text-center border rounded-lg py-1" onchange="updateQty(${item.id}, this.value)">
+                <button onclick="updateQty(${item.id}, ${item.quantity + 1})" class="w-8 h-8 border rounded-lg hover:bg-gray-100">+</button>
+                <button onclick="removeItem(${item.id})" class="text-red-400 hover:text-red-500 ml-4"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSummary() {
+      const valid = cartItems.filter(i => i.product_status === 1 && i.stock > 0);
+      document.getElementById('checkout-items').innerHTML = valid.map(i => `
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600 line-clamp-1">${i.name} x${i.quantity}</span>
+          <span>$${(i.price * i.quantity).toFixed(2)}</span>
+        </div>
+      `).join('');
+      document.getElementById('subtotal').textContent = '$' + totalAmount.toFixed(2);
+      document.getElementById('total-amount').textContent = '$' + totalAmount.toFixed(2);
+
+      fetch('/api/auth/profile', { headers: getAuthHeaders() })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) {
+            const bal = d.data.balance || 0;
+            document.getElementById('user-balance').textContent = '$' + bal.toFixed(2);
+            if (bal <= 0) document.getElementById('balance-use').style.display = 'none';
+          }
+        });
+    }
+
+    document.getElementById('use-balance').addEventListener('change', function() {
+      const bal = parseFloat(document.getElementById('user-balance').textContent.replace('$', '')) || 0;
+      const discount = this.checked ? Math.min(bal, totalAmount) : 0;
+      const final = totalAmount - discount;
+      document.getElementById('discount-row').style.display = discount > 0 ? 'flex' : 'none';
+      document.getElementById('discount-amount').textContent = '-$' + discount.toFixed(2);
+      document.getElementById('total-amount').textContent = '$' + final.toFixed(2);
+    });
+
+    async function updateQty(id, qty) {
+      qty = parseInt(qty);
+      if (qty < 1) return;
+      try {
+        const res = await fetch('/api/shop/cart/' + id, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ quantity: qty })
+        });
+        const data = await res.json();
+        if (data.success) loadCart();
+        else alert(data.message);
+      } catch (e) {
+        alert('Failed to update');
+      }
+    }
+
+    async function removeItem(id) {
+      if (!confirm('Remove this item?')) return;
+      try {
+        const res = await fetch('/api/shop/cart/' + id, { method: 'DELETE', headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.success) loadCart();
+      } catch (e) {}
+    }
+
+    function openCheckout() {
+      const valid = cartItems.filter(i => i.product_status === 1 && i.stock > 0);
+      if (valid.length === 0) {
+        alert('No items available for checkout');
+        return;
+      }
+      document.getElementById('checkout-count').textContent = valid.reduce((s, i) => s + i.quantity, 0);
+      document.getElementById('checkout-total').textContent = document.getElementById('total-amount').textContent;
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeCheckout() {
+      document.getElementById('checkout-modal').classList.add('hidden');
+    }
+
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      const useBalance = document.getElementById('use-balance').checked;
+
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({
+            items: cartItems.filter(i => i.product_status === 1 && i.stock > 0).map(i => ({
+              product_id: i.product_id,
+              quantity: i.quantity,
+              specification: i.specification
+            })),
+            receiver_name: document.getElementById('receiver-name').value,
+            receiver_phone: document.getElementById('receiver-phone').value,
+            receiver_address: document.getElementById('receiver-address').value,
+            remark: document.getElementById('order-remark').value,
+            use_balance: useBalance
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('Order placed successfully!');
+          window.location.href = '/orders';
+        } else {
+          alert(data.message);
+          btn.disabled = false;
+          btn.textContent = 'Place Order';
+        }
+      } catch (e) {
+        alert('Failed to place order');
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireLogin()) return;
+      loadCart();
+      checkLoginStatus();
+    });
+  </script>
+</body>
+</html>
