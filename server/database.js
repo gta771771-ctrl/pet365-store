@@ -6,10 +6,11 @@ const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-// Database path - use /data on Render, local otherwise
-const DATA_DIR = process.env.RENDER ? '/data' : path.join(__dirname);
+// Database path - use /data on Render/Railway, local otherwise
+const IS_CLOUD = process.env.RENDER || process.env.RAILWAY_ENVIRONMENT;
+const DATA_DIR = IS_CLOUD ? '/data' : path.join(__dirname);
 const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
-const UPLOAD_DIR = process.env.RENDER ? '/data/uploads' : path.join(__dirname, '../public/uploads');
+const UPLOAD_DIR = IS_CLOUD ? '/data/uploads' : path.join(__dirname, '../public/uploads');
 
 // Ensure directories exist
 if (!fs.existsSync(DATA_DIR)) {
