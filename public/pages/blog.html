@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-gray-600 hover:text-sky-500 transition">Home</a>
+          <a href="/services" class="text-gray-600 hover:text-sky-500 transition">Services</a>
+          <a href="/shop" class="text-gray-600 hover:text-sky-500 transition">Shop</a>
+          <a href="/blog" class="text-sky-500 font-medium">Blog</a>
+        </div>
+        <div class="flex items-center space-x-4" id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Pet Care Blog</h1>
+
+    <div class="flex flex-wrap gap-2 mb-8" id="category-filter">
+      <button onclick="filterCategory('')" class="cat-btn active px-4 py-2 rounded-full text-sm font-medium gradient-bg text-white">All</button>
+      <button onclick="filterCategory('health')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Health</button>
+      <button onclick="filterCategory('nutrition')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Nutrition</button>
+      <button onclick="filterCategory('training')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Training</button>
+      <button onclick="filterCategory('grooming')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Grooming</button>
+    </div>
+
+    <div id="articles-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <p class="col-span-full text-center text-gray-400 py-12">Loading articles...</p>
+    </div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let currentCategory = '';
+
+    async function loadArticles() {
+      const params = new URLSearchParams();
+      if (currentCategory) params.append('category', currentCategory);
+
+      try {
+        const res = await fetch('/api/content/articles?' + params);
+        const data = await res.json();
+        if (!data.success) return;
+
+        const container = document.getElementById('articles-grid');
+        if (data.data.length === 0) {
+          container.innerHTML = '<p class="col-span-full text-center text-gray-400 py-12">No articles found</p>';
+          return;
+        }
+
+        container.innerHTML = data.data.map(a => `
+          <article class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <img src="${a.image || 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop'}" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <div class="flex items-center gap-2 mb-3">
+                ${a.category ? `<span class="text-xs font-medium text-sky-500 bg-sky-50 px-2 py-1 rounded">${a.category}</span>` : ''}
+                <span class="text-xs text-gray-400">${formatDate(a.created_at)}</span>
+              </div>
+              <h2 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">${a.title}</h2>
+              <p class="text-gray-600 text-sm line-clamp-3">${a.excerpt || a.content?.substring(0, 150) || ''}</p>
+              <div class="flex items-center justify-between mt-4 text-sm text-gray-500">
+                <span><i class="fas fa-eye mr-1"></i>${a.views || 0} views</span>
+                <a href="#" class="text-sky-500 hover:underline">Read more</a>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('gradient-bg', 'text-white', 'active');
+        btn.classList.add('bg-white', 'text-gray-600');
+      });
+      event.target.classList.remove('bg-white', 'text-gray-600');
+      event.target.classList.add('gradient-bg', 'text-white', 'active');
+      loadArticles();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLoginStatus();
+      loadArticles();
+    });
+  </script>
+</body>
+</html>
