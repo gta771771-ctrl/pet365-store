@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-gray-600 hover:text-sky-500 transition">Home</a>
+          <a href="/services" class="text-sky-500 font-medium">Services</a>
+          <a href="/shop" class="text-gray-600 hover:text-sky-500 transition">Shop</a>
+          <a href="/blog" class="text-gray-600 hover:text-sky-500 transition">Blog</a>
+        </div>
+        <div class="flex items-center space-x-4" id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="gradient-bg text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <h1 class="text-4xl lg:text-5xl font-bold mb-6">Our Services</h1>
+      <p class="text-xl text-white/90 max-w-2xl mx-auto">Comprehensive pet care services designed to keep your furry friends healthy and happy.</p>
+    </div>
+  </section>
+
+  <!-- Services Grid -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="services-grid">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1612531386530-97286d97c2d2?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-stethoscope text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Vet Discount Program</h3>
+            </div>
+            <p class="text-gray-600">Get up to 50% off at participating veterinarians. Our network includes over 1,000 trusted vets nationwide.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Up to 50% discount</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>1000+ partner vets</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>No paperwork needed</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-heartbeat text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Annual Health Checkup</h3>
+            </div>
+            <p class="text-gray-600">Comprehensive wellness exams to catch health issues early. Includes vaccination updates and dental checks.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Full body examination</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Vaccination updates</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Dental assessment</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-shield-alt text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Pet Insurance</h3>
+            </div>
+            <p class="text-gray-600">Comprehensive coverage for accidents, illnesses, and routine care. Peace of mind for pet parents.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Accident coverage</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Illness coverage</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Routine care included</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-cut text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Grooming Services</h3>
+            </div>
+            <p class="text-gray-600">Professional grooming to keep your pet looking and feeling their best. Bathing, haircuts, and nail trims.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Full grooming service</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Nail trimming</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Ear cleaning</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-ambulance text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Emergency Care</h3>
+            </div>
+            <p class="text-gray-600">24/7 emergency hotline and discounted emergency vet visits. We're here when you need us most.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>24/7 hotline</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Emergency discounts</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Priority booking</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+          <img src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&h=250&fit=crop" class="w-full h-48 object-cover">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
+                <i class="fas fa-hotel text-white"></i>
+              </div>
+              <h3 class="text-xl font-semibold">Pet Boarding</h3>
+            </div>
+            <p class="text-gray-600">Safe and comfortable boarding when you travel. Your pet will be well cared for in our partner facilities.</p>
+            <ul class="mt-4 space-y-2 text-sm text-gray-500">
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Vetted facilities</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Daily updates</li>
+              <li><i class="fas fa-check text-green-500 mr-2"></i>Special diet handling</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+      <p class="text-gray-600 text-lg mb-8">Join thousands of happy pet parents who trust PetPaw for their pet's healthcare needs.</p>
+      <a href="/register" class="inline-block gradient-bg text-white px-8 py-4 rounded-full font-semibold text-lg hover:opacity-90 transition">
+        Sign Up Now <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+  </section>
+
+  <script src="/js/main.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', checkLoginStatus);</script>
+</body>
+</html>
