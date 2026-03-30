@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Team - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">My Team</h1>
+
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="text-gray-500 text-sm mb-1">My Invite Code</div>
+          <div class="text-3xl font-bold text-sky-500" id="invite-code">Loading...</div>
+        </div>
+        <button onclick="copyCode()" class="gradient-bg text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90">
+          <i class="fas fa-copy mr-2"></i>Copy Code
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-sky-500" id="level1-count">0</div>
+          <div class="text-gray-500 text-sm">Level 1 Referrals</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-sky-500" id="level2-count">0</div>
+          <div class="text-gray-500 text-sm">Level 2 Referrals</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-green-500">$<span id="level1-reward">0</span></div>
+          <div class="text-gray-500 text-sm">Level 1 Rewards</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-green-500">$<span id="level2-reward">0</span></div>
+          <div class="text-gray-500 text-sm">Level 2 Rewards</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h3 class="text-lg font-bold mb-4"><i class="fas fa-user-plus text-sky-500 mr-2"></i>Level 1 Referrals</h3>
+        <div id="level1-list"></div>
+      </div>
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h3 class="text-lg font-bold mb-4"><i class="fas fa-users text-emerald-500 mr-2"></i>Level 2 Referrals</h3>
+        <div id="level2-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    async function loadTeam() {
+      try {
+        const res = await fetch('/api/auth/team', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const team = data.data;
+        document.getElementById('level1-count').textContent = team.stats.level1_count || 0;
+        document.getElementById('level2-count').textContent = team.stats.level2_count || 0;
+        document.getElementById('level1-reward').textContent = (team.stats.level1_reward || 0).toFixed(2);
+        document.getElementById('level2-reward').textContent = (team.stats.level2_reward || 0).toFixed(2);
+
+        const l1 = document.getElementById('level1-list');
+        l1.innerHTML = team.level1.length === 0
+          ? '<p class="text-center text-gray-400 py-8">No referrals yet</p>'
+          : team.level1.map(u => `
+            <div class="flex items-center justify-between py-3 border-b last:border-b-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white font-bold">${(u.username || 'U')[0].toUpperCase()}</div>
+                <div>
+                  <div class="font-medium">${u.username}</div>
+                  <div class="text-sm text-gray-500">${formatDate(u.invite_time)}</div>
+                </div>
+              </div>
+              <div class="text-green-500 font-medium">+$${u.reward_amount || 0}</div>
+            </div>
+          `).join('');
+
+        const l2 = document.getElementById('level2-list');
+        l2.innerHTML = team.level2.length === 0
+          ? '<p class="text-center text-gray-400 py-8">No referrals yet</p>'
+          : team.level2.map(u => `
+            <div class="flex items-center justify-between py-3 border-b last:border-b-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold">${(u.username || 'U')[0].toUpperCase()}</div>
+                <div>
+                  <div class="font-medium">${u.username}</div>
+                  <div class="text-sm text-gray-500">From: ${u.parent_name || '-'}</div>
+                </div>
+              </div>
+              <div class="text-green-500 font-medium">+$${u.reward_amount || 0}</div>
+            </div>
+          `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/auth/profile', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('invite-code').textContent = data.data.invite_code || '-';
+        }
+      } catch (e) {}
+    }
+
+    function copyCode() {
+      const code = document.getElementById('invite-code').textContent;
+      copyToClipboard(code);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireLogin()) return;
+      loadTeam();
+      loadProfile();
+      checkLoginStatus();
+    });
+  </script>
+</body>
+</html>
