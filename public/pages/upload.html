@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Files - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.drop-zone{border:2px dashed #cbd5e1;transition:all .3s}.drop-zone.dragover{border-color:#0ea5e9;background:#f0f9ff}.status-pending{background:#fef9c3;color:#854d0e}.status-approved{background:#dcfce7;color:#166534}.status-rejected{background:#fee2e2;color:#991b1b}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+        <div class="flex items-center gap-4">
+          <a href="/profile" class="text-gray-600 hover:text-sky-500"><i class="fas fa-user mr-1"></i>Profile</a>
+          <button onclick="logout()" class="text-red-400 hover:text-red-500 text-sm">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">File Upload</h1>
+    <p class="text-gray-500 mb-8">Supports PDF and images (JPG/PNG/GIF/WEBP), max 10MB</p>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-lg font-bold mb-4"><i class="fas fa-cloud-upload-alt text-sky-500 mr-2"></i>Upload New File</h2>
+        <form id="upload-form" enctype="multipart/form-data">
+          <div id="drop-zone" class="drop-zone rounded-xl p-10 text-center cursor-pointer mb-4" onclick="document.getElementById('file-input').click()">
+            <i class="fas fa-file-upload text-5xl text-gray-300 mb-4 block"></i>
+            <p class="text-gray-500 mb-2">Click to select or drag & drop</p>
+            <p class="text-sm text-gray-400">PDF, JPG, PNG, GIF, WEBP • Max 10MB</p>
+            <input type="file" id="file-input" name="file" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" class="hidden">
+          </div>
+
+          <div id="file-preview" class="hidden mb-4 p-4 bg-gray-50 rounded-xl flex items-center gap-4">
+            <div id="preview-icon" class="w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl"></div>
+            <div class="flex-1 min-w-0">
+              <div id="preview-name" class="font-medium truncate"></div>
+              <div id="preview-size" class="text-sm text-gray-500"></div>
+            </div>
+            <button type="button" onclick="clearFile()" class="text-gray-400 hover:text-red-500"><i class="fas fa-times text-xl"></i></button>
+          </div>
+
+          <div id="img-preview-wrap" class="hidden mb-4">
+            <img id="img-preview" src="" class="max-h-48 rounded-xl mx-auto object-contain">
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+            <input type="text" id="description" placeholder="What is this file for?" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+
+          <div id="progress-wrap" class="hidden mb-4">
+            <div class="flex justify-between text-sm text-gray-600 mb-1"><span>Uploading...</span><span id="progress-text">0%</span></div>
+            <div class="w-full bg-gray-200 rounded-full h-2"><div id="progress-bar" class="gradient-bg h-2 rounded-full transition-all duration-300" style="width:0%"></div></div>
+          </div>
+
+          <div id="upload-msg" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+          <button type="submit" id="upload-btn" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 disabled:opacity-50">
+            <i class="fas fa-upload mr-2"></i>Upload
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold"><i class="fas fa-folder-open text-sky-500 mr-2"></i>My Files</h2>
+          <button onclick="loadMyFiles()" class="text-sky-500 text-sm hover:underline"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+        </div>
+        <div id="files-list" class="space-y-3 max-h-[520px] overflow-y-auto">
+          <p class="text-center py-8 text-gray-400">Loading...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+
+    function setFile(file) {
+      const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowed.includes(file.type)) { showMsg('Only PDF or image files allowed', 'error'); return; }
+      if (file.size > 10 * 1024 * 1024) { showMsg('File size cannot exceed 10MB', 'error'); return; }
+
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+
+      const isPdf = file.type === 'application/pdf';
+      const icon = document.getElementById('preview-icon');
+      icon.className = `w-12 h-12 rounded-lg flex items-center justify-center text-white text-xl ${isPdf ? 'bg-red-500' : 'bg-sky-500'}`;
+      icon.innerHTML = `<i class="fas ${isPdf ? 'fa-file-pdf' : 'fa-image'}"></i>`;
+      document.getElementById('preview-name').textContent = file.name;
+      document.getElementById('preview-size').textContent = formatSize(file.size);
+      document.getElementById('file-preview').classList.remove('hidden');
+
+      if (!isPdf) {
+        const reader = new FileReader();
+        reader.onload = e => { document.getElementById('img-preview').src = e.target.result; document.getElementById('img-preview-wrap').classList.remove('hidden'); };
+        reader.readAsDataURL(file);
+      } else {
+        document.getElementById('img-preview-wrap').classList.add('hidden');
+      }
+    }
+
+    function clearFile() {
+      fileInput.value = '';
+      document.getElementById('file-preview').classList.add('hidden');
+      document.getElementById('img-preview-wrap').classList.add('hidden');
+      document.getElementById('upload-msg').classList.add('hidden');
+    }
+
+    document.getElementById('upload-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!fileInput.files[0]) { showMsg('Please select a file', 'error'); return; }
+
+      const btn = document.getElementById('upload-btn');
+      btn.disabled = true;
+      document.getElementById('progress-wrap').classList.remove('hidden');
+      document.getElementById('upload-msg').classList.add('hidden');
+
+      const fd = new FormData();
+      fd.append('file', fileInput.files[0]);
+      fd.append('description', document.getElementById('description').value);
+
+      const xhr = new XMLHttpRequest();
+      xhr.upload.addEventListener('progress', e => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          document.getElementById('progress-bar').style.width = pct + '%';
+          document.getElementById('progress-text').textContent = pct + '%';
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        document.getElementById('progress-wrap').classList.add('hidden');
+        btn.disabled = false;
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) {
+            showMsg('Upload successful! Awaiting admin review.', 'success');
+            clearFile();
+            document.getElementById('description').value = '';
+            loadMyFiles();
+          } else {
+            showMsg(res.message, 'error');
+          }
+        } catch (e) { showMsg('Upload failed', 'error'); }
+      });
+
+      xhr.addEventListener('error', () => { document.getElementById('progress-wrap').classList.add('hidden'); btn.disabled = false; showMsg('Network error', 'error'); });
+      xhr.open('POST', '/api/files/upload');
+      xhr.setRequestHeader('Authorization', 'Bearer ' + getToken());
+      xhr.send(fd);
+    });
+
+    async function loadMyFiles() {
+      const container = document.getElementById('files-list');
+      container.innerHTML = '<p class="text-center py-8 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i>Loading...</p>';
+
+      try {
+        const res = await fetch('/api/files/my-files', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!data.success) return;
+
+        if (data.data.length === 0) {
+          container.innerHTML = '<p class="text-center py-12 text-gray-400"><i class="fas fa-folder-open text-4xl mb-3 block"></i>No uploads yet</p>';
+          return;
+        }
+
+        const statusMap = { 0: 'Pending', 1: 'Approved', 2: 'Rejected' };
+        const statusClass = { 0: 'status-pending', 1: 'status-approved', 2: 'status-rejected' };
+
+        container.innerHTML = data.data.map(f => `
+          <div class="flex items-start gap-3 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0 ${f.file_type === 'pdf' ? 'bg-red-500' : 'bg-sky-500'}">
+              <i class="fas ${f.file_type === 'pdf' ? 'fa-file-pdf' : 'fa-image'}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-sm truncate">${f.original_name}</div>
+              <div class="text-xs text-gray-500 mt-0.5">${formatSize(f.file_size)} • ${formatDateTime(f.created_at)}</div>
+              ${f.description ? `<div class="text-xs text-gray-500 mt-0.5 truncate">${f.description}</div>` : ''}
+              ${f.admin_remark ? `<div class="text-xs text-orange-500 mt-0.5">Admin note: ${f.admin_remark}</div>` : ''}
+            </div>
+            <div class="flex flex-col items-end gap-2 flex-shrink-0">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium ${statusClass[f.status]}">${statusMap[f.status]}</span>
+              <div class="flex gap-2">
+                <a href="${f.file_path}" target="_blank" class="text-sky-500 text-xs hover:underline"><i class="fas fa-eye mr-1"></i>View</a>
+                ${f.status === 0 ? `<button onclick="deleteFile(${f.id})" class="text-red-400 text-xs hover:underline"><i class="fas fa-trash mr-1"></i>Delete</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        container.innerHTML = '<p class="text-center py-8 text-red-400">Failed to load</p>';
+      }
+    }
+
+    async function deleteFile(id) {
+      if (!confirm('Delete this file?')) return;
+      try {
+        const res = await fetch('/api/files/my-files/' + id, { method: 'DELETE', headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.success) loadMyFiles();
+        else alert(data.message);
+      } catch (e) { alert('Failed to delete'); }
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function showMsg(msg, type) {
+      const el = document.getElementById('upload-msg');
+      el.textContent = msg;
+      el.className = `mb-4 px-4 py-3 rounded-xl text-sm font-medium ${type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`;
+      el.classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireLogin()) return;
+      checkLoginStatus();
+      loadMyFiles();
+    });
+  </script>
+</body>
+</html>
