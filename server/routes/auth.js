@@ -1,88 +1,207 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
-const { run, get, all, save } = require('../database');
-const { authMiddleware, generateToken } = require('../middleware/auth');
+const db = require('../database');
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024';
+const INVITE_REWARD_LEVEL1 = 10;
+const INVITE_REWARD_LEVEL2 = 5;
 
+// Middleware to verify JWT token
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (e) {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
+
+// Register
 router.post('/register', async (req, res) => {
   try {
     const { username, email, phone, password, invite_code } = req.body;
-    if (!username || !password) return res.status(400).json({ success: false, message: 'Username and password required' });
-    if (!email && !phone) return res.status(400).json({ success: false, message: 'Email or phone required' });
 
-    const exists = get('SELECT id FROM users WHERE username = ? OR email = ? OR phone = ?', [username, email || '', phone || '']);
-    if (exists) return res.status(400).json({ success: false, message: 'User already exists' });
-
-    const hash = await bcrypt.hash(password, 10);
-    const code = uuidv4().substring(0, 8).toUpperCase();
-    let parentId = null;
-    if (invite_code) {
-      const ref = get('SELECT id FROM users WHERE invite_code = ?', [invite_code]);
-      if (ref) parentId = ref.id;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username and password are required' });
     }
 
-    const result = run('INSERT INTO users (username, email, phone, password, invite_code, parent_id) VALUES (?, ?, ?, ?, ?, ?)', [username, email || null, phone || null, hash, code, parentId]);
+    // Check existing user
+    const existingUser = db.get("SELECT id FROM users WHERE username = ? OR email = ? OR phone = ?", 
+      [username, email || '', phone || '']);
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    // Generate invite code
+    const userInviteCode = uuidv4().substring(0, 8).toUpperCase();
+
+    // Find inviter
+    let parentId = null;
+    if (invite_code) {
+      const inviter = db.get("SELECT id, level FROM users WHERE invite_code = ?", [invite_code]);
+      if (inviter) {
+        parentId = inviter.id;
+      }
+    }
+
+    // Create user
+    const result = db.run(
+      "INSERT INTO users (username, email, phone, password, invite_code, parent_id, level) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId ? 1 : 0]
+    );
+
     const userId = result.lastInsertRowid;
 
+    // Award invite rewards
     if (parentId) {
-      const parent = get('SELECT id, parent_id, balance FROM users WHERE id = ?', [parentId]);
+      const parent = db.get("SELECT parent_id, balance FROM users WHERE id = ?", [parentId]);
       if (parent) {
-        const r1 = 10;
-        run('UPDATE users SET balance = balance + ? WHERE id = ?', [r1, parent.id]);
-        run('INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, ?, ?, ?, ?, ?)', [parent.id, 'add', r1, parent.balance, parent.balance + r1, 'Level 1 referral reward']);
-        run('INSERT INTO invite_rewards (inviter_id, invitee_id, level, reward_amount) VALUES (?, ?, ?, ?)', [parent.id, userId, 1, r1]);
+        const newBalance = parent.balance + INVITE_REWARD_LEVEL1;
+        db.run("UPDATE users SET balance = ? WHERE id = ?", [newBalance, parentId]);
+        db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'add', ?, ?, ?, ?)",
+          [parentId, INVITE_REWARD_LEVEL1, parent.balance, newBalance, 'Invite reward (Level 1)']);
+
+        // Level 2 reward
         if (parent.parent_id) {
-          const gp = get('SELECT id, balance FROM users WHERE id = ?', [parent.parent_id]);
-          if (gp) {
-            const r2 = 5;
-            run('UPDATE users SET balance = balance + ? WHERE id = ?', [r2, gp.id]);
-            run('INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, ?, ?, ?, ?, ?)', [gp.id, 'add', r2, gp.balance, gp.balance + r2, 'Level 2 referral reward']);
-            run('INSERT INTO invite_rewards (inviter_id, invitee_id, level, reward_amount) VALUES (?, ?, ?, ?)', [gp.id, userId, 2, r2]);
+          const grandparent = db.get("SELECT balance FROM users WHERE id = ?", [parent.parent_id]);
+          if (grandparent) {
+            const ggNewBalance = grandparent.balance + INVITE_REWARD_LEVEL2;
+            db.run("UPDATE users SET balance = ? WHERE id = ?", [ggNewBalance, parent.parent_id]);
+            db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'add', ?, ?, ?, ?)",
+              [parent.parent_id, INVITE_REWARD_LEVEL2, grandparent.balance, ggNewBalance, 'Invite reward (Level 2)']);
           }
         }
       }
     }
-    save();
-    const token = generateToken({ id: userId, username, role: 'user' });
-    res.json({ success: true, data: { token, user: { id: userId, username, invite_code: code } } });
-  } catch (err) { console.error(err); res.status(500).json({ success: false, message: 'Server error' }); }
+
+    // Generate token
+    const token = jwt.sign({ id: userId, username, level: parentId ? 1 : 0 }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: { id: userId, username, email, phone, invite_code: userInviteCode, balance: 0 }
+      }
+    });
+  } catch (e) {
+    console.error('Register error:', e);
+    res.status(500).json({ success: false, message: 'Registration failed' });
+  }
 });
 
+// Login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = get('SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?', [username, username, username]);
-    if (!user) return res.status(400).json({ success: false, message: 'User not found' });
-    if (user.status === 0) return res.status(400).json({ success: false, message: 'Account disabled' });
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ success: false, message: 'Incorrect password' });
-    const token = generateToken(user);
-    res.json({ success: true, data: { token, user: { id: user.id, username: user.username, email: user.email, phone: user.phone, balance: user.balance, invite_code: user.invite_code, role: user.role } } });
-  } catch (err) { res.status(500).json({ success: false, message: 'Server error' }); }
-});
+    const { account, password } = req.body;
 
-router.get('/profile', authMiddleware, (req, res) => {
-  const user = get('SELECT id, username, email, phone, avatar, balance, invite_code, parent_id, created_at FROM users WHERE id = ?', [req.user.id]);
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-  res.json({ success: true, data: user });
-});
+    if (!account || !password) {
+      return res.status(400).json({ success: false, message: 'Account and password required' });
+    }
 
-router.get('/team', authMiddleware, (req, res) => {
-  const level1 = all(`SELECT u.id, u.username, u.created_at, r.reward_amount, r.created_at as invite_time FROM users u LEFT JOIN invite_rewards r ON u.id = r.invitee_id AND r.inviter_id = ? WHERE u.parent_id = ?`, [req.user.id, req.user.id]);
-  const level2Ids = level1.map(u => u.id);
-  let level2 = [];
-  if (level2Ids.length > 0) {
-    level2 = all(`SELECT u.id, u.username, u.created_at, r.reward_amount, r.created_at as invite_time, p.username as parent_name FROM users u LEFT JOIN invite_rewards r ON u.id = r.invitee_id AND r.level = 2 LEFT JOIN users p ON u.parent_id = p.id WHERE u.parent_id IN (${level2Ids.map(() => '?').join(',')})`, level2Ids);
+    const user = db.get("SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?",
+      [account, account, account]);
+
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    if (user.status === 0) {
+      return res.status(403).json({ success: false, message: 'Account disabled' });
+    }
+
+    const token = jwt.sign({ id: user.id, username: user.username, level: user.level }, JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          balance: user.balance,
+          invite_code: user.invite_code
+        }
+      }
+    });
+  } catch (e) {
+    console.error('Login error:', e);
+    res.status(500).json({ success: false, message: 'Login failed' });
   }
-  const stats = { level1_count: level1.length, level2_count: level2.length, level1_reward: level1.reduce((s, u) => s + (u.reward_amount || 0), 0), level2_reward: level2.reduce((s, u) => s + (u.reward_amount || 0), 0) };
-  res.json({ success: true, data: { level1, level2, stats } });
 });
 
+// Get user profile
+router.get('/profile', authMiddleware, (req, res) => {
+  try {
+    const user = db.get("SELECT id, username, email, phone, balance, invite_code, created_at FROM users WHERE id = ?", [req.user.id]);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, data: user });
+  } catch (e) {
+    console.error('Profile error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get profile' });
+  }
+});
+
+// Get balance logs
 router.get('/balance-logs', authMiddleware, (req, res) => {
-  const logs = all('SELECT * FROM balance_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.user.id]);
-  res.json({ success: true, data: logs });
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const page = parseInt(req.query.page) || 1;
+    const offset = (page - 1) * limit;
+
+    const logs = db.all(
+      "SELECT * FROM balance_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+      [req.user.id, limit, offset]
+    );
+
+    const total = db.get("SELECT COUNT(*) as count FROM balance_logs WHERE user_id = ?", [req.user.id]);
+
+    res.json({ success: true, data: logs, pagination: { total: total.count, page, limit } });
+  } catch (e) {
+    console.error('Balance logs error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get balance logs' });
+  }
+});
+
+// Get team (referrals)
+router.get('/team', authMiddleware, (req, res) => {
+  try {
+    const level1 = db.all(
+      "SELECT u.username, u.created_at as invite_time, bl.amount as reward_amount FROM users u LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 1%' WHERE u.parent_id = ?",
+      [req.user.id]
+    );
+    const level2 = db.all(
+      "SELECT u.username, u.parent_id, p.username as parent_name, u.created_at, bl.amount as reward_amount FROM users u LEFT JOIN users p ON p.id = u.parent_id LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 2%' WHERE u.parent_id IN (SELECT id FROM users WHERE parent_id = ?)",
+      [req.user.id]
+    );
+
+    const stats = {
+      level1_count: level1.length,
+      level2_count: level2.length,
+      level1_reward: level1.reduce((sum, u) => sum + (u.reward_amount || 0), 0),
+      level2_reward: level2.reduce((sum, u) => sum + (u.reward_amount || 0), 0)
+    };
+
+    res.json({ success: true, data: { level1, level2, stats } });
+  } catch (e) {
+    console.error('Team error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get team data' });
+  }
 });
 
 module.exports = router;
