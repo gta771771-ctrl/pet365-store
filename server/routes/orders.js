@@ -1,87 +1,171 @@
 const express = require('express');
-const { v4: uuidv4 } = require('uuid');
-const { run, get, all, save } = require('../database');
-const { authMiddleware } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+const db = require('../database');
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'pet-service-platform-secret-key-2024';
 
-router.get('/', authMiddleware, (req, res) => {
-  const { status, page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
-  let sql = 'SELECT * FROM orders WHERE user_id = ?';
-  const params = [req.user.id];
-  if (status) { sql += ' AND status = ?'; params.push(status); }
-  const total = get(sql.replace('SELECT *', 'SELECT COUNT(*) as total'), params)?.total || 0;
-  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), offset);
-  const orders = all(sql, params);
-  orders.forEach(o => { o.items = all('SELECT * FROM order_items WHERE order_id = ?', [o.id]); });
-  res.json({ success: true, data: orders, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
-});
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (e) {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
 
-router.get('/:id', authMiddleware, (req, res) => {
-  const order = get('SELECT * FROM orders WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-  order.items = all('SELECT * FROM order_items WHERE order_id = ?', [order.id]);
-  res.json({ success: true, data: order });
-});
-
+// Create order
 router.post('/', authMiddleware, (req, res) => {
   try {
     const { items, receiver_name, receiver_phone, receiver_address, remark, use_balance } = req.body;
-    if (!items || items.length === 0) return res.status(400).json({ success: false, message: 'No items' });
 
-    const user = get('SELECT balance FROM users WHERE id = ?', [req.user.id]);
+    if (!items || items.length === 0) {
+      return res.status(400).json({ success: false, message: 'No items' });
+    }
+
+    // Calculate total
     let totalAmount = 0;
-    const orderItems = [];
     for (const item of items) {
-      const prod = get('SELECT * FROM products WHERE id = ? AND status = 1', [item.product_id]);
-      if (!prod) return res.status(400).json({ success: false, message: `Product ${item.product_id} not available` });
-      if (prod.stock < item.quantity) return res.status(400).json({ success: false, message: `Insufficient stock for ${prod.name}` });
-      totalAmount += prod.price * item.quantity;
-      orderItems.push({ ...prod, quantity: item.quantity, specification: item.specification || '' });
+      const product = db.get("SELECT price, stock, status FROM products WHERE id = ?", [item.product_id]);
+      if (product && product.status === 1 && product.stock >= item.quantity) {
+        totalAmount += product.price * item.quantity;
+      }
     }
 
-    let discountAmount = 0;
-    if (use_balance && user.balance > 0) discountAmount = Math.min(user.balance, totalAmount);
-    const payAmount = totalAmount - discountAmount;
-    const orderNo = 'ORD' + Date.now() + uuidv4().substring(0, 4).toUpperCase();
-
-    const result = run('INSERT INTO orders (order_no, user_id, total_amount, discount_amount, pay_amount, use_balance, receiver_name, receiver_phone, receiver_address, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [orderNo, req.user.id, totalAmount, discountAmount, payAmount, discountAmount > 0 ? 1 : 0, receiver_name, receiver_phone, receiver_address, remark]);
-    const orderId = result.lastInsertRowid;
-
-    orderItems.forEach(item => {
-      run('INSERT INTO order_items (order_id, product_id, product_name, product_image, price, quantity, specification) VALUES (?, ?, ?, ?, ?, ?, ?)', [orderId, item.id, item.name, item.image, item.price, item.quantity, item.specification]);
-      run('UPDATE products SET stock = stock - ?, sales = sales + ? WHERE id = ?', [item.quantity, item.quantity, item.id]);
-    });
-
-    if (discountAmount > 0) {
-      run('UPDATE users SET balance = balance - ? WHERE id = ?', [discountAmount, req.user.id]);
-      run('INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, ?, ?, ?, ?, ?)', [req.user.id, 'deduct', discountAmount, user.balance, user.balance - discountAmount, `Order ${orderNo}`]);
+    if (totalAmount === 0) {
+      return res.status(400).json({ success: false, message: 'No valid items' });
     }
 
-    run('DELETE FROM cart WHERE user_id = ?', [req.user.id]);
-    save();
-    res.json({ success: true, data: { orderId, orderNo, payAmount } });
-  } catch (err) { console.error(err); res.status(500).json({ success: false, message: 'Server error' }); }
+    // Use balance if checked
+    let balanceUsed = 0;
+    let payAmount = totalAmount;
+
+    if (use_balance) {
+      const user = db.get("SELECT balance FROM users WHERE id = ?", [req.user.id]);
+      if (user && user.balance > 0) {
+        balanceUsed = Math.min(user.balance, totalAmount);
+        payAmount = totalAmount - balanceUsed;
+      }
+    }
+
+    // Generate order number
+    const orderNo = 'ORD' + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+    // Create order
+    const orderResult = db.run(
+      "INSERT INTO orders (order_no, user_id, total_amount, pay_amount, balance_used, status, receiver_name, receiver_phone, receiver_address, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [orderNo, req.user.id, totalAmount, payAmount, balanceUsed, 1, receiver_name, receiver_phone, receiver_address, remark || null]
+    );
+
+    const orderId = orderResult.lastInsertRowid;
+
+    // Insert order items
+    for (const item of items) {
+      const product = db.get("SELECT name, price, image FROM products WHERE id = ?", [item.product_id]);
+      if (product) {
+        db.run(
+          "INSERT INTO order_items (order_id, product_id, product_name, product_image, price, quantity, specification) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          [orderId, item.product_id, product.name, product.image, product.price, item.quantity, item.specification || null]
+        );
+
+        // Update stock
+        db.run("UPDATE products SET stock = stock - ?, sales = sales + ? WHERE id = ?",
+          [item.quantity, item.quantity, item.product_id]);
+      }
+    }
+
+    // Deduct balance
+    if (balanceUsed > 0) {
+      const user = db.get("SELECT balance FROM users WHERE id = ?", [req.user.id]);
+      db.run("UPDATE users SET balance = ? WHERE id = ?", [user.balance - balanceUsed, req.user.id]);
+      db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'deduct', ?, ?, ?, ?)",
+        [req.user.id, balanceUsed, user.balance, user.balance - balanceUsed, 'Order payment: ' + orderNo]);
+    }
+
+    // Clear cart
+    db.run("DELETE FROM cart WHERE user_id = ?", [req.user.id]);
+
+    res.json({ success: true, data: { order_id: orderId, order_no: orderNo, pay_amount: payAmount } });
+  } catch (e) {
+    console.error('Create order error:', e);
+    res.status(500).json({ success: false, message: 'Failed to create order' });
+  }
 });
 
-router.put('/:id/cancel', authMiddleware, (req, res) => {
-  const order = get('SELECT * FROM orders WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-  if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
-  if (order.status !== 1) return res.status(400).json({ success: false, message: 'Cannot cancel this order' });
+// Get orders
+router.get('/', authMiddleware, (req, res) => {
+  try {
+    const { page = 1, limit = 10, status } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-  run('UPDATE orders SET status = 5 WHERE id = ?', [req.params.id]);
-  const items = all('SELECT * FROM order_items WHERE order_id = ?', [req.params.id]);
-  items.forEach(i => run('UPDATE products SET stock = stock + ?, sales = sales - ? WHERE id = ?', [i.quantity, i.quantity, i.product_id]));
+    let sql = "SELECT * FROM orders WHERE user_id = ?";
+    let params = [req.user.id];
 
-  if (order.use_balance && order.discount_amount > 0) {
-    const user = get('SELECT balance FROM users WHERE id = ?', [req.user.id]);
-    run('UPDATE users SET balance = balance + ? WHERE id = ?', [order.discount_amount, req.user.id]);
-    run('INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, ?, ?, ?, ?, ?)', [req.user.id, 'refund', order.discount_amount, user.balance, user.balance + order.discount_amount, `Order ${order.order_no} cancelled`]);
+    if (status) {
+      sql += " AND status = ?";
+      params.push(parseInt(status));
+    }
+
+    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    params.push(parseInt(limit), offset);
+
+    const orders = db.all(sql, params);
+
+    // Get order items
+    for (const order of orders) {
+      order.items = db.all("SELECT * FROM order_items WHERE order_id = ?", [order.id]);
+    }
+
+    const total = db.get("SELECT COUNT(*) as count FROM orders WHERE user_id = ?", [req.user.id]);
+
+    res.json({ success: true, data: orders, pagination: { total: total.count, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (e) {
+    console.error('Get orders error:', e);
+    res.status(500).json({ success: false, message: 'Failed to get orders' });
   }
-  save();
-  res.json({ success: true });
+});
+
+// Cancel order
+router.put('/:id/cancel', authMiddleware, (req, res) => {
+  try {
+    const order = db.get("SELECT * FROM orders WHERE id = ? AND user_id = ?", [req.params.id, req.user.id]);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    if (order.status !== 1) {
+      return res.status(400).json({ success: false, message: 'Cannot cancel this order' });
+    }
+
+    // Refund balance
+    if (order.balance_used > 0) {
+      const user = db.get("SELECT balance FROM users WHERE id = ?", [req.user.id]);
+      db.run("UPDATE users SET balance = ? WHERE id = ?", [user.balance + order.balance_used, req.user.id]);
+      db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'refund', ?, ?, ?, ?)",
+        [req.user.id, order.balance_used, user.balance, user.balance + order.balance_used, 'Order cancelled: ' + order.order_no]);
+    }
+
+    // Restore stock
+    const items = db.all("SELECT product_id, quantity FROM order_items WHERE order_id = ?", [order.id]);
+    for (const item of items) {
+      db.run("UPDATE products SET stock = stock + ? WHERE id = ?", [item.quantity, item.product_id]);
+    }
+
+    // Update order status
+    db.run("UPDATE orders SET status = 5, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [order.id]);
+
+    res.json({ success: true, message: 'Order cancelled' });
+  } catch (e) {
+    console.error('Cancel order error:', e);
+    res.status(500).json({ success: false, message: 'Failed to cancel order' });
+  }
 });
 
 module.exports = router;
