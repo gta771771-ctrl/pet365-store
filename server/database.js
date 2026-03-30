@@ -524,20 +524,20 @@ async function init() {
 // Helper functions
 function run(sql, params = []) {
   try {
+    // Use db.exec() to get both changes and lastInsertRowid in one call
+    const results = db.exec(sql, params);
+    saveDb();
+    // Get lastInsertRowid separately (most reliable way in sql.js)
+    const lastId = db.exec("SELECT last_insert_rowid()");
+    const insertId = (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0;
+    return { changes: results.length > 0 ? results[0].values.length : 0, lastInsertRowid: insertId };
+  } catch (e) {
+    // Fallback: try db.run
     db.run(sql, params);
     saveDb();
-    return { changes: db.getRowsModified(), lastInsertRowid: getLastInsertRowid() };
-  } catch (e) {
-    throw e;
+    const lastId = db.exec("SELECT last_insert_rowid()");
+    return { changes: 0, lastInsertRowid: (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0 };
   }
-}
-
-function getLastInsertRowid() {
-  const result = db.exec("SELECT last_insert_rowid()");
-  if (result.length > 0 && result[0].values.length > 0) {
-    return result[0].values[0][0];
-  }
-  return 0;
 }
 
 function get(sql, params = []) {
