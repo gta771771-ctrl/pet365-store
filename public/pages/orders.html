@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Orders - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button onclick="filterStatus('')" class="status-btn active px-4 py-2 rounded-full text-sm font-medium gradient-bg text-white">All</button>
+      <button onclick="filterStatus('1')" class="status-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600">Pending</button>
+      <button onclick="filterStatus('3')" class="status-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600">Shipped</button>
+      <button onclick="filterStatus('4')" class="status-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600">Completed</button>
+      <button onclick="filterStatus('5')" class="status-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600">Cancelled</button>
+    </div>
+
+    <div id="orders-list" class="space-y-4"></div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let currentPage = 1;
+    let currentStatus = '';
+
+    async function loadOrders() {
+      const params = new URLSearchParams({ page: currentPage, limit: 10 });
+      if (currentStatus !== '') params.append('status', currentStatus);
+
+      try {
+        const res = await fetch('/api/orders?' + params, { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const container = document.getElementById('orders-list');
+        if (data.data.length === 0) {
+          container.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+              <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+              <p class="text-gray-500 text-lg">No orders yet</p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = data.data.map(o => `
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <span class="text-gray-500 text-sm">${o.order_no}</span>
+                <span class="text-gray-500 text-sm">${formatDateTime(o.created_at)}</span>
+              </div>
+              <span class="font-semibold ${getOrderStatusColor(o.status)}">${getOrderStatusText(o.status)}</span>
+            </div>
+            <div class="p-6">
+              <div class="flex gap-4 overflow-x-auto pb-2">
+                ${o.items.map(i => `
+                  <div class="flex-shrink-0 flex items-center gap-3">
+                    <img src="${i.product_image}" class="w-16 h-16 object-cover rounded-lg">
+                    <div>
+                      <div class="font-medium text-sm">${i.product_name}</div>
+                      <div class="text-xs text-gray-500">${i.specification || ''}</div>
+                      <div class="text-sm text-sky-500">$${i.price} x ${i.quantity}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="flex items-center justify-between mt-4 pt-4 border-t">
+                <div>
+                  <span class="text-gray-500">Total ${o.items.reduce((s, i) => s + i.quantity, 0)} items</span>
+                  <span class="ml-4 text-lg font-bold">Paid: <span class="text-sky-500">$${o.pay_amount.toFixed(2)}</span></span>
+                </div>
+                <div>
+                  ${o.status === 1 ? `<button onclick="cancelOrder(${o.id})" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Cancel Order</button>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function filterStatus(status) {
+      currentStatus = status;
+      currentPage = 1;
+      document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.classList.remove('gradient-bg', 'text-white', 'active');
+        btn.classList.add('bg-white', 'text-gray-600');
+      });
+      event.target.classList.remove('bg-white', 'text-gray-600');
+      event.target.classList.add('gradient-bg', 'text-white', 'active');
+      loadOrders();
+    }
+
+    async function cancelOrder(id) {
+      if (!confirm('Cancel this order?')) return;
+      try {
+        const res = await fetch('/api/orders/' + id + '/cancel', { method: 'PUT', headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.success) {
+          alert('Order cancelled');
+          loadOrders();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert('Failed to cancel');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!requireLogin()) return;
+      loadOrders();
+      checkLoginStatus();
+    });
+  </script>
+</body>
+</html>
