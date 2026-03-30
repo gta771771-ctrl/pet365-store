@@ -525,19 +525,66 @@ async function init() {
 function run(sql, params = []) {
   try {
     const stmt = db.prepare(sql);
+    if (params.length > 0) {
+      // Bind params as positional values (sql.js uses 1-based index)
+      const bindParams = {};
+      params.forEach((val, idx) => { bindParams['
+
+function get(sql, params = []) {
+  try {
+    const stmt = db.prepare(sql);
     if (params.length > 0) stmt.bind(params);
+    if (stmt.step()) {
+      const row = stmt.getAsObject();
+      stmt.free();
+      return row;
+    }
+    stmt.free();
+    return null;
+  } catch (e) {
+    throw e;
+  }
+}
+
+function all(sql, params = []) {
+  try {
+    const stmt = db.prepare(sql);
+    if (params.length > 0) stmt.bind(params);
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
+  } catch (e) {
+    throw e;
+  }
+}
+
+function exec(sql) {
+  try {
+    db.run(sql);
+    saveDb();
+    return { changes: db.getRowsModified() };
+  } catch (e) {
+    throw e;
+  }
+}
+
+module.exports = { init, run, get, all, exec, getDb: () => db, saveDb, UPLOAD_DIR }; + (idx + 1)] = val; });
+      stmt.bind(bindParams);
+    }
     stmt.step();
     stmt.free();
     saveDb();
-    const lastId = db.exec("SELECT last_insert_rowid()");
-    const insertId = (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0;
-    return { changes: 1, lastInsertRowid: insertId };
+    // Get last insert ID using get() helper
+    const lastIdResult = get("SELECT last_insert_rowid() as id");
+    return { changes: 1, lastInsertRowid: lastIdResult ? lastIdResult.id : 0 };
   } catch (e) {
-    // Fallback
-    db.run(sql, params);
-    saveDb();
-    const lastId = db.exec("SELECT last_insert_rowid()");
-    return { changes: 0, lastInsertRowid: (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0 };
+    // Fallback: use db.run (no params support)
+    try { db.run(sql, params); saveDb(); } catch(e2) {}
+    const lastIdResult = get("SELECT last_insert_rowid() as id");
+    return { changes: 0, lastInsertRowid: lastIdResult ? lastIdResult.id : 0 };
   }
 }
 
