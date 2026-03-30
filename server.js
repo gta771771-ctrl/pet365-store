@@ -14,15 +14,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve uploads
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/shop', require('./routes/shop'));
-app.use('/api/orders', require('./routes/orders'));
-app.use('/api/content', require('./routes/content'));
-app.use('/api/files', require('./routes/files'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/auth', require('./server/routes/auth'));
+app.use('/api/shop', require('./server/routes/shop'));
+app.use('/api/orders', require('./server/routes/orders'));
+app.use('/api/content', require('./server/routes/content'));
+app.use('/api/files', require('./server/routes/files'));
+app.use('/api/admin', require('./server/routes/admin'));
 
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
@@ -54,7 +54,7 @@ app.use((req, res) => {
 });
 
 // Initialize database and start server
-const db = require('./database');
+const db = require('./server/database');
 
 async function start() {
   try {
@@ -62,10 +62,7 @@ async function start() {
     console.log('Database initialized');
 
     app.listen(PORT, () => {
-      console.log(`\n🐾 PetPaw - Pet Service Platform`);
-      console.log(`   Local: http://localhost:${PORT}`);
-      console.log(`   Admin: http://localhost:${PORT}/admin`);
-      console.log(`   Default admin: admin / 123456\n`);
+      console.log('PetPaw server running on port ' + PORT);
     });
   } catch (e) {
     console.error('Failed to start server:', e);
