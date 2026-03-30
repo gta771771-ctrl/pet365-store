@@ -1,87 +1,79 @@
 import urllib.request
-import urllib.parse
-import urllib.error
 import json
+import ssl
 
-# Render API - need to get the API key from the user's Render dashboard
-# The user needs to create a Render API key at: https://dashboard.render.com/api-keys
+RENDER_API_KEY = "rnd_YAf4TOeIi6zKF57ZTtBuXjUX8BtV"
 
-# For now, let's try to use Render Blueprint API
-# We can deploy via GitHub integration
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
-RENDER_API_KEY = None  # User needs to provide this
-
-def render_api_request(url, method="GET", data=None, api_key=None):
-    if not api_key:
-        return {"error": "No API key provided"}, 401
-    
+def render_api(url, method="GET", data=None):
     headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {RENDER_API_KEY}",
+        "Content-Type": "application/json",
+        "Accept": "application/json"
     }
     req = urllib.request.Request(url, method=method, headers=headers)
     if data:
         req.data = json.dumps(data).encode()
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode()), resp.status
+        with urllib.request.urlopen(req, timeout=60, context=ctx) as r:
+            return json.loads(r.read()), r.status
     except urllib.error.HTTPError as e:
-        return json.loads(e.read().decode()), e.code
+        try:
+            return json.loads(e.read()), e.code
+        except:
+            return {"error": str(e)}, e.code
+    except Exception as e:
+        return {"error": str(e)}, 0
 
-print("""
-=== Render Deployment Instructions ===
+print("=== Step 1: Testing Render API ===")
+test, code = render_api("https://api.render.com/v1/services")
+print(f"Status: {code}")
+if code == 200:
+    print(f"Connected! Found {len(test)} services")
+elif code == 401:
+    print(f"Auth failed: {test}")
+elif code == 403:
+    print(f"Forbidden - check API key permissions: {test}")
+else:
+    print(f"Response: {test}")
 
-Since we cannot access the browser directly, please follow these steps:
+print("\n=== Step 2: Creating Web Service ===")
+# Create a new web service from GitHub repo
+new_service, code = render_api("https://api.render.com/v1/services", "POST", {
+    "service": {
+        "name": "petpaw",
+        "region": "oregon",
+        "serviceType": "web",
+        "ownerId": "me",
+        "source": {
+            "type": "github",
+            "repo": "gta771771-ctrl/pet365-store",
+            "branch": "main",
+            "autoDeploy": True,
+            "shouldRebuild": True
+        },
+        "envVars": [
+            {"key": "NODE_ENV", "value": "production"},
+            {"key": "RENDER", "value": "true"},
+            {"key": "BCRYPT_ROUNDS", "value": "10"}
+        ],
+        "plan": "free",
+        "buildCommand": "npm install",
+        "startCommand": "npm start"
+    }
+})
 
-STEP 1: Open Render Dashboard
-   Go to: https://dashboard.render.com
+print(f"Create response code: {code}")
+print(f"Response: {json.dumps(new_service, indent=2)}")
 
-STEP 2: Connect GitHub
-   - Click "New +" → "Blueprint"
-   - Authorize GitHub if not already connected
-   - Select the "pet365-store" repository
+if code in [200, 201]:
+    print(f"\n=== Service Created! ===")
+    print(f"Service ID: {new_service.get('id')}")
+    print(f"Service Name: {new_service.get('name')}")
+else:
+    print(f"\nError: {new_service}")
 
-STEP 3: Configure the Blueprint
-   - Name: petpaw
-   - Region: Oregon (or closest to you)
-   - Branch: main
-   - Plan: Free
-   - The render.yaml will auto-configure everything
-
-STEP 4: Click "Apply"
-
-STEP 5: Wait for deployment (3-5 minutes)
-
-STEP 6: Get the URL (e.g., https://petpaw.onrender.com)
-
-STEP 7: Configure DNS on Namecheap (see below)
-
-=== Namecheap DNS Setup ===
-
-After getting the Render URL, go to Namecheap:
-1. Sign in at: https://www.namecheap.com
-2. Go to Dashboard → Domain List → pet365.store → Manage
-3. Click "Advanced DNS"
-4. Add these records:
-
-   Type: CNAME Record
-   Host: @
-   Value: YOUR_RENDER_URL (e.g., petpaw.onrender.com)
-   TTL: Automatic
-
-   Type: CNAME Record  
-   Host: www
-   Value: YOUR_RENDER_URL (e.g., petpaw.onrender.com)
-   TTL: Automatic
-
-5. Save and wait 24-48 hours for DNS propagation
-
-=== Admin Access After Deployment ===
-- Admin URL: https://pet365.store/admin
-- Username: admin
-- Password: 123456
-""")
-
-# Check if we can deploy via API instead
-print("\n\nTrying to deploy via Render API...")
-print("To get a Render API key, go to: https://dashboard.render.com/api-keys")
+print("\n=== Done ===")
