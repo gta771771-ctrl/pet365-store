@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-white shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xl"></i>
+          </div>
+          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+        </a>
+        <div class="flex items-center gap-4" id="nav-auth"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Pet Shop</h1>
+      <div class="flex gap-4">
+        <input type="text" id="search-input" placeholder="Search products..." class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 w-64">
+        <a href="/cart" class="gradient-bg text-white px-4 py-2 rounded-xl font-medium hover:opacity-90">
+          <i class="fas fa-shopping-cart mr-2"></i>Cart
+        </a>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-8" id="category-filter">
+      <button onclick="filterCategory('')" class="cat-btn active px-4 py-2 rounded-full text-sm font-medium gradient-bg text-white">All</button>
+      <button onclick="filterCategory('food')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Food</button>
+      <button onclick="filterCategory('treats')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Treats</button>
+      <button onclick="filterCategory('supplies')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Supplies</button>
+      <button onclick="filterCategory('toys')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Toys</button>
+      <button onclick="filterCategory('medicine')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Medicine</button>
+      <button onclick="filterCategory('health')" class="cat-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-600 hover:bg-gray-100">Health</button>
+    </div>
+
+    <div id="products-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <p class="col-span-full text-center text-gray-400 py-12">Loading products...</p>
+    </div>
+  </main>
+
+  <script src="/js/main.js"></script>
+  <script>
+    let currentCategory = '';
+    let searchKeyword = '';
+
+    async function loadProducts() {
+      const params = new URLSearchParams();
+      if (currentCategory) params.append('category', currentCategory);
+      if (searchKeyword) params.append('keyword', searchKeyword);
+
+      try {
+        const res = await fetch('/api/shop/products?' + params);
+        const data = await res.json();
+        if (!data.success) return;
+
+        const container = document.getElementById('products-grid');
+        if (data.data.length === 0) {
+          container.innerHTML = '<p class="col-span-full text-center text-gray-400 py-12">No products found</p>';
+          return;
+        }
+
+        container.innerHTML = data.data.map(p => `
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+            <div class="p-4">
+              <h3 class="font-semibold text-gray-900 mb-1">${p.name}</h3>
+              <p class="text-sm text-gray-500 mb-2 line-clamp-2">${p.description || ''}</p>
+              <div class="flex items-center justify-between">
+                <span class="text-xl font-bold text-sky-500">$${p.price}</span>
+                <button onclick="addToCart(${p.id})" class="gradient-bg text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90">
+                  <i class="fas fa-cart-plus mr-1"></i>Add
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('gradient-bg', 'text-white', 'active');
+        btn.classList.add('bg-white', 'text-gray-600');
+      });
+      event.target.classList.remove('bg-white', 'text-gray-600');
+      event.target.classList.add('gradient-bg', 'text-white', 'active');
+      loadProducts();
+    }
+
+    async function addToCart(productId) {
+      const token = getToken();
+      if (!token) {
+        alert('Please login first');
+        window.location.href = '/login';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/shop/cart', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ product_id: productId, quantity: 1 })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Added to cart!');
+          loadCartCount();
+        } else {
+          alert(data.message);
+        }
+      } catch (e) {
+        alert('Failed to add to cart');
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', function() {
+      searchKeyword = this.value.trim();
+      loadProducts();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkLoginStatus();
+      loadProducts();
+    });
+  </script>
+</body>
+</html>
