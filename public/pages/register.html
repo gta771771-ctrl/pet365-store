@@ -3,128 +3,531 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - PetPaw</title>
+  <title>Get Started - PetPaw</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
-  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#0ea5e9', secondary: '#10b981' },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+    .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); }
+    .gradient-text { background: linear-gradient(135deg, #0ea5e9, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .step-dot { transition: all 0.3s ease; }
+    .step-dot.active { background: #0ea5e9; color: white; transform: scale(1.15); }
+    .step-dot.done { background: #10b981; color: white; }
+    .step-dot.inactive { background: #e2e8f0; color: #94a3b8; }
+    .pet-card { transition: all 0.2s ease; cursor: pointer; }
+    .pet-card:hover { border-color: #0ea5e9; background: #f0f9ff; }
+    .pet-card.selected { border-color: #0ea5e9; background: #e0f2fe; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+    .plan-card { transition: all 0.3s ease; }
+    .plan-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+    .plan-card.selected { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.2); }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <div class="min-h-screen flex items-center justify-center p-4 py-8">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-      <div class="text-center mb-8">
-        <a href="/" class="inline-flex items-center space-x-2 mb-4">
-          <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center">
-            <i class="fas fa-paw text-white text-xl"></i>
+<body class="min-h-screen">
+
+  <!-- Nav -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-9 h-9 gradient-bg rounded-lg flex items-center justify-center">
+            <i class="fas fa-paw text-white text-base"></i>
           </div>
-          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+          <span class="text-xl font-bold gradient-text">PetPaw</span>
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Create Account</h1>
-        <p class="text-gray-500 mt-2">Join PetPaw today</p>
-      </div>
-
-      <form id="register-form" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Username *</label>
-          <input type="text" id="reg-username" placeholder="Choose a username" required
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
+        <div class="flex items-center space-x-4">
+          <a href="/login" class="text-gray-600 text-sm hover:text-sky-500 font-medium">Sign In</a>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-          <input type="email" id="reg-email" placeholder="your@email.com" required
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-          <input type="tel" id="reg-phone" placeholder="+1 (555) 000-0000"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
-          <input type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
-          <input type="password" id="reg-confirm" placeholder="Confirm your password" required
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">Invite Code (Optional)</label>
-          <input type="text" id="reg-invite" placeholder="Enter invite code if you have one"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-
-        <div id="register-error" class="hidden bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm"></div>
-
-        <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
-          Create Account
-        </button>
-      </form>
-
-      <div class="mt-6 text-center">
-        <p class="text-gray-600">Already have an account? <a href="/login" class="text-sky-500 font-medium hover:underline">Sign In</a></p>
       </div>
     </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+    <!-- Progress Steps -->
+    <div class="flex items-center justify-center mb-10" id="steps">
+      <div class="flex items-center gap-4">
+        <div id="dot1" class="step-dot active w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold">1</div>
+        <div class="w-16 md:w-24 h-0.5 bg-gray-200" id="line1"></div>
+        <div id="dot2" class="step-dot inactive w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+        <div class="w-16 md:w-24 h-0.5 bg-gray-200" id="line2"></div>
+        <div id="dot3" class="step-dot inactive w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+        <div class="w-16 md:w-24 h-0.5 bg-gray-200" id="line3"></div>
+        <div id="dot4" class="step-dot inactive w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold">4</div>
+      </div>
+    </div>
+
+    <div class="text-center mb-8">
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2" id="step-title">Tell us about your pet family</h1>
+      <p class="text-gray-500" id="step-desc">We'll help you find the perfect plan for your pets</p>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="error-banner" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-6 text-sm flex items-center gap-2">
+      <i class="fas fa-exclamation-circle"></i>
+      <span id="error-text"></span>
+    </div>
+
+    <!-- STEP 1: Basic Info -->
+    <div id="step1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Zip Code <span class="text-red-500">*</span></label>
+          <input type="text" id="zipcode" maxlength="10" placeholder="e.g. 10001"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            onkeyup="if(event.key==='Enter')document.getElementById('step1-next').click()">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
+          <input type="email" id="email" placeholder="your@email.com"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            onkeyup="if(event.key==='Enter')document.getElementById('step1-next').click()">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <span class="flex items-center gap-2">
+              <span class="text-2xl">🐕</span> Number of dogs, horses or other large animals
+            </span>
+          </label>
+          <select id="large_pets" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5+</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <span class="flex items-center gap-2">
+              <span class="text-2xl">🐈</span> Number of cats, small animals, rodents, reptiles or birds
+            </span>
+          </label>
+          <select id="small_pets" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option><option value="5">5+</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-8 flex justify-end">
+        <button onclick="goToStep(2)" id="step1-next"
+          class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition text-sm">
+          Continue <i class="fas fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Choose Plans -->
+    <div id="step2" class="hidden">
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Vet Discount Card -->
+        <div id="vet-card" class="pet-card bg-white rounded-2xl border-2 border-gray-200 p-6 cursor-pointer" onclick="selectPlan('vet')">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-2xl">🏥</span>
+                <h3 class="font-bold text-gray-900 text-lg">Vet Discount Plan</h3>
+              </div>
+              <div class="text-3xl font-extrabold text-sky-600">25%</div>
+              <div class="text-gray-400 text-sm">off all in-house vet services</div>
+            </div>
+            <div id="vet-check" class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> Instant savings at network vets</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> No claim forms needed</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> No deductible, no waiting period</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> All pre-existing conditions covered</li>
+          </ul>
+          <div class="mt-4 text-right">
+            <div class="text-sm text-gray-500">Starting at</div>
+            <div class="text-xl font-bold text-gray-900" id="vet-price">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Wellness Card -->
+        <div id="wellness-card" class="pet-card bg-white rounded-2xl border-2 border-gray-200 p-6 cursor-pointer" onclick="selectPlan('wellness')">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-2xl">🌿</span>
+                <h3 class="font-bold text-gray-900 text-lg">Wellness Plan</h3>
+                <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">NEW</span>
+              </div>
+              <div class="text-3xl font-extrabold text-emerald-600">$100+</div>
+              <div class="text-gray-400 text-sm">annual reimbursement on routine care</div>
+            </div>
+            <div id="wellness-check" class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> Visit ANY veterinarian</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> Simple online claim submission</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> Covers vaccinations, bloodwork, grooming</li>
+            <li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> 3 coverage tiers available</li>
+          </ul>
+          <div class="mt-4 text-right">
+            <div class="text-sm text-gray-500">Starting at</div>
+            <div class="text-xl font-bold text-gray-900" id="wellness-price">Loading...</div>
+          </div>
+        </div>
+      </div>
+      <div id="wellness-tiers" class="hidden grid md:grid-cols-3 gap-4 mb-6">
+        <!-- Wellness tiers loaded here -->
+      </div>
+      <div class="bg-sky-50 rounded-xl p-4 mb-6 flex items-start gap-3">
+        <i class="fas fa-info-circle text-sky-500 mt-0.5"></i>
+        <p class="text-sky-700 text-sm">You can also purchase plans after registration from your account dashboard.</p>
+      </div>
+      <div class="flex justify-between">
+        <button onclick="goToStep(1)" class="text-gray-500 hover:text-gray-700 font-medium text-sm px-4 py-3">
+          <i class="fas fa-arrow-left mr-1"></i> Back
+        </button>
+        <button onclick="goToStep(3)" id="step2-next"
+          class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition text-sm">
+          Continue <i class="fas fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Account Info -->
+    <div id="step3" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
+      <div class="max-w-md mx-auto">
+        <h3 class="text-lg font-bold text-gray-900 mb-6 text-center">Create your account</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+            <input type="text" id="reg-username" placeholder="Choose a username"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+            <input type="password" id="reg-password" placeholder="Create a password (min 6 chars)"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Phone (optional)</label>
+            <input type="text" id="reg-phone" placeholder="Your phone number"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Referral Code (optional)</label>
+            <input type="text" id="reg-invite" placeholder="Friend's referral code"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+        <div class="mt-6 flex justify-between items-center">
+          <button onclick="goToStep(2)" class="text-gray-500 hover:text-gray-700 font-medium text-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Back
+          </button>
+          <button onclick="goToStep(4)" id="step3-next"
+            class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition text-sm">
+            Review Order <i class="fas fa-arrow-right ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Review & Pay -->
+    <div id="step4" class="hidden">
+      <div class="max-w-lg mx-auto">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="gradient-bg p-4 text-white text-center">
+            <h3 class="font-bold text-lg">Review Your Order</h3>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Account</div>
+              <div class="bg-gray-50 rounded-xl p-3 text-sm text-gray-700" id="review-account">-</div>
+            </div>
+            <div>
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Selected Plans</div>
+              <div class="space-y-2" id="review-plans">
+                <div class="flex justify-between items-center bg-gray-50 rounded-xl p-3">
+                  <div>
+                    <div class="font-medium text-gray-800 text-sm" id="rv-plan-name">-</div>
+                    <div class="text-gray-400 text-xs" id="rv-plan-pets">0 pets</div>
+                  </div>
+                  <div class="font-bold text-gray-900" id="rv-plan-price">$0</div>
+                </div>
+              </div>
+            </div>
+            <div class="border-t border-gray-200 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-gray-900 text-lg">Total</span>
+                <span class="font-extrabold text-2xl gradient-text" id="review-total">$0</span>
+              </div>
+            </div>
+            <div class="bg-emerald-50 rounded-xl p-3 flex items-start gap-2">
+              <i class="fas fa-shield-alt text-emerald-500 mt-0.5"></i>
+              <p class="text-emerald-700 text-xs">30-day risk-free cancellation. No claims in 30 days? Full refund, no questions asked.</p>
+            </div>
+            <button onclick="submitRegistration()" id="submit-btn"
+              class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition">
+              Complete Registration <i class="fas fa-lock ml-2"></i>
+            </button>
+            <p class="text-center text-gray-400 text-xs">By registering, you agree to our Terms of Service and Member Agreement.</p>
+          </div>
+        </div>
+        <div class="mt-4 flex justify-center">
+          <button onclick="goToStep(3)" class="text-gray-500 hover:text-gray-700 font-medium text-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Modify order
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div id="success-view" class="hidden text-center py-10">
+      <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">
+        <i class="fas fa-check text-white text-3xl"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to PetPaw!</h2>
+      <p class="text-gray-500 mb-2" id="success-name">Your account has been created.</p>
+      <p class="text-gray-500 mb-8">Check your email for confirmation.</p>
+      <a href="/profile" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition inline-block">
+        Go to My Account <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </div>
+
   </div>
 
   <script>
-    document.getElementById('register-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const btn = this.querySelector('button[type="submit"]');
-      const errorDiv = document.getElementById('register-error');
+    const API = 'https://pet365-store.onrender.com';
+    let currentStep = 1;
+    let selectedPlans = { vet: false, wellness: false, wellnessPlanId: null };
+    let planPrices = {};
+    let formData = {};
 
-      const password = document.getElementById('reg-password').value;
-      const confirm = document.getElementById('reg-confirm').value;
-
-      if (password !== confirm) {
-        errorDiv.textContent = 'Passwords do not match';
-        errorDiv.classList.remove('hidden');
-        return;
+    function setStep(step) {
+      [1,2,3,4].forEach(s => {
+        document.getElementById('step' + s).classList.add('hidden');
+        document.getElementById('dot' + s).className = 'step-dot inactive w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold';
+      });
+      document.getElementById('step' + step).classList.remove('hidden');
+      document.getElementById('dot' + step).className = 'step-dot active w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold';
+      for (let s = 1; s < step; s++) {
+        document.getElementById('dot' + s).className = 'step-dot done w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold';
+        if (document.getElementById('line' + s)) {
+          document.getElementById('line' + s).style.background = '#10b981';
+        }
       }
+      currentStep = step;
+      if (step === 4) updateReview();
+    }
 
+    function goToStep(step) {
+      if (step === 2) {
+        const zip = document.getElementById('zipcode').value.trim();
+        const email = document.getElementById('email').value.trim();
+        if (!zip || !email) { showError('Please fill in zip code and email.'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email address.'); return; }
+        formData.zipcode = zip; formData.email = email;
+        formData.large_pets = parseInt(document.getElementById('large_pets').value);
+        formData.small_pets = parseInt(document.getElementById('small_pets').value);
+        hideError();
+        loadPlanPrices();
+      } else if (step === 3) {
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        if (!username || username.length < 3) { showError('Username must be at least 3 characters.'); return; }
+        if (!password || password.length < 6) { showError('Password must be at least 6 characters.'); return; }
+        formData.username = username; formData.password = password;
+        formData.phone = document.getElementById('reg-phone').value.trim();
+        formData.invite_code = document.getElementById('reg-invite').value.trim();
+        hideError();
+      } else if (step === 4) {
+        if (!selectedPlans.vet && !selectedPlans.wellness) {
+          showError('Please select at least one plan.'); return;
+        }
+        hideError();
+      }
+      setStep(step);
+    }
+
+    function showError(msg) {
+      document.getElementById('error-banner').classList.remove('hidden');
+      document.getElementById('error-text').textContent = msg;
+    }
+    function hideError() {
+      document.getElementById('error-banner').classList.add('hidden');
+    }
+
+    function selectPlan(type) {
+      if (type === 'vet') {
+        selectedPlans.vet = !selectedPlans.vet;
+        const card = document.getElementById('vet-card');
+        const check = document.getElementById('vet-check');
+        if (selectedPlans.vet) {
+          card.classList.add('selected');
+          check.innerHTML = '<i class="fas fa-check text-sky-500 text-xs"></i>';
+          check.style.borderColor = '#0ea5e9';
+        } else {
+          card.classList.remove('selected');
+          check.innerHTML = '';
+          check.style.borderColor = '#d1d5db';
+        }
+      } else if (type === 'wellness') {
+        selectedPlans.wellness = !selectedPlans.wellness;
+        const card = document.getElementById('wellness-card');
+        const check = document.getElementById('wellness-check');
+        if (selectedPlans.wellness) {
+          card.classList.add('selected');
+          check.innerHTML = '<i class="fas fa-check text-emerald-500 text-xs"></i>';
+          check.style.borderColor = '#10b981';
+          document.getElementById('wellness-tiers').classList.remove('hidden');
+        } else {
+          card.classList.remove('selected');
+          check.innerHTML = '';
+          check.style.borderColor = '#d1d5db';
+          document.getElementById('wellness-tiers').classList.add('hidden');
+          selectedPlans.wellnessPlanId = null;
+        }
+      }
+    }
+
+    async function loadPlanPrices() {
+      try {
+        const [vetRes, wellRes] = await Promise.all([
+          fetch(API + '/api/vet/discount-plans'),
+          fetch(API + '/api/vet/wellness-plans')
+        ]);
+        const vetData = await vetRes.json();
+        const wellData = await wellRes.json();
+        if (vetData.success && vetData.data.length) {
+          planPrices.vet = vetData.data[0].price || 9.99;
+          document.getElementById('vet-price').textContent = '$' + planPrices.vet + '/mo';
+        } else {
+          document.getElementById('vet-price').textContent = '$9.99/mo';
+        }
+        if (wellData.success && wellData.data.length) {
+          planPrices.wellness = wellData.data[0].price || 14.99;
+          document.getElementById('wellness-price').textContent = '$' + planPrices.wellness + '/mo';
+          renderWellnessTiers(wellData.data);
+        } else {
+          document.getElementById('wellness-price').textContent = '$14.99/mo';
+        }
+      } catch(e) {
+        document.getElementById('vet-price').textContent = '$9.99/mo';
+        document.getElementById('wellness-price').textContent = '$14.99/mo';
+      }
+    }
+
+    function renderWellnessTiers(plans) {
+      const tiers = ['🌱 Basic', '🌿 Plus', '🌳 Premium'];
+      const container = document.getElementById('wellness-tiers');
+      container.innerHTML = plans.map((p, i) => `
+        <div id="wtier-${p.id}" class="pet-card bg-white rounded-xl border-2 border-gray-200 p-4 cursor-pointer ${i === 1 ? 'selected' : ''}"
+          onclick="selectWellnessTier(${p.id}, '${p.name}', ${p.price})">
+          <div class="text-center">
+            <div class="text-2xl mb-1">${tiers[i] || '📦'}</div>
+            <div class="font-bold text-gray-900 text-sm">${p.name}</div>
+            <div class="text-xl font-extrabold text-emerald-600 mt-1">$${p.price}</div>
+            <div class="text-gray-400 text-xs">/${p.duration_days} days</div>
+            <div id="wcheck-${p.id}" class="mt-2 w-5 h-5 rounded-full border-2 ${i === 1 ? 'border-emerald-500 bg-emerald-500' : 'border-gray-300'} flex items-center justify-center mx-auto">
+              ${i === 1 ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+      selectedPlans.wellnessPlanId = plans[1] ? plans[1].id : (plans[0] ? plans[0].id : null);
+    }
+
+    function selectWellnessTier(id, name, price) {
+      selectedPlans.wellnessPlanId = id;
+      document.querySelectorAll('[id^="wtier-"]').forEach(el => {
+        el.classList.remove('selected');
+        const eid = parseInt(el.id.split('-')[1]);
+        const check = document.getElementById('wcheck-' + eid);
+        check.className = 'mt-2 w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center mx-auto';
+        check.innerHTML = '';
+      });
+      document.getElementById('wtier-' + id).classList.add('selected');
+      const check = document.getElementById('wcheck-' + id);
+      check.className = 'mt-2 w-5 h-5 rounded-full border-2 border-emerald-500 bg-emerald-500 flex items-center justify-center mx-auto';
+      check.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+      planPrices.wellness = price;
+    }
+
+    function updateReview() {
+      const totalPets = formData.large_pets + formData.small_pets;
+      document.getElementById('review-account').innerHTML =
+        `<b>${formData.username}</b><br><span class="text-gray-400">${formData.email}</span>`;
+
+      let plansHtml = '';
+      let total = 0;
+      if (selectedPlans.vet) {
+        const p = planPrices.vet || 9.99;
+        total += p;
+        plansHtml += `<div class="flex justify-between items-center bg-gray-50 rounded-xl p-3">
+          <div><div class="font-medium text-gray-800 text-sm">Vet Discount Plan</div><div class="text-gray-400 text-xs">${totalPets} pet${totalPets !== 1 ? 's' : ''}</div></div>
+          <div class="font-bold text-gray-900">$${p}/mo</div></div>`;
+      }
+      if (selectedPlans.wellness) {
+        const p = planPrices.wellness || 14.99;
+        total += p;
+        plansHtml += `<div class="flex justify-between items-center bg-gray-50 rounded-xl p-3">
+          <div><div class="font-medium text-gray-800 text-sm">Wellness Plan</div><div class="text-gray-400 text-xs">${totalPets} pet${totalPets !== 1 ? 's' : ''}</div></div>
+          <div class="font-bold text-gray-900">$${p}/mo</div></div>`;
+      }
+      document.getElementById('review-plans').innerHTML = plansHtml || '<p class="text-center text-gray-400 text-sm py-4">No plans selected</p>';
+      document.getElementById('review-total').textContent = '$' + total.toFixed(2) + '/mo';
+    }
+
+    async function submitRegistration() {
+      const btn = document.getElementById('submit-btn');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating...';
-      errorDiv.classList.add('hidden');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating account...';
+
+      const body = {
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        phone: formData.phone || '',
+        invite_code: formData.invite_code || ''
+      };
 
       try {
-        const res = await fetch('/api/auth/register', {
+        const r = await fetch(API + '/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('reg-username').value.trim(),
-            email: document.getElementById('reg-email').value.trim(),
-            phone: document.getElementById('reg-phone').value.trim() || null,
-            password: password,
-            invite_code: document.getElementById('reg-invite').value.trim() || null
-          })
+          body: JSON.stringify(body)
         });
-
-        const data = await res.json();
-
-        if (data.success) {
-          localStorage.setItem('token', data.data.token);
-          localStorage.setItem('userInfo', JSON.stringify(data.data.user));
-          alert('Account created successfully!');
-          window.location.href = '/profile';
+        const d = await r.json();
+        if (d.success && d.data && d.data.user && d.data.user.id > 0) {
+          localStorage.setItem('token', d.data.token);
+          localStorage.setItem('user', JSON.stringify(d.data.user));
+          // Show success
+          [1,2,3,4].forEach(s => document.getElementById('step' + s).classList.add('hidden'));
+          document.getElementById('steps').classList.add('hidden');
+          document.querySelector('.text-center.mb-8').classList.add('hidden');
+          document.getElementById('success-view').classList.remove('hidden');
+          document.getElementById('success-name').textContent = 'Welcome, ' + formData.username + '!';
         } else {
-          errorDiv.textContent = data.message;
-          errorDiv.classList.remove('hidden');
+          showError(d.message || 'Registration failed. Please try again.');
           btn.disabled = false;
-          btn.textContent = 'Create Account';
+          btn.textContent = 'Complete Registration';
         }
-      } catch (err) {
-        errorDiv.textContent = 'Network error. Please try again.';
-        errorDiv.classList.remove('hidden');
+      } catch(e) {
+        showError('Network error. Please check your connection.');
         btn.disabled = false;
-        btn.textContent = 'Create Account';
+        btn.textContent = 'Complete Registration';
       }
-    });
+    }
+
+    // Load from URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('plan') === 'vet') selectPlan('vet');
+    if (params.get('plan') && params.get('plan').startsWith('wellness')) selectPlan('wellness');
   </script>
 </body>
 </html>
