@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><title>Debug</title></head>
+<body>
+<h1>Testing sql.js behavior</h1>
+<pre id="output"></pre>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+<script>
+const output = document.getElementById('output');
+function log(msg) {
+    output.textContent += msg + '\n';
+    console.log(msg);
+}
+
+async function test() {
+    try {
+        const SQL = await initSqlJs();
+        const db = new SQL.Database();
+        
+        db.run("CREATE TABLE test (id INTEGER PRIMARY KEY, name TEXT)");
+        
+        // Test 1: db.run with params
+        db.run("INSERT INTO test (name) VALUES (?)", ["Alice"]);
+        let r = db.exec("SELECT last_insert_rowid()");
+        log("Test1 db.run lastId: " + JSON.stringify(r));
+        
+        // Test 2: db.run with object
+        const stmt = db.prepare("INSERT INTO test (name) VALUES (?)");
+        stmt.bind({$1: "Bob"});
+        stmt.step();
+        stmt.free();
+        r = db.exec("SELECT last_insert_rowid()");
+        log("Test2 stmt.bind lastId: " + JSON.stringify(r));
+        
+        // Test 3: multiple inserts
+        db.run("INSERT INTO test (name) VALUES (?), (?), (?)", ["C1", "C2", "C3"]);
+        r = db.exec("SELECT last_insert_rowid()");
+        log("Test3 multi-insert lastId: " + JSON.stringify(r));
+        
+        // Test 4: check all
+        r = db.exec("SELECT * FROM test");
+        log("Test4 all rows: " + JSON.stringify(r));
+        
+        db.close();
+    } catch(e) {
+        log("ERROR: " + e.message);
+    }
+}
+
+test();
+</script>
+</body>
+</html>
