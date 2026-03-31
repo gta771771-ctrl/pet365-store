@@ -24,6 +24,7 @@ app.use('/api/content', require('./routes/content'));
 app.use('/api/files', require('./routes/files'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/vet', require('./routes/vet'));
+app.use('/api/pets', require('./routes/pets'));
 
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
