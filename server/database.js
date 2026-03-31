@@ -282,24 +282,15 @@ async function init() {
   return db;
 }
 
-// Run INSERT/UPDATE/DELETE with ? placeholders - auto-converts to $1, $2...
+// Run INSERT/UPDATE/DELETE with ? placeholders
 function run(sql, params) {
   if (params === undefined) params = [];
   try {
-    // Convert ? to $1, $2... for sql.js prepare()
-    let idx = 0;
-    const fixedSql = sql.replace(/\?/g, () => '$' + (++idx));
-    const stmt = db.prepare(fixedSql);
-    if (params.length > 0) {
-      const bindObj = {};
-      params.forEach((val, i) => { bindObj['$' + (i + 1)] = val; });
-      stmt.bind(bindObj);
-    }
-    stmt.step();
-    stmt.free();
+    // Use db.run() which in sql.js DOES support array params with ?
+    db.run(sql, params);
     saveDb();
-    const lastId = db.exec("SELECT last_insert_rowid()");
-    return { changes: 1, lastInsertRowid: (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0 };
+    const r = db.exec("SELECT last_insert_rowid() as id");
+    return { changes: 1, lastInsertRowid: (r.length > 0 && r[0].values.length > 0) ? r[0].values[0][0] : 0 };
   } catch (e) {
     throw e;
   }
