@@ -62,7 +62,9 @@ router.post('/register', async (req, res) => {
       [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId ? 1 : 0]
     );
 
-    const userId = result.lastInsertRowid;
+    // Query user ID by username (avoids lastInsertRowid issues in sql.js)
+    const createdUser = db.get("SELECT id, username, email, phone, balance, invite_code FROM users WHERE username = ?", [username]);
+    const userId = createdUser ? createdUser.id : 0;
 
     // Award invite rewards
     if (parentId) {
