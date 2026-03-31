@@ -51,6 +51,8 @@
           <a href="#" data-page="articles" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-newspaper w-5 mr-3"></i>Articles</a>
           <a href="#" data-page="balance" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-wallet w-5 mr-3"></i>Balance Logs</a>
           <a href="#" data-page="files" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-file-alt w-5 mr-3"></i>File Review</a>
+          <a href="#" data-page="wellness" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-leaf w-5 mr-3"></i>Wellness Plans</a>
+          <a href="#" data-page="vetplans" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-hospital w-5 mr-3"></i>Vet Discount Plans</a>
         </div>
       </nav>
     </aside>
@@ -64,6 +66,139 @@
         </div>
       </header>
       <div id="page-content" class="p-6"></div>
+    <!-- Wellness Plans Page -->
+    <div id="page-wellness" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Wellness Plans</h2>
+        <button onclick="showWellnessModal()" class="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 text-sm font-medium">
+          <i class="fas fa-plus mr-1"></i> Add Plan
+        </button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Price/mo</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Reimbursement</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Duration</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="wellness-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Vet Discount Plans Page -->
+    <div id="page-vetplans" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">Vet Discount Plans</h2>
+        <button onclick="showVetPlanModal()" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-medium">
+          <i class="fas fa-plus mr-1"></i> Add Plan
+        </button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Price/mo</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
+              <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vetplans-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Wellness Modal -->
+    <div id="wellness-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-lg mx-4">
+        <h3 class="text-lg font-bold mb-4" id="wellness-modal-title">Add Wellness Plan</h3>
+        <input type="hidden" id="wellness-id">
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Plan Name *</label>
+            <input type="text" id="wellness-name" placeholder="e.g. Basic Wellness" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description</label>
+            <textarea id="wellness-desc" rows="2" placeholder="Plan description" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Price ($/mo) *</label>
+              <input type="number" id="wellness-price" placeholder="14.99" step="0.01" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Reimbursement ($)</label>
+              <input type="number" id="wellness-reimb" placeholder="500" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Duration (days)</label>
+              <input type="number" id="wellness-duration" placeholder="365" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Features (one per line)</label>
+            <textarea id="wellness-features" rows="4" placeholder="$500 annual reimbursement&#10;Annual checkups&#10;Vaccinations" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
+            <select id="wellness-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-5">
+          <button onclick="saveWellness()" class="flex-1 bg-emerald-500 text-white py-2 rounded-lg font-semibold text-sm hover:bg-emerald-600">Save</button>
+          <button onclick="closeModal('wellness-modal')" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vet Plan Modal -->
+    <div id="vetplan-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-lg mx-4">
+        <h3 class="text-lg font-bold mb-4" id="vetplan-modal-title">Add Vet Discount Plan</h3>
+        <input type="hidden" id="vetplan-id">
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Plan Name *</label>
+            <input type="text" id="vetplan-name" placeholder="e.g. Basic Vet Discount" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description</label>
+            <textarea id="vetplan-desc" rows="2" placeholder="Plan description" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Price ($/mo) *</label>
+            <input type="number" id="vetplan-price" placeholder="9.99" step="0.01" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Features (one per line)</label>
+            <textarea id="vetplan-features" rows="4" placeholder="25% off vet bills&#10;5000+ network vets&#10;No waiting period" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
+            <select id="vetplan-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <option value="1">Active</option>
+              <option value="0">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-3 mt-5">
+          <button onclick="saveVetPlan()" class="flex-1 bg-sky-500 text-white py-2 rounded-lg font-semibold text-sm hover:bg-sky-600">Save</button>
+          <button onclick="closeModal('vetplan-modal')" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300">Cancel</button>
+        </div>
+      </div>
+    </div>
+
     </main>
   </div>
 </div>
@@ -426,6 +561,159 @@ document.getElementById('sidebar-menu').addEventListener('click', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', checkAdminLogin);
+
+    // ===== WELLNESS PLANS =====
+    async function loadWellness() {
+      const r = await adminFetch('/api/admin/wellness-plans');
+      const d = await r.json();
+      const plans = d.data || [];
+      document.getElementById('wellness-table').innerHTML = plans.map(p => `
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium text-gray-900">${p.name}</td>
+          <td class="px-4 py-3 text-emerald-600 font-bold">$${p.price}</td>
+          <td class="px-4 py-3 text-gray-600">$${p.reimbursement_amount || 0}</td>
+          <td class="px-4 py-3 text-gray-500">${p.duration_days || 365}d</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${p.status==1?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${p.status==1?'Active':'Inactive'}</span></td>
+          <td class="px-4 py-3">
+            <button onclick="editWellness(${JSON.stringify(p).replace(/"/g,'&quot;')})" class="text-sky-500 hover:text-sky-700 mr-3 text-xs font-medium">Edit</button>
+            <button onclick="deleteWellness(${p.id})" class="text-red-400 hover:text-red-600 text-xs font-medium">Delete</button>
+          </td>
+        </tr>`).join('') || '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No plans yet</td></tr>';
+    }
+
+    function showWellnessModal(plan) {
+      document.getElementById('wellness-id').value = '';
+      document.getElementById('wellness-name').value = '';
+      document.getElementById('wellness-desc').value = '';
+      document.getElementById('wellness-price').value = '';
+      document.getElementById('wellness-reimb').value = '';
+      document.getElementById('wellness-duration').value = '365';
+      document.getElementById('wellness-features').value = '';
+      document.getElementById('wellness-status').value = '1';
+      document.getElementById('wellness-modal-title').textContent = 'Add Wellness Plan';
+      document.getElementById('wellness-modal').classList.remove('hidden');
+    }
+
+    function editWellness(p) {
+      document.getElementById('wellness-id').value = p.id;
+      document.getElementById('wellness-name').value = p.name;
+      document.getElementById('wellness-desc').value = p.description || '';
+      document.getElementById('wellness-price').value = p.price;
+      document.getElementById('wellness-reimb').value = p.reimbursement_amount || '';
+      document.getElementById('wellness-duration').value = p.duration_days || 365;
+      const features = Array.isArray(p.features) ? p.features.join('\n') : (p.features || '');
+      document.getElementById('wellness-features').value = features;
+      document.getElementById('wellness-status').value = p.status;
+      document.getElementById('wellness-modal-title').textContent = 'Edit Wellness Plan';
+      document.getElementById('wellness-modal').classList.remove('hidden');
+    }
+
+    async function saveWellness() {
+      const id = document.getElementById('wellness-id').value;
+      const name = document.getElementById('wellness-name').value.trim();
+      const price = parseFloat(document.getElementById('wellness-price').value);
+      if (!name || !price) { alert('Name and price are required'); return; }
+      const featuresRaw = document.getElementById('wellness-features').value.trim();
+      const features = featuresRaw ? featuresRaw.split('\n').map(f=>f.trim()).filter(Boolean) : [];
+      const body = {
+        name,
+        description: document.getElementById('wellness-desc').value.trim(),
+        price,
+        reimbursement_amount: parseFloat(document.getElementById('wellness-reimb').value) || 0,
+        duration_days: parseInt(document.getElementById('wellness-duration').value) || 365,
+        features: JSON.stringify(features),
+        status: parseInt(document.getElementById('wellness-status').value)
+      };
+      const url = id ? '/api/admin/wellness-plans/' + id : '/api/admin/wellness-plans';
+      const method = id ? 'PUT' : 'POST';
+      const r = await adminFetch(url, { method, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.success) { closeModal('wellness-modal'); loadWellness(); }
+      else alert(d.message || 'Failed to save');
+    }
+
+    async function deleteWellness(id) {
+      if (!confirm('Delete this plan?')) return;
+      const r = await adminFetch('/api/admin/wellness-plans/' + id, { method: 'DELETE' });
+      const d = await r.json();
+      if (d.success) loadWellness();
+      else alert(d.message || 'Failed to delete');
+    }
+
+    // ===== VET DISCOUNT PLANS =====
+    async function loadVetPlans() {
+      const r = await adminFetch('/api/admin/discount-plans');
+      const d = await r.json();
+      const plans = d.data || [];
+      document.getElementById('vetplans-table').innerHTML = plans.map(p => `
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-4 py-3 font-medium text-gray-900">${p.name}</td>
+          <td class="px-4 py-3 text-sky-600 font-bold">$${p.price}</td>
+          <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">${p.description || '-'}</td>
+          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${p.status==1?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${p.status==1?'Active':'Inactive'}</span></td>
+          <td class="px-4 py-3">
+            <button onclick="editVetPlan(${JSON.stringify(p).replace(/"/g,'&quot;')})" class="text-sky-500 hover:text-sky-700 mr-3 text-xs font-medium">Edit</button>
+            <button onclick="deleteVetPlan(${p.id})" class="text-red-400 hover:text-red-600 text-xs font-medium">Delete</button>
+          </td>
+        </tr>`).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No plans yet</td></tr>';
+    }
+
+    function showVetPlanModal() {
+      document.getElementById('vetplan-id').value = '';
+      document.getElementById('vetplan-name').value = '';
+      document.getElementById('vetplan-desc').value = '';
+      document.getElementById('vetplan-price').value = '';
+      document.getElementById('vetplan-features').value = '';
+      document.getElementById('vetplan-status').value = '1';
+      document.getElementById('vetplan-modal-title').textContent = 'Add Vet Discount Plan';
+      document.getElementById('vetplan-modal').classList.remove('hidden');
+    }
+
+    function editVetPlan(p) {
+      document.getElementById('vetplan-id').value = p.id;
+      document.getElementById('vetplan-name').value = p.name;
+      document.getElementById('vetplan-desc').value = p.description || '';
+      document.getElementById('vetplan-price').value = p.price;
+      const features = Array.isArray(p.features) ? p.features.join('\n') : (p.features || '');
+      document.getElementById('vetplan-features').value = features;
+      document.getElementById('vetplan-status').value = p.status;
+      document.getElementById('vetplan-modal-title').textContent = 'Edit Vet Discount Plan';
+      document.getElementById('vetplan-modal').classList.remove('hidden');
+    }
+
+    async function saveVetPlan() {
+      const id = document.getElementById('vetplan-id').value;
+      const name = document.getElementById('vetplan-name').value.trim();
+      const price = parseFloat(document.getElementById('vetplan-price').value);
+      if (!name || !price) { alert('Name and price are required'); return; }
+      const featuresRaw = document.getElementById('vetplan-features').value.trim();
+      const features = featuresRaw ? featuresRaw.split('\n').map(f=>f.trim()).filter(Boolean) : [];
+      const body = {
+        name,
+        description: document.getElementById('vetplan-desc').value.trim(),
+        price,
+        features: JSON.stringify(features),
+        status: parseInt(document.getElementById('vetplan-status').value)
+      };
+      const url = id ? '/api/admin/discount-plans/' + id : '/api/admin/discount-plans';
+      const method = id ? 'PUT' : 'POST';
+      const r = await adminFetch(url, { method, body: JSON.stringify(body) });
+      const d = await r.json();
+      if (d.success) { closeModal('vetplan-modal'); loadVetPlans(); }
+      else alert(d.message || 'Failed to save');
+    }
+
+    async function deleteVetPlan(id) {
+      if (!confirm('Delete this plan?')) return;
+      const r = await adminFetch('/api/admin/discount-plans/' + id, { method: 'DELETE' });
+      const d = await r.json();
+      if (d.success) loadVetPlans();
+      else alert(d.message || 'Failed to delete');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
 </script>
 </body>
 </html>
