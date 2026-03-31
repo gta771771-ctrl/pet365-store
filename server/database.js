@@ -283,18 +283,11 @@ async function init() {
 }
 
 // Helper function to run queries
-// Helper function to run INSERT/UPDATE/DELETE with params
-// Uses db.prepare() + stmt.bind() for parameterized queries (sql.js requires this)
+// Helper function to run INSERT/UPDATE/DELETE with ? placeholders
+// sql.js db.run() supports ? with an array of params
 function run(sql, params = []) {
   try {
-    const stmt = db.prepare(sql);
-    if (params.length > 0) {
-      const bindObj = {};
-      params.forEach((val, idx) => { bindObj['$' + String(idx + 1)] = val; });
-      stmt.bind(bindObj);
-    }
-    stmt.step();
-    stmt.free();
+    db.run(sql, params);
     saveDb();
     // Get last insert rowid
     const result = db.exec("SELECT last_insert_rowid()");
@@ -303,9 +296,7 @@ function run(sql, params = []) {
   } catch (e) {
     throw e;
   }
-}
-
-function get(sql, params = []) {
+}function get(sql, params = []) {
   try {
     const stmt = db.prepare(sql);
     if (params.length > 0) stmt.bind(params);
