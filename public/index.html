@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetPaw - Veterinary Discount & Wellness Plans</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#0ea5e9', secondary: '#10b981' },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); }
+    .gradient-text { background: linear-gradient(135deg, #0ea5e9, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-bg { background: linear-gradient(135deg, #0f172a 0%, #0c4a6e 50%, #064e3b 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
+  </style>
+</head>
+<body class="bg-white">
+
+  <!-- Navigation -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-9 h-9 gradient-bg rounded-lg flex items-center justify-center">
+            <i class="fas fa-paw text-white text-base"></i>
+          </div>
+          <span class="text-xl font-bold gradient-text">PetPaw</span>
+        </a>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="/" class="text-gray-900 font-medium text-sm hover:text-sky-500 transition">Home</a>
+          <a href="/vet-discount" class="text-gray-600 text-sm hover:text-sky-500 transition">Vet Discount Plan</a>
+          <a href="/wellness" class="text-gray-600 text-sm hover:text-sky-500 transition">Wellness Plan</a>
+          <a href="/shop" class="text-gray-600 text-sm hover:text-sky-500 transition">Shop</a>
+          <a href="/blog" class="text-gray-600 text-sm hover:text-sky-500 transition">Blog</a>
+        </div>
+        <div class="flex items-center space-x-3" id="nav-auth">
+          <a href="/login" class="text-gray-600 text-sm hover:text-sky-500 font-medium">Sign In</a>
+          <a href="/register" class="gradient-bg text-white text-sm px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">Get a Quote</a>
+        </div>
+        <!-- Mobile menu button -->
+        <button class="md:hidden text-gray-600" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-2">
+      <a href="/" class="block text-gray-700 py-2 text-sm">Home</a>
+      <a href="/vet-discount" class="block text-gray-700 py-2 text-sm">Vet Discount Plan</a>
+      <a href="/wellness" class="block text-gray-700 py-2 text-sm">Wellness Plan</a>
+      <a href="/shop" class="block text-gray-700 py-2 text-sm">Shop</a>
+      <a href="/login" class="block text-gray-700 py-2 text-sm">Sign In</a>
+      <a href="/register" class="block gradient-bg text-white py-2 px-4 rounded-lg text-sm text-center">Get a Quote</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-bg text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6">
+          <i class="fas fa-star text-yellow-400 mr-2"></i>
+          America's #1 Pet Care Savings Platform Since 2024
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
+          Affordable pet plans<br>
+          <span class="text-sky-400">from pet care experts</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl">
+          Save on vet care with instant discounts or get reimbursed for routine wellness expenses. Every pet, every age, every condition — covered.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a href="/register" class="gradient-bg text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition text-center">
+            Get Coverage Today
+          </a>
+          <a href="#plans" class="bg-white/10 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition text-center">
+            Compare Plans
+          </a>
+        </div>
+        <div class="flex items-center gap-8 mt-10 text-sm text-gray-400">
+          <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-400"></i> No waiting period</div>
+          <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-400"></i> No deductible</div>
+          <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-400"></i> Pre-existing conditions covered</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Two Plans Section -->
+  <section id="plans" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Choose your pet plan</h2>
+        <p class="text-gray-500 text-lg max-w-2xl mx-auto">Two powerful ways to save on pet care. Use one or both together for maximum coverage.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+
+        <!-- Vet Discount Plan -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover border border-gray-100">
+          <div class="gradient-bg p-8 text-white">
+            <div class="flex items-center justify-between mb-4">
+              <div class="bg-white/20 rounded-xl p-3">
+                <i class="fas fa-hospital text-2xl"></i>
+              </div>
+              <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">INSTANT SAVINGS</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-1">Veterinary Discount Plan</h3>
+            <p class="text-white/80 text-sm">by PetPaw</p>
+          </div>
+          <div class="p-8">
+            <div class="flex items-baseline gap-2 mb-6">
+              <span class="text-4xl font-extrabold text-gray-900">25%</span>
+              <span class="text-gray-500">off all in-house medical services</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Instant discounts at participating vets
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                5,000+ network veterinarians
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                No claim forms needed
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Routine & emergency care covered
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                All pre-existing conditions covered
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                No deductible, no waiting period
+              </li>
+            </ul>
+            <a href="/vet-discount" class="block w-full gradient-bg text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+              Learn More <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Wellness Plan -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden card-hover border border-gray-100">
+          <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 text-white">
+            <div class="flex items-center justify-between mb-4">
+              <div class="bg-white/20 rounded-xl p-3">
+                <i class="fas fa-leaf text-2xl"></i>
+              </div>
+              <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">REIMBURSEMENT</span>
+            </div>
+            <h3 class="text-2xl font-bold mb-1">Wellness Plan</h3>
+            <p class="text-white/80 text-sm">by PetPaw</p>
+          </div>
+          <div class="p-8">
+            <div class="flex items-baseline gap-2 mb-6">
+              <span class="text-4xl font-extrabold text-gray-900">$100+</span>
+              <span class="text-gray-500">annual reimbursement for routine care</span>
+            </div>
+            <ul class="space-y-3 mb-8">
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Money back on routine vet bills
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Visit any veterinarian
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Simple online claim submission
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                Vaccinations, bloodwork, grooming
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                3 coverage tiers available
+              </li>
+              <li class="flex items-center gap-3 text-gray-700 text-sm">
+                <i class="fas fa-check-circle text-emerald-500 flex-shrink-0"></i>
+                30-day risk-free cancellation
+              </li>
+            </ul>
+            <a href="/wellness" class="block w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+              Learn More <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Using your plan is easy</h2>
+        <p class="text-gray-500 text-lg">Three simple steps to start saving on pet care</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span class="text-white text-2xl font-bold">1</span>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Enroll your pets</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Select a plan, create your account, and register your pets. Coverage starts immediately — no waiting period!</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span class="text-white text-2xl font-bold">2</span>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Visit the vet</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Show your PetPaw ID card at a network vet for instant discounts, or visit any vet and save your invoice for wellness reimbursement.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-5">
+            <span class="text-white text-2xl font-bold">3</span>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">Save money</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">Get instant 25% discounts at the counter, or submit your wellness invoice online and receive reimbursement fast.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- All Pets Eligible -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <div class="inline-flex items-center bg-sky-100 text-sky-700 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+            <i class="fas fa-paw mr-2"></i> All Pets Welcome
+          </div>
+          <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Every pet is eligible</h2>
+          <p class="text-gray-500 text-lg mb-8 leading-relaxed">
+            Every member of the animal kingdom can be covered by PetPaw plans. Enroll pets of any age and with any diagnosed health conditions — including those traditional pet insurance companies deem pre-existing.
+          </p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
+              <span class="text-3xl">🐕</span>
+              <span class="font-medium text-gray-700">Dogs</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
+              <span class="text-3xl">🐈</span>
+              <span class="font-medium text-gray-700">Cats</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
+              <span class="text-3xl">🐇</span>
+              <span class="font-medium text-gray-700">Rabbits</span>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 shadow-sm">
+              <span class="text-3xl">🦜</span>
+              <span class="font-medium text-gray-700">Birds & More</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl p-6 shadow-sm text-center card-hover">
+            <div class="text-4xl font-extrabold gradient-text mb-2">25%</div>
+            <div class="text-gray-500 text-sm">Instant discount at network vets</div>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm text-center card-hover">
+            <div class="text-4xl font-extrabold gradient-text mb-2">5,000+</div>
+            <div class="text-gray-500 text-sm">Network veterinarians</div>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm text-center card-hover">
+            <div class="text-4xl font-extrabold gradient-text mb-2">$0</div>
+            <div class="text-gray-500 text-sm">Deductible, no waiting period</div>
+          </div>
+          <div class="bg-white rounded-2xl p-6 shadow-sm text-center card-hover">
+            <div class="text-4xl font-extrabold gradient-text mb-2">30-day</div>
+            <div class="text-gray-500 text-sm">Risk-free cancellation</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Savings Calculator -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See how much you can save</h2>
+        <p class="text-gray-500 text-lg">Real savings based on actual veterinary bills</p>
+      </div>
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-gray-50 rounded-2xl overflow-hidden border border-gray-200">
+          <div class="grid grid-cols-3 bg-gray-100 text-sm font-semibold text-gray-600 px-6 py-3">
+            <div>Veterinary Service</div>
+            <div class="text-center">Average Cost</div>
+            <div class="text-center text-emerald-600">Your Savings (25%)</div>
+          </div>
+          <div id="savings-table">
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">Routine Wellness Exam</div>
+              <div class="text-center text-gray-600">$45</div>
+              <div class="text-center font-semibold text-emerald-600">Save $11.25</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">Vaccinations</div>
+              <div class="text-center text-gray-600">$118</div>
+              <div class="text-center font-semibold text-emerald-600">Save $29.50</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">Fecal Exam</div>
+              <div class="text-center text-gray-600">$57</div>
+              <div class="text-center font-semibold text-emerald-600">Save $14.25</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">In-House Lab Work</div>
+              <div class="text-center text-gray-600">$96</div>
+              <div class="text-center font-semibold text-emerald-600">Save $24.00</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">Dental Cleaning & X-Rays</div>
+              <div class="text-center text-gray-600">$475</div>
+              <div class="text-center font-semibold text-emerald-600">Save $118.75</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 border-b border-gray-100 hover:bg-gray-50">
+              <div class="text-gray-700">Emergency Sick Exam</div>
+              <div class="text-center text-gray-600">$90</div>
+              <div class="text-center font-semibold text-emerald-600">Save $22.50</div>
+            </div>
+            <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50">
+              <div class="text-gray-700">Tumor Removal</div>
+              <div class="text-center text-gray-600">$525</div>
+              <div class="text-center font-semibold text-emerald-600">Save $131.25</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-gray-400 text-xs mt-4">*Based on average veterinary bills of PetPaw members</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Pet parents love PetPaw</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+          <div class="flex text-yellow-400 mb-4">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-4">"No deductible and no waiting period! I enrolled and used it the same day for my dog's spay. Saved over $150 instantly!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center text-white font-bold text-sm">J</div>
+            <div>
+              <div class="font-semibold text-gray-800 text-sm">Jean M.</div>
+              <div class="text-gray-400 text-xs">Dog owner</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+          <div class="flex text-yellow-400 mb-4">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-4">"It paid for itself in the first month. Fast, easy, and I was able to use it the minute I signed up. Highly recommend!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center text-white font-bold text-sm">S</div>
+            <div>
+              <div class="font-semibold text-gray-800 text-sm">Suzie K.</div>
+              <div class="text-gray-400 text-xs">Cat owner</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm card-hover">
+          <div class="flex text-yellow-400 mb-4">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed mb-4">"The wellness plan reimbursement was in my account within 2 days. So simple to submit claims online. Best pet plan ever!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 gradient-bg rounded-full flex items-center justify-center text-white font-bold text-sm">M</div>
+            <div>
+              <div class="font-semibold text-gray-800 text-sm">Mike T.</div>
+              <div class="text-gray-400 text-xs">Rabbit owner</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 hero-bg text-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Take control of your pet's care today</h2>
+      <p class="text-gray-300 text-lg mb-10">Join thousands of pet parents saving on vet care with PetPaw plans.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/register" class="gradient-bg text-white px-10 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition">
+          Get Coverage Now
+        </a>
+        <a href="/vet-discount" class="bg-white/10 border border-white/20 text-white px-10 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition">
+          View Vet Discount Plan
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-4">
+            <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
+              <i class="fas fa-paw text-white text-sm"></i>
+            </div>
+            <span class="text-white font-bold text-lg">PetPaw</span>
+          </div>
+          <p class="text-sm leading-relaxed">Affordable pet care plans for every pet family. Saving pet parents money since 2024.</p>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4 text-sm">Plans</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/vet-discount" class="hover:text-white transition">Vet Discount Plan</a></li>
+            <li><a href="/wellness" class="hover:text-white transition">Wellness Plan</a></li>
+            <li><a href="/shop" class="hover:text-white transition">Pet Shop</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4 text-sm">Account</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/login" class="hover:text-white transition">Sign In</a></li>
+            <li><a href="/register" class="hover:text-white transition">Register</a></li>
+            <li><a href="/profile" class="hover:text-white transition">My Account</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white font-semibold mb-4 text-sm">Support</h4>
+          <ul class="space-y-2 text-sm">
+            <li><a href="/blog" class="hover:text-white transition">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+            <li><a href="#" class="hover:text-white transition">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm">
+        <p>© 2024 PetPaw. All rights reserved.</p>
+        <div class="flex gap-6 mt-4 md:mt-0">
+          <a href="#" class="hover:text-white transition">Privacy Policy</a>
+          <a href="#" class="hover:text-white transition">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Check login state
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (token && user) {
+      document.getElementById('nav-auth').innerHTML = `
+        <a href="/profile" class="flex items-center gap-2 text-gray-700 text-sm hover:text-sky-500 font-medium">
+          <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center text-white text-xs font-bold">
+            ${user.username ? user.username[0].toUpperCase() : 'U'}
+          </div>
+          <span>${user.username}</span>
+        </a>
+        <a href="/profile" class="gradient-bg text-white text-sm px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">My Account</a>
+      `;
+    }
+  </script>
+</body>
+</html>
