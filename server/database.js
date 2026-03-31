@@ -282,21 +282,30 @@ async function init() {
   return db;
 }
 
-// Helper function to run queries
-// Helper function to run INSERT/UPDATE/DELETE with ? placeholders
-// sql.js db.run() supports ? with an array of params
-function run(sql, params = []) {
+// Run INSERT/UPDATE/DELETE with ? placeholders - auto-converts to $1, $2...
+function run(sql, params) {
+  if (params === undefined) params = [];
   try {
-    db.run(sql, params);
+    // Convert ? to $1, $2... for sql.js prepare()
+    let idx = 0;
+    const fixedSql = sql.replace(/\?/g, () => '$' + (++idx));
+    const stmt = db.prepare(fixedSql);
+    if (params.length > 0) {
+      const bindObj = {};
+      params.forEach((val, i) => { bindObj['$' + (i + 1)] = val; });
+      stmt.bind(bindObj);
+    }
+    stmt.step();
+    stmt.free();
     saveDb();
-    // Get last insert rowid
-    const result = db.exec("SELECT last_insert_rowid()");
-    const lastId = (result.length > 0 && result[0].values.length > 0) ? result[0].values[0][0] : 0;
-    return { changes: 1, lastInsertRowid: lastId };
+    const lastId = db.exec("SELECT last_insert_rowid()");
+    return { changes: 1, lastInsertRowid: (lastId.length > 0 && lastId[0].values.length > 0) ? lastId[0].values[0][0] : 0 };
   } catch (e) {
     throw e;
   }
-}function get(sql, params = []) {
+}
+
+function get(sql, params = []) {
   try {
     const stmt = db.prepare(sql);
     if (params.length > 0) stmt.bind(params);
