@@ -3,391 +3,389 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vet Discount Plan - PetPaw</title>
+  <title>Veterinary Discount Plan - PetPaw</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
-  <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);} .card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.12);} .card{transition:all .3s ease;}</style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#0ea5e9', secondary: '#10b981' },
+          fontFamily: { sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .gradient-bg { background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%); }
+    .gradient-text { background: linear-gradient(135deg, #0ea5e9, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-bg { background: linear-gradient(135deg, #0f172a 0%, #0c4a6e 100%); }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-white">
 
-  <nav class="bg-white shadow-lg sticky top-0 z-50">
+  <!-- Nav -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16 items-center">
         <a href="/" class="flex items-center space-x-2">
-          <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center"><i class="fas fa-paw text-white text-xl"></i></div>
-          <span class="text-2xl font-bold bg-gradient-to-r from-sky-500 to-emerald-500 bg-clip-text text-transparent">PetPaw</span>
+          <div class="w-9 h-9 gradient-bg rounded-lg flex items-center justify-center">
+            <i class="fas fa-paw text-white text-base"></i>
+          </div>
+          <span class="text-xl font-bold gradient-text">PetPaw</span>
         </a>
         <div class="hidden md:flex items-center space-x-8">
-          <a href="/" class="text-gray-600 hover:text-sky-500">Home</a>
-          <a href="/vet-discount" class="text-sky-500 font-medium">Vet Discount</a>
-          <a href="/wellness" class="text-gray-600 hover:text-sky-500">Wellness</a>
-          <a href="/shop" class="text-gray-600 hover:text-sky-500">Shop</a>
-          <a href="/profile" class="text-gray-600 hover:text-sky-500">My Account</a>
+          <a href="/" class="text-gray-600 text-sm hover:text-sky-500 transition">Home</a>
+          <a href="/vet-discount" class="text-sky-500 font-medium text-sm">Vet Discount Plan</a>
+          <a href="/wellness" class="text-gray-600 text-sm hover:text-sky-500 transition">Wellness Plan</a>
+          <a href="/shop" class="text-gray-600 text-sm hover:text-sky-500 transition">Shop</a>
+          <a href="/blog" class="text-gray-600 text-sm hover:text-sky-500 transition">Blog</a>
         </div>
-        <div class="flex items-center space-x-4" id="nav-auth"></div>
+        <div class="flex items-center space-x-3" id="nav-auth">
+          <a href="/login" class="text-gray-600 text-sm hover:text-sky-500 font-medium">Sign In</a>
+          <a href="/register" class="gradient-bg text-white text-sm px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">Get a Quote</a>
+        </div>
+        <button class="md:hidden text-gray-600" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
       </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-2">
+      <a href="/" class="block text-gray-700 py-2 text-sm">Home</a>
+      <a href="/vet-discount" class="block text-gray-700 py-2 text-sm">Vet Discount Plan</a>
+      <a href="/wellness" class="block text-gray-700 py-2 text-sm">Wellness Plan</a>
+      <a href="/shop" class="block text-gray-700 py-2 text-sm">Shop</a>
     </div>
   </nav>
 
   <!-- Hero -->
-  <section class="gradient-bg text-white py-16">
-    <div class="max-w-7xl mx-auto px-4 text-center">
-      <h1 class="text-4xl lg:text-5xl font-bold mb-4"><i class="fas fa-stethoscope mr-3"></i>Vet Discount Plan</h1>
-      <p class="text-xl text-white/90 max-w-2xl mx-auto">Save up to 50% on veterinary services at participating clinics. Instant discounts, no paperwork needed.</p>
-    </div>
-  </section>
-
-  <!-- Active Plan Banner -->
-  <section id="active-banner" class="py-6 bg-white border-b hidden">
-    <div class="max-w-5xl mx-auto px-4">
-      <div class="gradient-bg rounded-2xl p-6 text-white flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <div class="flex items-center gap-3 mb-1">
-            <i class="fas fa-check-circle text-xl"></i>
-            <h3 class="text-xl font-bold" id="active-plan-name">-</h3>
-          </div>
-          <p class="opacity-90 text-sm" id="active-plan-desc">Active membership</p>
+  <section class="hero-bg text-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center bg-white/10 rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
+          <i class="fas fa-hospital mr-2"></i> VETERINARY DISCOUNT PLAN SINCE 2024
         </div>
-        <div class="text-right">
-          <div class="text-3xl font-bold" id="active-discount">-</div>
-          <div class="text-sm opacity-80">Your discount</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Plan Selection -->
-  <section class="py-16">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl font-bold mb-3">Choose Your Vet Discount Plan</h2>
-        <p class="text-gray-500 max-w-xl mx-auto">Select a plan that fits your needs. All plans include instant discounts at participating vet clinics. <strong class="text-primary">Pet registration required.</strong></p>
-      </div>
-      <div class="grid md:grid-cols-3 gap-8" id="plans-container">
-        <div class="col-span-3 text-center text-gray-400 py-16"><i class="fas fa-spinner fa-spin text-3xl"></i></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Why Enroll -->
-  <section class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-8">Why Choose Vet Discount?</h2>
-      <div class="grid md:grid-cols-4 gap-6">
-        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-bolt"></i></div><h3 class="font-bold mb-2">Instant Savings</h3><p class="text-gray-500 text-sm">Discount applied at checkout, no waiting</p></div>
-        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-file-alt"></i></div><h3 class="font-bold mb-2">No Claims</h3><p class="text-gray-500 text-sm">Just show your card, no paperwork</p></div>
-        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-paw"></i></div><h3 class="font-bold mb-2">All Pets Covered</h3><p class="text-gray-500 text-sm">Dogs, cats, birds & more</p></div>
-        <div class="text-center p-6 rounded-xl hover:bg-gray-50"><div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl"><i class="fas fa-clock"></i></div><h3 class="font-bold mb-2">No Waiting</h3><p class="text-gray-500 text-sm">Use your plan immediately</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Vet Clinics -->
-  <section class="py-16">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-8"><i class="fas fa-hospital text-primary mr-2"></i>Participating Vet Clinics</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="clinics-container">
-        <div class="col-span-3 text-center text-gray-400 py-12"><i class="fas fa-spinner fa-spin text-2xl"></i></div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-6">
+          Affordable care for<br>
+          <span class="text-sky-400">every pet family</span>
+        </h1>
+        <p class="text-lg text-gray-300 mb-8 max-w-2xl leading-relaxed">
+          Building a lasting relationship with your vet is a key part of keeping your pet healthy. With the PetPaw Veterinary Discount Plan, you'll save 25% on vet care with a veterinarian you can trust.
+        </p>
+        <a href="/register" class="gradient-bg text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition inline-block">
+          Get Coverage Today <i class="fas fa-arrow-right ml-2"></i>
+        </a>
       </div>
     </div>
   </section>
 
   <!-- How It Works -->
   <section class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-8">How It Works</h2>
-      <div class="grid md:grid-cols-4 gap-6">
-        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">1</div><h3 class="font-bold mb-1">Register Pet</h3><p class="text-gray-500 text-sm">Add your pet's info</p></div>
-        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">2</div><h3 class="font-bold mb-1">Choose Plan</h3><p class="text-gray-500 text-sm">Pick the right coverage</p></div>
-        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">3</div><h3 class="font-bold mb-1">Visit Vet</h3><p class="text-gray-500 text-sm">Show your membership</p></div>
-        <div class="text-center"><div class="w-14 h-14 gradient-bg rounded-full flex items-center justify-center mx-auto mb-4 text-white text-xl font-bold">4</div><h3 class="font-bold mb-1">Save Money</h3><p class="text-gray-500 text-sm">Instant discount applied</p></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">Using your veterinary discount plan is easy</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <div class="text-center">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-white text-2xl font-bold">1</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Enroll your pets</h3>
+          <p class="text-gray-500 text-sm">Sign up, choose the Vet Discount Plan, and register your pets in minutes.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-white text-2xl font-bold">2</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Visit a network vet</h3>
+          <p class="text-gray-500 text-sm">Show your PetPaw ID card at a participating network veterinarian.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 gradient-bg rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span class="text-white text-2xl font-bold">3</span>
+          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">Save 25% instantly</h3>
+          <p class="text-gray-500 text-sm">Receive instant 25% discount on all in-house medical services at checkout.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Enroll Modal (with pet selection) -->
-  <div id="enrollModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center px-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-      <h3 class="text-xl font-bold mb-4"><i class="fas fa-paw text-primary mr-2"></i>Enroll in <span id="enroll-plan-name" class="text-primary"></span></h3>
-      
-      <!-- Step indicator -->
-      <div class="flex items-center mb-6" id="enroll-steps">
-        <div class="flex-1 text-center"><div class="w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold" id="step1-indicator">1</div><div class="text-xs mt-1 text-gray-500">Pet Info</div></div>
-        <div class="w-8 h-0.5 bg-gray-200"><div class="h-full bg-primary w-0 transition-all" id="step-line1"></div></div>
-        <div class="flex-1 text-center"><div class="w-8 h-8 bg-gray-200 rounded-full text-gray-400 text-sm flex items-center justify-center mx-auto font-bold" id="step2-indicator">2</div><div class="text-xs mt-1 text-gray-500">Confirm</div></div>
-      </div>
-
-      <!-- Step 1: Pet selection -->
-      <div id="enroll-step1">
-        <div class="bg-sky-50 border border-sky-200 rounded-lg p-3 mb-4 text-sm text-sky-700"><i class="fas fa-info-circle mr-1"></i> Please select the pet(s) to be covered by this plan</div>
-        
-        <div id="pets-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto">
-          <div class="text-center text-gray-400 py-8"><i class="fas fa-spinner fa-spin"></i></div>
+  <!-- What's Covered -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-6">Network providers apply instant savings to all in-house medical services</h2>
+          <div class="space-y-4">
+            <div class="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm card-hover">
+              <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-check text-white"></i>
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800">All types of pets are eligible</div>
+                <div class="text-gray-500 text-sm mt-1">Dogs, cats, rabbits, birds, and more — every pet is welcome.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm card-hover">
+              <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-check text-white"></i>
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800">Save on vet care for pets of all ages</div>
+                <div class="text-gray-500 text-sm mt-1">From puppies and kittens to senior pets — every age is covered.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm card-hover">
+              <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-check text-white"></i>
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800">All in-house medical services are covered</div>
+                <div class="text-gray-500 text-sm mt-1">Routine exams, vaccinations, emergency care, dental, surgery, and more.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 bg-white rounded-xl p-4 shadow-sm card-hover">
+              <div class="w-10 h-10 gradient-bg rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-check text-white"></i>
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800">Covers all pre-existing conditions</div>
+                <div class="text-gray-500 text-sm mt-1">Unlike traditional insurance, we don't exclude pre-existing conditions.</div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div id="no-pets-warning" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <p class="text-yellow-700 text-sm mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>You need to register at least one pet before enrolling.</p>
-          <a href="/pets" class="block w-full bg-yellow-500 text-white text-center py-2 rounded-lg font-semibold hover:bg-yellow-600">→ Register a Pet First</a>
-        </div>
-        
-        <button onclick="goToStep2()" id="btn-next-step2" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-50" disabled><i class="fas fa-arrow-right mr-2"></i>Next: Confirm</button>
-      </div>
-
-      <!-- Step 2: Confirm -->
-      <div id="enroll-step2" class="hidden">
-        <div class="bg-gray-50 rounded-lg p-4 mb-4">
-          <div class="flex justify-between mb-2"><span class="text-gray-500">Plan:</span><span class="font-semibold" id="confirm-plan-name">-</span></div>
-          <div class="flex justify-between mb-2"><span class="text-gray-500">Discount:</span><span class="font-bold text-green-600" id="confirm-discount">-</span></div>
-          <div class="flex justify-between mb-2"><span class="text-gray-500">Monthly Fee:</span><span class="font-semibold" id="confirm-fee">-</span></div>
-          <div class="flex justify-between border-t pt-2 mt-2"><span class="text-gray-500">Pets:</span><span class="font-semibold" id="confirm-pets">-</span></div>
-        </div>
-        <div class="flex space-x-3">
-          <button onclick="goToStep1()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300"><i class="fas fa-arrow-left mr-2"></i>Back</button>
-          <button onclick="confirmEnroll()" id="btn-confirm-enroll" class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90"><i class="fas fa-check mr-2"></i>Confirm Enrollment</button>
+        <div>
+          <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Plan highlights</h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-percent text-sky-500"></i>
+                  <span class="font-medium">Discount rate</span>
+                </div>
+                <span class="font-bold text-sky-600">25% off</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-file-alt text-sky-500"></i>
+                  <span class="font-medium">Claim forms</span>
+                </div>
+                <span class="font-bold text-emerald-600">None needed</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-clock text-sky-500"></i>
+                  <span class="font-medium">Waiting period</span>
+                </div>
+                <span class="font-bold text-emerald-600">None — use immediately</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-dollar-sign text-sky-500"></i>
+                  <span class="font-medium">Deductible</span>
+                </div>
+                <span class="font-bold text-emerald-600">$0</span>
+              </div>
+              <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-hospital text-sky-500"></i>
+                  <span class="font-medium">Network vets</span>
+                </div>
+                <span class="font-bold text-sky-600">5,000+ nationwide</span>
+              </div>
+              <div class="flex items-center justify-between py-3">
+                <div class="flex items-center gap-3 text-gray-700">
+                  <i class="fas fa-infinity text-sky-500"></i>
+                  <span class="font-medium">Annual maximum</span>
+                </div>
+                <span class="font-bold text-emerald-600">No limit</span>
+              </div>
+            </div>
+            <a href="/register" class="mt-6 block w-full gradient-bg text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition">
+              Enroll Now <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Record Visit Modal -->
-  <div id="transModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center px-4">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-lg">
-      <h3 class="text-xl font-bold mb-4"><i class="fas fa-receipt text-primary mr-2"></i>Record Vet Visit</h3>
-      <form id="transForm" onsubmit="saveTransaction(event)">
-        <div class="space-y-4">
-          <div id="trans-pet-select-wrapper">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Pet *</label>
-            <select id="trans-pet" required class="w-full px-4 py-2 border rounded-lg"><option value="">Loading...</option></select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Vet Clinic</label>
-            <select id="trans-clinic" class="w-full px-4 py-2 border rounded-lg"><option value="">Select clinic</option></select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Service Type</label>
-            <select id="trans-service" class="w-full px-4 py-2 border rounded-lg"><option value="">Select</option><option>Routine Checkup</option><option>Vaccination</option><option>Dental</option><option>Surgery</option><option>Emergency</option><option>Lab Test</option><option>Prescription</option><option>Grooming</option><option>Other</option></select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Bill Amount ($) *</label>
-            <input type="number" step="0.01" id="trans-amount" required class="w-full px-4 py-2 border rounded-lg" placeholder="0.00">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea id="trans-desc" rows="2" class="w-full px-4 py-2 border rounded-lg"></textarea>
-          </div>
+  <!-- What's Covered List -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">What's covered?</h2>
+        <p class="text-gray-500 max-w-2xl mx-auto">Get instant discounts for medical services and procedures at each routine, emergency, or follow-up care visit with participating providers.</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">🩺</div>
+          <div class="font-medium text-gray-800 text-sm">Routine Exams</div>
         </div>
-        <div class="flex space-x-3 mt-6">
-          <button type="submit" class="flex-1 gradient-bg text-white py-3 rounded-lg font-semibold">Save Visit</button>
-          <button type="button" onclick="closeTransModal()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">💉</div>
+          <div class="font-medium text-gray-800 text-sm">Vaccinations</div>
         </div>
-      </form>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">🦷</div>
+          <div class="font-medium text-gray-800 text-sm">Dental Care</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">🏥</div>
+          <div class="font-medium text-gray-800 text-sm">Emergency Care</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">🩸</div>
+          <div class="font-medium text-gray-800 text-sm">Lab Work</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">💊</div>
+          <div class="font-medium text-gray-800 text-sm">Medications</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">🔬</div>
+          <div class="font-medium text-gray-800 text-sm">X-Rays</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-5 text-center card-hover">
+          <div class="text-3xl mb-3">✂️</div>
+          <div class="font-medium text-gray-800 text-sm">Surgery</div>
+        </div>
+      </div>
+      <p class="text-center text-gray-400 text-sm mt-6">...and all other in-house medical services at participating providers</p>
     </div>
-  </div>
+  </section>
 
-  <!-- Quick Record FAB -->
-  <button onclick="showTransModal()" id="record-fab" class="fixed bottom-6 right-6 w-14 h-14 gradient-bg rounded-full shadow-lg flex items-center justify-center text-white text-xl hover:shadow-xl transition z-40 hidden">
-    <i class="fas fa-plus"></i>
-  </button>
+  <!-- Savings Table -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">Real savings on real vet bills</h2>
+        <p class="text-gray-500">See how much you could save with 25% instant discounts</p>
+      </div>
+      <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200">
+        <div class="grid grid-cols-3 bg-sky-500 text-white text-sm font-semibold px-6 py-3">
+          <div>Veterinary Service</div>
+          <div class="text-center">Average Cost</div>
+          <div class="text-center">Your Savings (25%)</div>
+        </div>
+        <div class="divide-y divide-gray-100">
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Routine Wellness Exam</div>
+            <div class="text-center text-gray-500 text-sm">$45</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $11.25</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Vaccinations</div>
+            <div class="text-center text-gray-500 text-sm">$118</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $29.50</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Fecal Exam</div>
+            <div class="text-center text-gray-500 text-sm">$57</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $14.25</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">In-House Lab Work</div>
+            <div class="text-center text-gray-500 text-sm">$96</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $24.00</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Dental Cleaning & X-Rays</div>
+            <div class="text-center text-gray-500 text-sm">$475</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $118.75</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Emergency Sick Exam</div>
+            <div class="text-center text-gray-500 text-sm">$90</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $22.50</div>
+          </div>
+          <div class="grid grid-cols-3 px-6 py-4 hover:bg-gray-50 transition">
+            <div class="text-gray-700 text-sm">Tumor Removal</div>
+            <div class="text-center text-gray-500 text-sm">$525</div>
+            <div class="text-center font-bold text-emerald-600 text-sm">Save $131.25</div>
+          </div>
+        </div>
+        <p class="text-center text-gray-400 text-xs px-6 py-3 bg-gray-50">*Based on actual veterinary bills of PetPaw members</p>
+      </div>
+    </div>
+  </section>
 
-  <script src="/js/main.js"></script>
+  <!-- Member Perks -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">More than just savings</h2>
+        <p class="text-gray-500">Every PetPaw membership comes with extra perks</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="bg-gray-50 rounded-2xl p-6 text-center card-hover">
+          <div class="text-4xl mb-4">🏷️</div>
+          <h3 class="font-bold text-gray-900 mb-2">Digital ID Card</h3>
+          <p class="text-gray-500 text-sm">Access your PetPaw ID card from your account and show it at the vet for instant discounts.</p>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-6 text-center card-hover">
+          <div class="text-4xl mb-4">🌐</div>
+          <h3 class="font-bold text-gray-900 mb-2">5,000+ Network Vets</h3>
+          <p class="text-gray-500 text-sm">Our exclusive network spans all 50 US states, Canada, and Puerto Rico.</p>
+        </div>
+        <div class="bg-gray-50 rounded-2xl p-6 text-center card-hover">
+          <div class="text-4xl mb-4">👨‍⚕️</div>
+          <h3 class="font-bold text-gray-900 mb-2">Trusted Providers</h3>
+          <p class="text-gray-500 text-sm">All our network vets are pre-screened, trusted veterinary professionals.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 hero-bg text-white">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-4">Ready to start saving?</h2>
+      <p class="text-gray-300 mb-8 text-lg">Join thousands of pet parents who save on vet care every day with PetPaw.</p>
+      <a href="/register" class="gradient-bg text-white px-10 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition inline-block">
+        Get Your Plan Today
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row justify-between items-center text-sm">
+        <div class="flex items-center space-x-2 mb-4 md:mb-0">
+          <div class="w-7 h-7 gradient-bg rounded-lg flex items-center justify-center">
+            <i class="fas fa-paw text-white text-xs"></i>
+          </div>
+          <span class="text-white font-bold">PetPaw</span>
+        </div>
+        <div class="flex gap-6">
+          <a href="/" class="hover:text-white transition">Home</a>
+          <a href="/vet-discount" class="hover:text-white transition">Vet Discount</a>
+          <a href="/wellness" class="hover:text-white transition">Wellness</a>
+          <a href="/shop" class="hover:text-white transition">Shop</a>
+        </div>
+        <p class="mt-4 md:mt-0">© 2024 PetPaw</p>
+      </div>
+    </div>
+  </footer>
+
   <script>
     const token = localStorage.getItem('token');
-    let plans = [], clinics = [], pets = [], selectedPlanId = null, selectedPets = [];
-
-    document.addEventListener('DOMContentLoaded', () => {
-      checkLoginStatus();
-      loadPlans();
-      loadClinics();
-      if (token) {
-        loadMyEnrollments();
-        loadPetsForTrans();
-      }
-    });
-
-    async function loadPlans() {
-      try {
-        const res = await fetch('/api/vet/discount-plans');
-        const data = await res.json();
-        plans = data.data || [];
-        renderPlans();
-      } catch (e) { console.error(e); }
-    }
-
-    async function loadClinics() {
-      try {
-        const res = await fetch('/api/vet/clinics');
-        const data = await res.json();
-        clinics = data.data || [];
-        renderClinics();
-        // populate clinic select in trans modal
-        const sel = document.getElementById('trans-clinic');
-        sel.innerHTML = '<option value="">Select clinic</option>' + clinics.map(c => '<option value="'+c.id+'">'+c.name+'</option>').join('');
-      } catch (e) { console.error(e); }
-    }
-
-    async function loadMyEnrollments() {
-      try {
-        const res = await fetch('/api/vet/my-enrollments', { headers: { 'Authorization': 'Bearer ' + token } });
-        const data = await res.json();
-        const enrollments = data.data || { discount: [], wellness: [] };
-        const active = enrollments.discount.find(e => e.status === 'active');
-        if (active) {
-          document.getElementById('active-banner').classList.remove('hidden');
-          document.getElementById('active-plan-name').textContent = active.plan_name;
-          document.getElementById('active-discount').textContent = active.discount_percent + '%';
-          document.getElementById('active-plan-desc').textContent = 'Covering up to ' + active.max_pets + ' pet(s) | Active since ' + new Date(active.start_date).toLocaleDateString();
-          document.getElementById('record-fab').classList.remove('hidden');
-        }
-        renderPlans(enrollments);
-      } catch (e) { console.error(e); }
-    }
-
-    function renderPlans(enrollments) {
-      enrollments = enrollments || { discount: [], wellness: [] };
-      const container = document.getElementById('plans-container');
-      container.innerHTML = plans.map(plan => {
-        let features = [];
-        try { features = JSON.parse(plan.features); } catch(e) {}
-        const isActive = enrollments.discount.find(e => e.plan_id === plan.id && e.status === 'active');
-        return '<div class="card bg-white rounded-2xl shadow-lg overflow-hidden"><div class="gradient-bg p-6 text-white text-center"><div class="text-5xl font-bold">'+plan.discount_percent+'%</div><div class="text-sm opacity-90 mt-1">DISCOUNT</div><h3 class="text-xl font-bold mt-2">'+plan.name+'</h3></div><div class="p-6"><ul class="space-y-2 mb-5">'+features.map(f => '<li class="text-sm text-gray-600"><i class="fas fa-check text-green-500 mr-2"></i>'+f+'</li>').join('')+'</ul><div class="border-t pt-4 mb-4"><div class="flex justify-between items-center"><span class="text-gray-500">Monthly Fee:</span><span class="text-2xl font-bold text-gray-900">$'+plan.monthly_fee.toFixed(2)+'</span></div><div class="text-xs text-gray-400 mt-1">Covers up to '+plan.max_pets+' pet'+(plan.max_pets>1?'s':'')+'</div></div>'+ (isActive ? '<div class="bg-green-500 text-white text-center py-3 rounded-lg font-semibold"><i class="fas fa-check-circle mr-2"></i>Active - Enrolled</div>' : '<button onclick="openEnrollModal('+plan.id+')" class="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-sky-600 transition"><i class="fas fa-paw mr-2"></i>Enroll Now</button>') +'</div></div>';
-      }).join('');
-    }
-
-    function renderClinics() {
-      const container = document.getElementById('clinics-container');
-      if (!clinics.length) { container.innerHTML = '<div class="col-span-3 text-center text-gray-400 py-12"><i class="fas fa-hospital text-4xl mb-3 opacity-50"></i><p>No clinics registered yet</p></div>'; return; }
-      container.innerHTML = clinics.map(c => '<div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition"><div class="flex items-start justify-between mb-3"><h3 class="font-bold text-gray-800">'+c.name+'</h3><span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Active</span></div><div class="space-y-1.5 text-sm text-gray-500">'+ (c.address?'<div><i class="fas fa-map-marker-alt text-red-400 mr-2 w-4"></i>'+c.address+', '+c.city+', '+c.state+'</div>':'') + (c.phone?'<div><i class="fas fa-phone text-blue-400 mr-2 w-4"></i><a href="tel:'+c.phone+'" class="hover:text-primary">'+c.phone+'</a></div>':'') + (c.hours?'<div><i class="fas fa-clock text-yellow-400 mr-2 w-4"></i>'+c.hours+'</div>':'') + (c.services?'<div class="flex flex-wrap gap-1 mt-2">'+c.services.split('|').map(s=>'<span class="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded">'+s+'</span>').join('')+'</div>':'') +'</div></div>').join('');
-    }
-
-    async function openEnrollModal(planId) {
-      if (!token) { window.location.href = '/login'; return; }
-      selectedPlanId = planId;
-      const plan = plans.find(p => p.id === planId);
-      document.getElementById('enroll-plan-name').textContent = plan.name;
-      document.getElementById('confirm-plan-name').textContent = plan.name;
-      document.getElementById('confirm-discount').textContent = plan.discount_percent + '%';
-      document.getElementById('confirm-fee').textContent = '$' + plan.monthly_fee.toFixed(2) + '/month';
-      selectedPets = [];
-      
-      // Load pets
-      try {
-        const r = await fetch('/api/pets', { headers: { 'Authorization': 'Bearer ' + token } });
-        const d = await r.json();
-        pets = d.data || [];
-      } catch(e) { pets = []; }
-      
-      renderPetsForEnroll(plan);
-      goToStep1();
-      document.getElementById('enrollModal').classList.remove('hidden');
-    }
-
-    function renderPetsForEnroll(plan) {
-      const container = document.getElementById('pets-list');
-      const warning = document.getElementById('no-pets-warning');
-      const btn = document.getElementById('btn-next-step2');
-      
-      if (pets.length === 0) {
-        container.innerHTML = '';
-        warning.classList.remove('hidden');
-        btn.disabled = true;
-        return;
-      }
-      
-      warning.classList.add('hidden');
-      container.innerHTML = pets.map(p => {
-        const icon = p.species==='Dog'?'fa-dog':p.species==='Cat'?'fa-cat':'fa-paw';
-        return '<label class="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition"><input type="checkbox" class="w-5 h-5 text-primary rounded pet-check" value="'+p.id+'" data-pet="'+p.name+'" onchange="updateSelectedPets()"><div class="flex items-center space-x-3 flex-1"><div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center"><i class="fas '+icon+' text-primary text-sm"></i></div><div><div class="font-semibold text-sm">'+p.name+'</div><div class="text-xs text-gray-400">'+p.species+(p.breed?' - '+p.breed:'')+'</div></div></div></label>';
-      }).join('');
-    }
-
-    function updateSelectedPets() {
-      const checks = document.querySelectorAll('.pet-check:checked');
-      selectedPets = Array.from(checks).map(c => ({ id: parseInt(c.value), name: c.dataset.pet }));
-      document.getElementById('btn-next-step2').disabled = selectedPets.length === 0;
-    }
-
-    function goToStep1() {
-      document.getElementById('enroll-step1').classList.remove('hidden');
-      document.getElementById('enroll-step2').classList.add('hidden');
-      document.getElementById('step1-indicator').className = 'w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
-      document.getElementById('step2-indicator').className = 'w-8 h-8 bg-gray-200 rounded-full text-gray-400 text-sm flex items-center justify-center mx-auto font-bold';
-    }
-
-    function goToStep2() {
-      if (selectedPets.length === 0) { alert('Please select at least one pet.'); return; }
-      document.getElementById('enroll-step1').classList.add('hidden');
-      document.getElementById('enroll-step2').classList.remove('hidden');
-      document.getElementById('step1-indicator').className = 'w-8 h-8 bg-green-500 rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
-      document.getElementById('step2-indicator').className = 'w-8 h-8 gradient-bg rounded-full text-white text-sm flex items-center justify-center mx-auto font-bold';
-      document.getElementById('confirm-pets').textContent = selectedPets.map(p => p.name).join(', ');
-    }
-
-    async function confirmEnroll() {
-      const btn = document.getElementById('btn-confirm-enroll');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-      try {
-        const res = await fetch('/api/vet/enroll-discount', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ plan_id: selectedPlanId, pet_ids: selectedPets.map(p => p.id) })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('enrollModal').classList.add('hidden');
-          alert('Congratulations! You\'re enrolled in ' + plans.find(p=>p.id===selectedPlanId).name + '!\n\nYour pet(s) are now covered: ' + selectedPets.map(p=>p.name).join(', '));
-          loadMyEnrollments();
-        } else {
-          alert(data.message || 'Enrollment failed');
-        }
-      } catch(e) { alert('Enrollment failed'); }
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-check mr-2"></i>Confirm Enrollment';
-    }
-
-    // Trans modal
-    async function loadPetsForTrans() {
-      try {
-        const r = await fetch('/api/pets', { headers: { 'Authorization': 'Bearer ' + token } });
-        const d = await r.json();
-        pets = d.data || [];
-        const sel = document.getElementById('trans-pet');
-        sel.innerHTML = '<option value="">Select pet</option>' + pets.map(p => '<option value="'+p.id+'">'+p.name+' ('+p.species+')</option>').join('');
-      } catch(e) {}
-    }
-
-    function showTransModal() {
-      document.getElementById('transModal').classList.remove('hidden');
-      loadPetsForTrans();
-    }
-    function closeTransModal() {
-      document.getElementById('transModal').classList.add('hidden');
-      document.getElementById('transForm').reset();
-    }
-
-    async function saveTransaction(e) {
-      e.preventDefault();
-      const data = {
-        pet_id: parseInt(document.getElementById('trans-pet').value),
-        clinic_id: parseInt(document.getElementById('trans-clinic').value) || null,
-        service_type: document.getElementById('trans-service').value,
-        original_amount: parseFloat(document.getElementById('trans-amount').value),
-        description: document.getElementById('trans-desc').value
-      };
-      if (!data.pet_id) { alert('Please select a pet'); return; }
-      try {
-        const res = await fetch('/api/vet/vet-transaction', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        const result = await res.json();
-        if (result.success) {
-          alert('Vet visit recorded!\nOriginal: $' + data.original_amount.toFixed(2) + '\nDiscount: -$' + result.data.discount_amount.toFixed(2) + '\nYou pay: $' + result.data.final_amount.toFixed(2));
-          closeTransModal();
-        } else { alert(result.message || 'Failed'); }
-      } catch(e) { alert('Failed'); }
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (token && user) {
+      document.getElementById('nav-auth').innerHTML = `
+        <a href="/profile" class="flex items-center gap-2 text-gray-700 text-sm hover:text-sky-500 font-medium">
+          <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center text-white text-xs font-bold">${user.username ? user.username[0].toUpperCase() : 'U'}</div>
+          <span>${user.username}</span>
+        </a>
+        <a href="/profile" class="gradient-bg text-white text-sm px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">My Account</a>
+      `;
     }
   </script>
 </body>
