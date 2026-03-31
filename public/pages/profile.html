@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'},fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+  <style>
+    body{font-family:'Inter',sans-serif}.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%)}
+    .gradient-text{background:linear-gradient(135deg,#0ea5e9,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-item{transition:all .2s}.nav-item:hover{background:#f0f9ff;color:#0ea5e9}
+    .nav-item.active{background:#e0f2fe;color:#0ea5e9;border-right:3px solid #0ea5e9}
+    .card{transition:all .2s}.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+    .section-view{display:none}.section-view.active{display:block}
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <a href="/" class="flex items-center space-x-2">
+          <div class="w-9 h-9 gradient-bg rounded-lg flex items-center justify-center"><i class="fas fa-paw text-white text-base"></i></div>
+          <span class="text-xl font-bold gradient-text">PetPaw</span>
+        </a>
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 gradient-bg rounded-full flex items-center justify-center text-white text-xs font-bold" id="user-avatar">U</div>
+            <span class="text-gray-700 text-sm font-medium hidden sm:inline" id="user-name">User</span>
+          </div>
+          <button onclick="logout()" class="text-gray-400 hover:text-red-500 text-sm"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex gap-8">
+
+      <!-- Sidebar -->
+      <aside class="hidden md:block w-56 flex-shrink-0">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+          <nav class="py-2">
+            <a href="#" onclick="return switchSection('dashboard')" class="nav-item active flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-dashboard"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</a>
+            <a href="#" onclick="return switchSection('pets')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-pets"><i class="fas fa-paw w-4 text-center"></i> My Pets</a>
+            <a href="#" onclick="return switchSection('vet-discount')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-vet"><i class="fas fa-hospital w-4 text-center"></i> Vet Discount</a>
+            <a href="#" onclick="return switchSection('wellness')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-wellness"><i class="fas fa-leaf w-4 text-center"></i> Wellness</a>
+            <a href="#" onclick="return switchSection('orders')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-orders"><i class="fas fa-shopping-bag w-4 text-center"></i> Orders</a>
+            <a href="#" onclick="return switchSection('balance')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-balance"><i class="fas fa-wallet w-4 text-center"></i> Balance</a>
+            <a href="#" onclick="return switchSection('settings')" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium" id="nav-settings"><i class="fas fa-cog w-4 text-center"></i> Settings</a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Mobile Nav -->
+      <div class="md:hidden w-full">
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-4" id="mobile-tabs">
+          <button onclick="switchSection('dashboard')" class="px-3 py-1.5 bg-sky-100 text-sky-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="dashboard">Dashboard</button>
+          <button onclick="switchSection('pets')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="pets">Pets</button>
+          <button onclick="switchSection('vet-discount')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="vet-discount">Vet</button>
+          <button onclick="switchSection('wellness')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="wellness">Wellness</button>
+          <button onclick="switchSection('orders')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="orders">Orders</button>
+          <button onclick="switchSection('balance')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold whitespace-nowrap tab-btn" data-tab="balance">Balance</button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main class="flex-1 min-w-0">
+
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" class="section-view active">
+          <h1 class="text-2xl font-bold text-gray-900 mb-6">Welcome back, <span id="dash-name">!</span></h1>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card"><div class="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-2">Balance</div><div class="text-2xl font-extrabold text-gray-900" id="s-balance">$0</div></div>
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card"><div class="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-2">Pets</div><div class="text-2xl font-extrabold text-gray-900" id="s-pets">0</div></div>
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card"><div class="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-2">Active Plans</div><div class="text-2xl font-extrabold text-gray-900" id="s-plans">0</div></div>
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card"><div class="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-2">Orders</div><div class="text-2xl font-extrabold text-gray-900" id="s-orders">0</div></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">My Active Plans</h2>
+            <div id="dash-plans"><p class="text-center text-gray-400 text-sm py-6">No active plans yet. <a href="/vet-discount" class="text-sky-500 hover:underline">Explore plans →</a></p></div>
+          </div>
+        </div>
+
+        <!-- MY PETS -->
+        <div id="view-pets" class="section-view">
+          <div class="flex items-center justify-between mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">My Pets</h1>
+            <button onclick="showAddPet()" class="gradient-bg text-white px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90"><i class="fas fa-plus mr-1"></i> Add Pet</button>
+          </div>
+          <div id="add-pet-form" class="hidden bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h3 class="font-bold text-gray-900 mb-4">Add New Pet</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Name *</label><input type="text" id="pet-name" placeholder="Pet name" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type *</label><select id="pet-type" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"><option value="Dog">🐕 Dog</option><option value="Cat">🐈 Cat</option><option value="Bird">🦜 Bird</option><option value="Rabbit">🐇 Rabbit</option><option value="Other">🐾 Other</option></select></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Breed</label><input type="text" id="pet-breed" placeholder="Breed (optional)" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Age</label><input type="text" id="pet-age" placeholder="e.g. 2 years" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+            </div>
+            <div class="mt-4 flex gap-3">
+              <button onclick="savePet()" class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90"><i class="fas fa-save mr-1"></i> Save</button>
+              <button onclick="hideAddPet()" class="text-gray-500 px-6 py-2.5 rounded-xl text-sm font-medium hover:text-gray-700">Cancel</button>
+            </div>
+          </div>
+          <div id="pets-list" class="grid md:grid-cols-2 gap-4">
+            <div class="text-center py-12 text-gray-400 col-span-2"><i class="fas fa-paw text-4xl mb-3 opacity-30"></i><p class="text-sm">No pets added yet</p></div>
+          </div>
+        </div>
+
+        <!-- VET DISCOUNT -->
+        <div id="view-vet-discount" class="section-view">
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Vet Discount Plan</h1>
+          <p class="text-gray-500 text-sm mb-6">25% off all in-house medical services at network vets</p>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6" id="vet-status">
+            <div class="text-center py-6 text-gray-400"><i class="fas fa-hospital text-4xl mb-3 opacity-30"></i><p class="text-sm">No active plan</p><a href="/vet-discount" class="text-sky-500 text-sm hover:underline">Enroll now →</a></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4"><i class="fas fa-plus-circle text-sky-500 mr-2"></i>Record Vet Visit</h2>
+            <div class="grid md:grid-cols-3 gap-4 mb-4">
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Clinic</label><select id="vt-clinic" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"><option value="">Select...</option></select></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Pet</label><select id="vt-pet" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"><option value="">Select...</option></select></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Bill Amount</label><input type="number" id="vt-amount" placeholder="0.00" step="0.01" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+            </div>
+            <div class="mb-4"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Service</label><select id="vt-service" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"><option value="Exam">Routine Exam</option><option value="Vaccination">Vaccination</option><option value="Dental">Dental</option><option value="Lab">Lab Work</option><option value="Surgery">Surgery</option><option value="Emergency">Emergency</option><option value="Medication">Medication</option><option value="Other">Other</option></select></div>
+            <div id="vt-savings" class="hidden bg-emerald-50 rounded-xl p-4 mb-4 flex items-center gap-3"><i class="fas fa-piggy-bank text-emerald-500 text-xl"></i><div><div class="font-bold text-emerald-700" id="vt-save-amt">You save: $0</div><div class="text-emerald-600 text-xs">25% discount applied</div></div></div>
+            <button onclick="submitVetVisit()" class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90"><i class="fas fa-check mr-1"></i> Record Visit</button>
+            <h3 class="font-semibold text-gray-800 text-sm mt-6 mb-3">Visit History</h3>
+            <div id="vt-history"><p class="text-center text-gray-400 text-sm py-4">No visits recorded</p></div>
+          </div>
+        </div>
+
+        <!-- WELLNESS -->
+        <div id="view-wellness" class="section-view">
+          <h1 class="text-2xl font-bold text-gray-900 mb-1">Wellness Plan</h1>
+          <p class="text-gray-500 text-sm mb-6">Reimbursement for routine care from any veterinarian</p>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6" id="wl-status">
+            <div class="text-center py-6 text-gray-400"><i class="fas fa-leaf text-4xl mb-3 opacity-30"></i><p class="text-sm">No active Wellness Plan</p><a href="/wellness" class="text-emerald-500 text-sm hover:underline">Enroll now →</a></div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4"><i class="fas fa-file-invoice-dollar text-emerald-500 mr-2"></i>Submit Wellness Claim</h2>
+            <div class="grid md:grid-cols-2 gap-4 mb-4">
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Pet</label><select id="wl-pet" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"><option value="">Select...</option></select></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Service</label><select id="wl-service" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"><option value="Wellness Visit">Wellness Visit</option><option value="Vaccination">Vaccination</option><option value="Bloodwork">Bloodwork</option><option value="Fecal">Fecal Test</option><option value="Grooming">Grooming</option><option value="Dental">Dental</option><option value="Other">Other</option></select></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Amount ($)</label><input type="number" id="wl-amount" placeholder="0.00" step="0.01" min="0" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Date</label><input type="date" id="wl-date" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></div>
+            </div>
+            <button onclick="submitWellnessClaim()" class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90"><i class="fas fa-paper-plane mr-1"></i> Submit Claim</button>
+            <h3 class="font-semibold text-gray-800 text-sm mt-6 mb-3">My Claims</h3>
+            <div id="wl-claims"><p class="text-center text-gray-400 text-sm py-4">No claims submitted</p></div>
+          </div>
+        </div>
+
+        <!-- ORDERS -->
+        <div id="view-orders" class="section-view">
+          <h1 class="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+          <div id="orders-list"><p class="text-center text-gray-400 py-12"><i class="fas fa-shopping-bag text-4xl mb-3 opacity-30 block"></i>No orders yet <a href="/shop" class="text-sky-500 hover:underline">Visit shop →</a></p></div>
+        </div>
+
+        <!-- BALANCE -->
+        <div id="view-balance" class="section-view">
+          <h1 class="text-2xl font-bold text-gray-900 mb-6">Balance</h1>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6 text-center">
+            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Current Balance</div>
+            <div class="text-4xl font-extrabold gradient-text" id="bal-amt">$0.00</div>
+          </div>
+          <div class="bg-sky-50 rounded-xl p-4 mb-6 text-sm text-sky-700"><i class="fas fa-gift mr-2"></i>Invite friends! Your code: <b id="my-code">-</b></div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Transaction History</h2>
+            <div id="bal-history"><p class="text-center text-gray-400 text-sm py-4">No transactions yet</p></div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="view-settings" class="section-view">
+          <h1 class="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 class="font-bold text-gray-900 mb-4">Profile</h2>
+            <div class="space-y-4 max-w-md">
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Username</label><input type="text" id="set-user" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm bg-gray-50" readonly></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email</label><input type="email" id="set-email" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+              <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Phone</label><input type="text" id="set-phone" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></div>
+              <button onclick="saveProfile()" class="gradient-bg text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90"><i class="fas fa-save mr-1"></i> Save</button>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="font-bold text-gray-900 mb-4">Change Password</h2>
+            <div class="max-w-md"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">New Password</label><input type="password" id="set-pass" placeholder="Min 6 characters" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-sky-500"><button onclick="changePw()" class="bg-gray-800 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-900"><i class="fas fa-lock mr-1"></i> Update</button></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+    <div class="bg-gray-800 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm"><i class="fas fa-check-circle text-emerald-400" id="toast-icon"></i><span id="toast-msg">Done!</span></div>
+  </div>
+
+<script>
+const API='https://pet365-store.onrender.com';
+let token=localStorage.getItem('token'),user=null,myPets=[];
+if(!token)location.href='/login';
+
+function toast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.remove('translate-y-20','opacity-0');setTimeout(()=>t.classList.add('translate-y-20','opacity-0'),3000);}
+function switchSection(name){
+  document.querySelectorAll('.section-view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav=document.getElementById('nav-'+name);
+  if(nav)nav.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.className=b.className.replace('bg-sky-100 text-sky-600','bg-gray-100 text-gray-600');
+  });
+  const mob=document.getElementById('mob-'+name)||document.querySelector('[data-tab="'+name+'"]');
+  if(mob)mob.className=mob.className.replace('bg-gray-100 text-gray-600','bg-sky-100 text-sky-600');
+  window.scrollTo({top:0,behavior:'smooth'});
+  return false;
+}
+
+async function loadAll(){
+  try{
+    const r=await fetch(API+'/api/auth/profile',{headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    if(!d.success){logout();return;}
+    user=d.data;
+    document.getElementById('user-name').textContent=user.username||user.email||'User';
+    document.getElementById('user-avatar').textContent=(user.username||'U')[0].toUpperCase();
+    document.getElementById('dash-name').textContent=user.username||'!';
+    document.getElementById('s-balance').textContent='$'+((user.balance||0)).toFixed(2);
+    document.getElementById('bal-amt').textContent='$'+((user.balance||0)).toFixed(2);
+    document.getElementById('my-code').textContent=user.invite_code||'-';
+    document.getElementById('set-user').value=user.username||'';
+    document.getElementById('set-email').value=user.email||'';
+    document.getElementById('set-phone').value=user.phone||'';
+    await Promise.all([loadPets(),loadDashboard(),loadOrders(),loadVet(),loadWellness(),loadBalance()]);
+  }catch(e){console.error(e);}
+}
+
+async function loadDashboard(){
+  try{
+    const[pr,plr,or]=await Promise.all([
+      fetch(API+'/api/pets',{headers:{'Authorization':'Bearer '+token}}),
+      fetch(API+'/api/vet/my-enrollments',{headers:{'Authorization':'Bearer '+token}}),
+      fetch(API+'/api/orders',{headers:{'Authorization':'Bearer '+token}})
+    ]);
+    const pd=await pr.json(),pld=await plr.json(),od=await or.json();
+    const pets=(pd.data||[]).length;
+    const plans=((pld.data||{}).discount||[]).length+((pld.data||{}).wellness||[]).length;
+    const orders=(od.data||[]).length;
+    document.getElementById('s-pets').textContent=pets;
+    document.getElementById('s-plans').textContent=plans;
+    document.getElementById('s-orders').textContent=orders;
+    renderDashPlans(pld.data);
+  }catch(e){}
+}
+
+function renderDashPlans(data){
+  const c=document.getElementById('dash-plans');
+  if(!data)return;
+  const items=[];
+  (data.discount||[]).forEach(p=>items.push('<div class="flex items-center gap-3 p-3 bg-sky-50 rounded-xl"><div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center"><i class="fas fa-hospital text-white"></i></div><div><div class="font-semibold text-gray-800 text-sm">Vet Discount Plan</div><div class="text-gray-400 text-xs">Active</div></div></div>'));
+  (data.wellness||[]).forEach(p=>items.push('<div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl"><div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center"><i class="fas fa-leaf text-white"></i></div><div><div class="font-semibold text-gray-800 text-sm">Wellness Plan</div><div class="text-gray-400 text-xs">'+p.plan_name+'</div></div></div>'));
+  c.innerHTML=items.length?items.join(''):'<p class="text-center text-gray-400 text-sm py-6">No active plans yet. <a href="/vet-discount" class="text-sky-500 hover:underline">Explore plans →</a></p>';
+}
+
+async function loadPets(){
+  try{
+    const r=await fetch(API+'/api/pets',{headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    myPets=d.data||[];
+    document.getElementById('s-pets').textContent=myPets.length;
+    renderPets();
+    populatePetSelects();
+  }catch(e){}
+}
+
+function renderPets(){
+  const c=document.getElementById('pets-list');
+  if(!myPets.length){
+    c.innerHTML='<div class="text-center py-12 text-gray-400 col-span-2"><i class="fas fa-paw text-4xl mb-3 opacity-30"></i><p class="text-sm">No pets added yet</p><button onclick="showAddPet()" class="text-sky-500 text-sm hover:underline mt-2">Add your first pet →</button></div>';
+    return;
+  }
+  const icons={'Dog':'🐕','Cat':'🐈','Bird':'🦜','Rabbit':'🐇','Hamster':'🐹','Fish':'🐠','Reptile':'🦎','Other':'🐾'};
+  c.innerHTML=myPets.map(p=>'<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 card"><div class="flex items-center gap-3 mb-3"><div class="text-3xl">'+(icons[p.pet_type]||'🐾')+'</div><div><div class="font-bold text-gray-900">'+p.name+'</div><div class="text-gray-400 text-xs">'+(p.breed||p.pet_type)+' · '+(p.age||'Age unknown')+'</div></div></div><div class="text-xs text-gray-400">'+(p.notes||'No notes')+'</div><button onclick="delPet('+p.id+')" class="mt-3 text-red-400 text-xs hover:text-red-600"><i class="fas fa-trash mr-1"></i>Remove</button></div>').join('');
+}
+
+function populatePetSelects(){
+  const opts='<option value="">Select pet...</option>'+myPets.map(p=>'<option value="'+p.id+'">'+p.name+'</option>').join('');
+  document.getElementById('vt-pet').innerHTML=opts;
+  document.getElementById('wl-pet').innerHTML=opts;
+}
+
+function showAddPet(){document.getElementById('add-pet-form').classList.remove('hidden');}
+function hideAddPet(){document.getElementById('add-pet-form').classList.add('hidden');}
+
+async function savePet(){
+  const name=document.getElementById('pet-name').value.trim();
+  if(!name){toast('Please enter pet name');return;}
+  try{
+    const r=await fetch(API+'/api/pets',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name,pet_type:document.getElementById('pet-type').value,breed:document.getElementById('pet-breed').value,age:document.getElementById('pet-age').value})});
+    const d=await r.json();
+    if(d.success){toast('Pet added!');hideAddPet();document.getElementById('pet-name').value='';document.getElementById('pet-breed').value='';document.getElementById('pet-age').value='';await loadPets();}else{toast(d.message||'Failed');}
+  }catch(e){toast('Error');}
+}
+
+async function delPet(id){
+  if(!confirm('Remove this pet?'))return;
+  try{
+    const r=await fetch(API+'/api/pets/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    if(d.success){toast('Pet removed');await loadPets();}else{toast(d.message||'Failed');}
+  }catch(e){}
+}
+
+async function loadVet(){
+  try{
+    const[cr,vr]=await Promise.all([
+      fetch(API+'/api/vet/clinics',{headers:{'Authorization':'Bearer '+token}}),
+      fetch(API+'/api/vet/vet-transactions',{headers:{'Authorization':'Bearer '+token}})
+    ]);
+    const cd=await cr.json(),vd=await vr.json();
+    const clinics=cd.data||[];
+    document.getElementById('vt-clinic').innerHTML='<option value="">Select...</option>'+clinics.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');
+    const txns=vd.data||[];
+    if(txns.length){
+      document.getElementById('vt-history').innerHTML=txns.slice(0,10).map(t=>'<div class="flex items-center justify-between py-2 border-b border-gray-100 text-sm"><div><div class="font-medium text-gray-800">'+t.clinic_name+'</div><div class="text-gray-400 text-xs">'+t.service_type+' · '+t.pet_name+'</div></div><div class="text-right"><div class="font-bold text-emerald-600">-$'+parseFloat(t.amount||0).toFixed(2)+'</div><div class="text-gray-400 text-xs">'+(t.discount_amount?'Saves $'+parseFloat(t.discount_amount).toFixed(2):'')+'</div></div></div>').join('');
+    }
+  }catch(e){}
+  document.getElementById('vt-amount').addEventListener('input',function(){
+    const amt=parseFloat(this.value)||0;
+    if(amt>0){document.getElementById('vt-savings').classList.remove('hidden');document.getElementById('vt-save-amt').textContent='You save: \$'+(amt*0.25).toFixed(2);}else{document.getElementById('vt-savings').classList.add('hidden');}
+  });
+}
+
+async function submitVetVisit(){
+  const clinic_id=document.getElementById('vt-clinic').value;
+  const pet_id=document.getElementById('vt-pet').value;
+  const amount=parseFloat(document.getElementById('vt-amount').value)||0;
+  const service=document.getElementById('vt-service').value;
+  if(!clinic_id||!pet_id||!amount){toast('Please fill all fields');return;}
+  try{
+    const r=await fetch(API+'/api/vet/vet-transaction',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({clinic_id,pet_id,amount,service_type:service})});
+    const d=await r.json();
+    if(d.success){toast('Vet visit recorded! You saved \$'+(amount*0.25).toFixed(2));document.getElementById('vt-amount').value='';await loadVet();}else{toast(d.message||'Failed');}
+  }catch(e){toast('Error');}
+}
+
+async function loadWellness(){
+  try{
+    const r=await fetch(API+'/api/vet/reimbursements',{headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    const claims=d.data||[];
+    if(claims.length){
+      document.getElementById('wl-claims').innerHTML=claims.map(c=>'<div class="flex items-center justify-between py-2 border-b border-gray-100 text-sm"><div><div class="font-medium text-gray-800">'+c.service_type+'</div><div class="text-gray-400 text-xs">'+c.pet_name+' · '+(c.invoice_date||'').substring(0,10)+'</div></div><div class="text-right"><div class="font-bold '+(c.status==='approved'?'text-emerald-600':c.status==='pending'?'text-amber-600':'text-gray-400')+'">'+c.status+'</div><div class="text-gray-400 text-xs">'+(c.status==='approved'?'+\$'+parseFloat(c.amount||0).toFixed(2):'\$'+parseFloat(c.amount||0).toFixed(2))+'</div></div></div>').join('');
+    }
+  }catch(e){}
+}
+
+async function submitWellnessClaim(){
+  const pet_id=document.getElementById('wl-pet').value;
+  const amount=parseFloat(document.getElementById('wl-amount').value)||0;
+  const service=document.getElementById('wl-service').value;
+  const date=document.getElementById('wl-date').value;
+  if(!pet_id||!amount){toast('Please fill required fields');return;}
+  try{
+    const r=await fetch(API+'/api/vet/reimbursement',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({pet_id,amount,service_type:service,invoice_date:date})});
+    const d=await r.json();
+    if(d.success){toast('Claim submitted! Status: '+d.data.status);document.getElementById('wl-amount').value='';await loadWellness();}else{toast(d.message||'Failed to submit');}
+  }catch(e){toast('Error submitting claim');}
+}
+
+async function loadOrders(){
+  try{
+    const r=await fetch(API+'/api/orders',{headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    const orders=d.data||[];
+    document.getElementById('s-orders').textContent=orders.length;
+    const c=document.getElementById('orders-list');
+    if(!orders.length){
+      c.innerHTML='<p class="text-center text-gray-400 py-12"><i class="fas fa-shopping-bag text-4xl mb-3 opacity-30 block"></i>No orders yet <a href="/shop" class="text-sky-500 hover:underline">Visit shop</a></p>';
+      return;
+    }
+    const statusColors={pending:'text-amber-600 bg-amber-50',processing:'text-blue-600 bg-blue-50',shipped:'text-purple-600 bg-purple-50',delivered:'text-emerald-600 bg-emerald-50',cancelled:'text-red-500 bg-red-50'};
+    c.innerHTML=orders.map(o=>'<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between mb-3"><div><div class="font-semibold text-gray-800 text-sm">Order #'+o.id+'</div><div class="text-gray-400 text-xs">'+(o.created_at||'').substring(0,10)+'</div></div><div class="text-right"><div class="font-bold text-gray-900">\$'+parseFloat(o.total||0).toFixed(2)+'</div><span class="text-xs px-2 py-0.5 rounded-full '+(statusColors[o.status]||'text-gray-600 bg-gray-50')+'">'+o.status+'</span></div></div>').join('');
+  }catch(e){}
+}
+
+async function loadBalance(){
+  try{
+    const r=await fetch(API+'/api/auth/balance-logs',{headers:{'Authorization':'Bearer '+token}});
+    const d=await r.json();
+    const logs=d.data||[];
+    const c=document.getElementById('bal-history');
+    if(!logs.length){
+      c.innerHTML='<p class="text-center text-gray-400 text-sm py-4">No transactions yet</p>';
+      return;
+    }
+    c.innerHTML=logs.map(l=>'<div class="flex items-center justify-between py-2 border-b border-gray-100 text-sm"><div><div class="font-medium text-gray-800">'+l.reason+'</div><div class="text-gray-400 text-xs">'+(l.created_at||'').substring(0,16).replace('T',' ')+'</div></div><div class="font-bold '+(l.type==='add'||l.type==='reimbursement'?'text-emerald-600':'text-gray-900')+'">'+(l.type==='add'||l.type==='reimbursement'?'+':'-')+'\$'+parseFloat(Math.abs(l.amount||0)).toFixed(2)+'</div></div>').join('');
+  }catch(e){}
+}
+
+function saveProfile(){
+  toast('Profile saved');
+}
+function changePw(){
+  const pw=document.getElementById('set-pass').value;
+  if(!pw||pw.length<6){toast('Password must be at least 6 characters');return;}
+  toast('Password updated (demo)');
+}
+
+function logout(){
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  location.href='/login';
+}
+
+loadAll();
+</script>
+</body>
+</html>
