@@ -60,8 +60,7 @@ router.get('/cart', (req, res) => {
       SELECT c.*, p.name, p.price, p.image, p.stock as product_stock, p.status as product_status
       FROM cart c
       JOIN products p ON c.product_id = p.id
-      WHERE c.user_id = ?
-    `, [decoded.id]);
+      WHERE c.user_id = ?     `, [decoded.id]);
 
     const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
