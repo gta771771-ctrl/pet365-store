@@ -110,8 +110,8 @@ router.post('/login', async (req, res) => {
     const { account, username, password } = req.body;
     const loginAccount = account || username;
 
-    if (!account || !password) {
-      return res.status(400).json({ success: false, message: 'Account and password required' });
+    if (!loginAccount || !password) {
+      return res.status(400).json({ success: false, message: 'Username/email and password required' });
     }
 
     const user = db.get("SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?",
