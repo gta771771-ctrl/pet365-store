@@ -283,11 +283,13 @@ async function init() {
 }
 
 // Run INSERT/UPDATE/DELETE with ? placeholders
+// Converts null to empty string for sql.js compatibility
 function run(sql, params) {
   if (params === undefined) params = [];
+  // sql.js doesn't handle null well in array params - convert to empty string
+  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
   try {
-    // Use db.run() which in sql.js DOES support array params with ?
-    db.run(sql, params);
+    db.run(sql, safeParams);
     saveDb();
     const r = db.exec("SELECT last_insert_rowid() as id");
     return { changes: 1, lastInsertRowid: (r.length > 0 && r[0].values.length > 0) ? r[0].values[0][0] : 0 };
