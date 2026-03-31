@@ -14,10 +14,10 @@
     .gradient-text{background:linear-gradient(135deg,#0ea5e9,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .step-dot{transition:all .3s}.step-dot.active{background:#0ea5e9;color:white;transform:scale(1.15)}
     .step-dot.done{background:#10b981;color:white}.step-dot.inactive{background:#e2e8f0;color:#94a3b8}
+    .step-line.done{background:#10b981}
   </style>
 </head>
 <body class="min-h-screen">
-
   <nav class="bg-white border-b border-gray-200 shadow-sm">
     <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
       <a href="/" class="flex items-center gap-2">
@@ -28,203 +28,175 @@
     </div>
   </nav>
 
-  <div class="max-w-3xl mx-auto px-4 py-10">
-
+  <div class="max-w-2xl mx-auto px-4 py-10">
     <!-- Steps -->
     <div class="flex items-center justify-center mb-8">
       <div class="flex items-center gap-2">
         <div id="dot1" class="step-dot active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">1</div>
-        <div class="w-10 h-0.5 bg-gray-200" id="line1"></div>
+        <div class="step-line w-12 h-0.5 bg-gray-200" id="line1"></div>
         <div id="dot2" class="step-dot inactive w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">2</div>
-        <div class="w-10 h-0.5 bg-gray-200" id="line2"></div>
+        <div class="step-line w-12 h-0.5 bg-gray-200" id="line2"></div>
         <div id="dot3" class="step-dot inactive w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">3</div>
       </div>
     </div>
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-900" id="step-title">Your Information</h1>
-      <p class="text-gray-400 text-sm mt-1" id="step-desc">Let's get to know you and your pets</p>
+      <h1 class="text-2xl font-bold text-gray-900" id="step-title">Your Account</h1>
+      <p class="text-gray-400 text-sm mt-1" id="step-desc">Create your login credentials</p>
     </div>
 
-    <!-- Error -->
     <div id="err" class="hidden bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 mb-4 text-sm flex items-center gap-2">
       <i class="fas fa-exclamation-circle"></i><span id="err-text"></span>
     </div>
 
-    <!-- STEP 1: Personal Info -->
+    <!-- STEP 1: Account Info -->
     <div id="step1" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">First Name <span class="text-red-500">*</span></label>
-          <input type="text" id="first_name" placeholder="John"
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Username <span class="text-red-500">*</span></label>
+          <input type="text" id="s1-username" placeholder="Choose a username"
             class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Last Name <span class="text-red-500">*</span></label>
-          <input type="text" id="last_name" placeholder="Doe"
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email <span class="text-red-500">*</span></label>
+          <input type="email" id="s1-email" placeholder="your@email.com"
             class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
         </div>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email <span class="text-red-500">*</span></label>
-        <input type="email" id="email" placeholder="your@email.com"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Phone <span class="text-red-500">*</span></label>
-        <input type="tel" id="phone" placeholder="(555) 123-4567"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Address <span class="text-red-500">*</span></label>
-        <input type="text" id="address" placeholder="123 Main Street"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">City <span class="text-red-500">*</span></label>
-          <input type="text" id="city" placeholder="New York"
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Password <span class="text-red-500">*</span></label>
+          <input type="password" id="s1-password" placeholder="Min 6 characters"
             class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Zip Code <span class="text-red-500">*</span></label>
-          <input type="text" id="zip" placeholder="10001"
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Phone (optional)</label>
+          <input type="text" id="s1-phone" placeholder="Phone number"
             class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
         </div>
       </div>
-      <div class="flex justify-end pt-4">
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Referral Code (optional)</label>
+        <input type="text" id="s1-invite" placeholder="Friend's referral code"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+      </div>
+      <div class="flex justify-end pt-2">
         <button onclick="step1Next()" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
-          Next <i class="fas fa-arrow-right ml-1"></i>
+          Continue <i class="fas fa-arrow-right ml-1"></i>
         </button>
       </div>
     </div>
 
     <!-- STEP 2: Pet Info -->
     <div id="step2" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-      <div class="mb-6">
-        <h3 class="font-bold text-gray-900 mb-4">Add Your Pets</h3>
-        <div id="pets-list" class="space-y-4 mb-4">
-          <!-- Pets added here -->
-        </div>
-        <button onclick="addPetForm()" class="w-full border-2 border-dashed border-gray-300 rounded-xl py-3 text-gray-600 hover:border-sky-500 hover:text-sky-500 transition text-sm font-medium">
-          <i class="fas fa-plus mr-1"></i> Add Another Pet
-        </button>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-gray-900">Your Pets</h3>
+        <span class="text-gray-400 text-xs">Optional — you can add pets later too</span>
       </div>
-      <div id="pet-form" class="hidden bg-gray-50 rounded-xl p-4 space-y-3 mb-4">
+
+      <!-- Pet list -->
+      <div id="pets-list" class="space-y-3 mb-4"></div>
+
+      <!-- Add pet form -->
+      <div id="pet-form" class="bg-gray-50 rounded-xl p-4 space-y-3 mb-4">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Pet Name <span class="text-red-500">*</span></label>
-            <input type="text" id="pet_name" placeholder="Buddy"
+            <input type="text" id="pet-name" placeholder="e.g. Buddy"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type <span class="text-red-500">*</span></label>
-            <select id="pet_type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <select id="pet-type" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
               <option value="">Select type</option>
               <option value="Dog">🐕 Dog</option>
               <option value="Cat">🐈 Cat</option>
               <option value="Bird">🦜 Bird</option>
               <option value="Rabbit">🐇 Rabbit</option>
+              <option value="Horse">🐴 Horse</option>
               <option value="Other">🐾 Other</option>
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Breed</label>
-            <input type="text" id="pet_breed" placeholder="Golden Retriever"
+            <input type="text" id="pet-breed" placeholder="e.g. Labrador"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Age (years)</label>
-            <input type="number" id="pet_age" placeholder="3" min="0" step="0.5"
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Age (yrs)</label>
+            <input type="number" id="pet-age" placeholder="3" min="0" step="0.5"
               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
           </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Gender</label>
-            <select id="pet_gender" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
-              <option value="">Select gender</option>
+            <select id="pet-gender" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <option value="">Select</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
             </select>
           </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Neutered/Spayed</label>
-            <select id="pet_neutered" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
-              <option value="">Select</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-          </div>
         </div>
-        <div class="flex gap-2">
+        <div>
+          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Neutered / Spayed</label>
+          <select id="pet-neutered" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="flex gap-2 pt-1">
           <button onclick="savePet()" class="flex-1 gradient-bg text-white py-2 rounded-lg text-sm font-semibold hover:opacity-90">
-            Save Pet
+            <i class="fas fa-plus mr-1"></i> Add Pet
           </button>
-          <button onclick="cancelPet()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300">
-            Cancel
+          <button onclick="clearPetForm()" class="px-4 bg-gray-200 text-gray-600 py-2 rounded-lg text-sm hover:bg-gray-300">
+            Clear
           </button>
         </div>
       </div>
-      <div class="flex justify-between pt-4">
+
+      <div class="flex justify-between pt-2">
         <button onclick="setStep(1)" class="text-gray-400 hover:text-gray-600 text-sm font-medium">
           <i class="fas fa-arrow-left mr-1"></i> Back
         </button>
-        <button onclick="step2Next()" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
-          Next <i class="fas fa-arrow-right ml-1"></i>
+        <button onclick="setStep(3)" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
+          Continue <i class="fas fa-arrow-right ml-1"></i>
         </button>
       </div>
     </div>
 
-    <!-- STEP 3: Account & Plans -->
-    <div id="step3" class="hidden bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Username <span class="text-red-500">*</span></label>
-          <input type="text" id="username" placeholder="Choose username"
-            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+    <!-- STEP 3: Review & Submit -->
+    <div id="step3" class="hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="gradient-bg p-4 text-white text-center">
+          <h3 class="font-bold text-lg">Review & Complete</h3>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Password <span class="text-red-500">*</span></label>
-          <input type="password" id="password" placeholder="Min 6 characters"
-            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Referral Code (optional)</label>
-        <input type="text" id="invite_code" placeholder="Friend's code"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-      </div>
-      <div class="border-t border-gray-100 pt-4">
-        <label class="block text-xs font-semibold text-gray-500 uppercase mb-3">Choose a Plan (optional)</label>
-        <div class="grid grid-cols-2 gap-3">
-          <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-sky-500 transition">
-            <input type="radio" name="plan" value="vet" class="w-4 h-4">
+        <div class="p-6 space-y-4">
+          <div class="bg-gray-50 rounded-xl p-4 flex items-center gap-3">
+            <div class="w-10 h-10 gradient-bg rounded-full flex items-center justify-center text-white font-bold text-lg" id="rv-avatar">U</div>
             <div>
-              <div class="font-semibold text-gray-800 text-sm">Vet Discount</div>
-              <div class="text-gray-400 text-xs">25% off at vets</div>
+              <div class="font-semibold text-gray-900" id="rv-username">-</div>
+              <div class="text-gray-400 text-sm" id="rv-email">-</div>
             </div>
-          </label>
-          <label class="flex items-center gap-3 p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition">
-            <input type="radio" name="plan" value="wellness" class="w-4 h-4">
-            <div>
-              <div class="font-semibold text-gray-800 text-sm">Wellness</div>
-              <div class="text-gray-400 text-xs">Reimbursement</div>
-            </div>
-          </label>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-gray-400 uppercase mb-2">Pets (<span id="rv-pet-count">0</span>)</div>
+            <div id="rv-pets" class="text-sm text-gray-600 bg-gray-50 rounded-xl p-3">No pets added</div>
+          </div>
+          <div class="bg-emerald-50 rounded-xl p-3 flex items-start gap-2 text-xs text-emerald-700">
+            <i class="fas fa-shield-alt mt-0.5"></i>
+            <span>30-day risk-free cancellation. No claims submitted? Full refund guaranteed.</span>
+          </div>
+          <button onclick="submitReg()" id="submit-btn"
+            class="w-full gradient-bg text-white py-4 rounded-xl font-bold text-base hover:opacity-90 transition">
+            <i class="fas fa-lock mr-2"></i> Complete Registration
+          </button>
+          <p class="text-center text-gray-400 text-xs">By registering you agree to our Terms of Service.</p>
         </div>
       </div>
-      <div class="bg-emerald-50 rounded-xl p-3 flex items-start gap-2 text-xs text-emerald-700">
-        <i class="fas fa-shield-alt mt-0.5"></i>
-        <span>30-day risk-free. No claims? Full refund.</span>
-      </div>
-      <div class="flex justify-between pt-4">
-        <button onclick="setStep(2)" class="text-gray-400 hover:text-gray-600 text-sm font-medium">
-          <i class="fas fa-arrow-left mr-1"></i> Back
-        </button>
-        <button onclick="submitReg()" id="submit-btn" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-sm hover:opacity-90">
-          <i class="fas fa-lock mr-1"></i> Complete Registration
+      <div class="mt-3 text-center">
+        <button onclick="setStep(2)" class="text-gray-400 hover:text-gray-600 text-sm">
+          <i class="fas fa-arrow-left mr-1"></i> Go back
         </button>
       </div>
     </div>
@@ -235,17 +207,18 @@
         <i class="fas fa-check text-white text-3xl"></i>
       </div>
       <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome to PetPaw!</h2>
-      <p class="text-gray-500 mb-8">Your account is ready. Let's get started!</p>
+      <p class="text-gray-500 mb-2" id="success-msg">Your account is ready.</p>
+      <p class="text-gray-400 text-sm mb-8" id="success-pets"></p>
       <a href="/profile" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 inline-block">
         Go to My Account <i class="fas fa-arrow-right ml-2"></i>
       </a>
     </div>
-
   </div>
 
 <script>
 const API = 'https://pet365-store.onrender.com';
-let fd = {}, pets = [];
+let fd = {};
+let pets = [];
 
 function showErr(msg) {
   document.getElementById('err').classList.remove('hidden');
@@ -264,80 +237,70 @@ function setStep(n) {
   for (let s = 1; s < n; s++) {
     document.getElementById('dot'+s).className = 'step-dot done w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold';
     const line = document.getElementById('line'+s);
-    if (line) line.style.background = '#10b981';
+    if (line) line.classList.add('done');
   }
-  const titles = ['', 'Your Information', 'Your Pets', 'Account & Plan'];
-  const descs = ['', 'Tell us about yourself', 'Add your beloved pets', 'Create account & choose plan'];
+  const titles = ['', 'Your Account', 'Your Pets', 'Review & Complete'];
+  const descs = ['', 'Create your login credentials', 'Tell us about your pets (optional)', 'Confirm and finish registration'];
   document.getElementById('step-title').textContent = titles[n];
   document.getElementById('step-desc').textContent = descs[n];
+  if (n === 3) buildReview();
 }
 
 function step1Next() {
-  const fn = document.getElementById('first_name').value.trim();
-  const ln = document.getElementById('last_name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const addr = document.getElementById('address').value.trim();
-  const city = document.getElementById('city').value.trim();
-  const zip = document.getElementById('zip').value.trim();
-  if (!fn || !ln || !email || !phone || !addr || !city || !zip) {
-    showErr('Please fill in all required fields.');
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showErr('Please enter a valid email address.');
-    return;
-  }
-  fd = { first_name: fn, last_name: ln, email, phone, address: addr, city, zip };
+  const username = document.getElementById('s1-username').value.trim();
+  const email = document.getElementById('s1-email').value.trim();
+  const password = document.getElementById('s1-password').value;
+  if (!username || username.length < 3) { showErr('Username must be at least 3 characters.'); return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address.'); return; }
+  if (!password || password.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+  fd.username = username;
+  fd.email = email;
+  fd.password = password;
+  fd.phone = document.getElementById('s1-phone').value.trim();
+  fd.invite = document.getElementById('s1-invite').value.trim();
   hideErr();
   setStep(2);
-  if (pets.length === 0) addPetForm();
-}
-
-function addPetForm() {
-  document.getElementById('pet-form').classList.remove('hidden');
-  document.getElementById('pet_name').focus();
-}
-
-function cancelPet() {
-  document.getElementById('pet-form').classList.add('hidden');
-  document.getElementById('pet_name').value = '';
-  document.getElementById('pet_type').value = '';
-  document.getElementById('pet_breed').value = '';
-  document.getElementById('pet_age').value = '';
-  document.getElementById('pet_gender').value = '';
-  document.getElementById('pet_neutered').value = '';
 }
 
 function savePet() {
-  const name = document.getElementById('pet_name').value.trim();
-  const type = document.getElementById('pet_type').value;
-  if (!name || !type) {
-    showErr('Please enter pet name and type.');
-    return;
-  }
+  const name = document.getElementById('pet-name').value.trim();
+  const type = document.getElementById('pet-type').value;
+  if (!name) { showErr('Please enter a pet name.'); return; }
+  if (!type) { showErr('Please select a pet type.'); return; }
+  hideErr();
   pets.push({
     name,
     type,
-    breed: document.getElementById('pet_breed').value.trim(),
-    age: parseFloat(document.getElementById('pet_age').value) || 0,
-    gender: document.getElementById('pet_gender').value,
-    neutered: document.getElementById('pet_neutered').value
+    breed: document.getElementById('pet-breed').value.trim(),
+    age: parseFloat(document.getElementById('pet-age').value) || 0,
+    gender: document.getElementById('pet-gender').value,
+    neutered: document.getElementById('pet-neutered').value
   });
   renderPets();
-  cancelPet();
+  clearPetForm();
 }
+
+function clearPetForm() {
+  ['pet-name','pet-breed','pet-age'].forEach(id => document.getElementById(id).value = '');
+  ['pet-type','pet-gender','pet-neutered'].forEach(id => document.getElementById(id).value = '');
+}
+
+const typeEmoji = { Dog:'🐕', Cat:'🐈', Bird:'🦜', Rabbit:'🐇', Horse:'🐴', Other:'🐾' };
 
 function renderPets() {
   const c = document.getElementById('pets-list');
+  if (pets.length === 0) { c.innerHTML = ''; return; }
   c.innerHTML = pets.map((p, i) => `
-    <div class="bg-gray-50 rounded-xl p-3 flex items-center justify-between">
-      <div class="text-sm">
-        <div class="font-semibold text-gray-800">${p.name}</div>
-        <div class="text-gray-400 text-xs">${p.type}${p.breed ? ' · ' + p.breed : ''}${p.age ? ' · ' + p.age + 'y' : ''}</div>
+    <div class="flex items-center justify-between bg-sky-50 border border-sky-100 rounded-xl px-4 py-3">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">${typeEmoji[p.type] || '🐾'}</span>
+        <div>
+          <div class="font-semibold text-gray-900 text-sm">${p.name}</div>
+          <div class="text-gray-400 text-xs">${p.type}${p.breed ? ' · ' + p.breed : ''}${p.age ? ' · ' + p.age + 'yr' : ''}${p.gender ? ' · ' + p.gender : ''}${p.neutered ? ' · Neutered: ' + p.neutered : ''}</div>
+        </div>
       </div>
-      <button onclick="removePet(${i})" class="text-red-400 hover:text-red-600 text-xs">
-        <i class="fas fa-trash"></i>
+      <button onclick="removePet(${i})" class="text-red-400 hover:text-red-600 text-sm ml-2">
+        <i class="fas fa-times"></i>
       </button>
     </div>`).join('');
 }
@@ -347,62 +310,82 @@ function removePet(i) {
   renderPets();
 }
 
-function step2Next() {
-  hideErr();
-  setStep(3);
+function buildReview() {
+  document.getElementById('rv-avatar').textContent = (fd.username || 'U')[0].toUpperCase();
+  document.getElementById('rv-username').textContent = fd.username || '-';
+  document.getElementById('rv-email').textContent = fd.email || '-';
+  document.getElementById('rv-pet-count').textContent = pets.length;
+  if (pets.length > 0) {
+    document.getElementById('rv-pets').innerHTML = pets.map(p =>
+      `<div class="flex items-center gap-2 py-1">${typeEmoji[p.type] || '🐾'} <span class="font-medium">${p.name}</span> <span class="text-gray-400">${p.type}${p.breed ? ' · ' + p.breed : ''}</span></div>`
+    ).join('');
+  } else {
+    document.getElementById('rv-pets').textContent = 'No pets added (you can add later)';
+  }
 }
 
 async function submitReg() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-  if (!username || username.length < 3) {
-    showErr('Username must be at least 3 characters.');
-    return;
-  }
-  if (!password || password.length < 6) {
-    showErr('Password must be at least 6 characters.');
-    return;
-  }
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Creating account...';
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating account...';
+  hideErr();
   try {
+    // Step 1: Register user
     const r = await fetch(API + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username,
-        password,
+        username: fd.username,
+        password: fd.password,
         email: fd.email,
-        phone: fd.phone,
-        invite_code: document.getElementById('invite_code').value.trim() || ''
+        phone: fd.phone || '',
+        invite_code: fd.invite || ''
       })
     });
     const d = await r.json();
-    if (d.success && d.data && d.data.user && d.data.user.id > 0) {
-      localStorage.setItem('token', d.data.token);
-      localStorage.setItem('user', JSON.stringify(d.data.user));
-      localStorage.setItem('userProfile', JSON.stringify({
-        first_name: fd.first_name,
-        last_name: fd.last_name,
-        address: fd.address,
-        city: fd.city,
-        zip: fd.zip,
-        pets
-      }));
-      document.getElementById('step3').classList.add('hidden');
-      document.getElementById('success').classList.remove('hidden');
-    } else {
-      showErr(d.message || 'Registration failed.');
+    if (!d.success || !d.data || !d.data.user || !d.data.user.id) {
+      showErr(d.message || 'Registration failed. Please try again.');
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-lock mr-1"></i> Complete Registration';
+      btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Complete Registration';
+      return;
     }
-  } catch(e) {
-    showErr('Network error.');
+
+    const token = d.data.token;
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(d.data.user));
+
+    // Step 2: Save pets
+    let savedPets = 0;
+    if (pets.length > 0) {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving pets...';
+      for (const pet of pets) {
+        try {
+          await fetch(API + '/api/pets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify(pet)
+          });
+          savedPets++;
+        } catch (e) {}
+      }
+    }
+
+    // Show success
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('success').classList.remove('hidden');
+    document.getElementById('success-msg').textContent = 'Welcome, ' + fd.username + '! Your account is ready.';
+    document.getElementById('success-pets').textContent = savedPets > 0
+      ? savedPets + ' pet' + (savedPets > 1 ? 's' : '') + ' saved successfully!'
+      : '';
+
+  } catch (e) {
+    showErr('Network error. Please try again.');
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-lock mr-1"></i> Complete Registration';
+    btn.innerHTML = '<i class="fas fa-lock mr-2"></i> Complete Registration';
   }
 }
+
+if (localStorage.getItem('token')) location.href = '/profile';
 </script>
 </body>
 </html>
