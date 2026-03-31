@@ -58,7 +58,7 @@ router.post('/register', async (req, res) => {
     // Create user
     const result = db.run(
       "INSERT INTO users (username, email, phone, password, invite_code, parent_id, level) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId $1 1 : 0]
+      [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId ? 1 : 0]
     );
 
     const userId = result.lastInsertRowid;
@@ -86,7 +86,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Generate token
-    const token = jwt.sign({ id: userId, username, level: parentId $2 1 : 0 }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: userId, username, level: parentId ? 1 : 0 }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       success: true,
