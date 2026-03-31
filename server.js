@@ -62,17 +62,17 @@ async function start() {
   try {
     await db.init();
     console.log('Database initialized');
-
-    app.listen(PORT, () => {
-      console.log(`\n🐾 PetPaw - Pet Service Platform`);
-      console.log(`   Local: http://localhost:${PORT}`);
-      console.log(`   Admin: http://localhost:${PORT}/admin`);
-      console.log(`   Default admin: admin / 123456\n`);
-    });
   } catch (e) {
-    console.error('Failed to start server:', e);
-    process.exit(1);
+    console.error('Database init failed (will retry on requests):', e.message);
+    // Don't exit - let the server start anyway
   }
+
+  app.listen(PORT, () => {
+    console.log(`\n🐾 PetPaw - Pet Service Platform`);
+    console.log(`   Local: http://localhost:${PORT}`);
+    console.log(`   Admin: http://localhost:${PORT}/admin`);
+    console.log(`   Default admin: admin / 123456\n`);
+  });
 }
 
 start();
