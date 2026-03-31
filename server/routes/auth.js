@@ -107,14 +107,15 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { account, password } = req.body;
+    const { account, username, password } = req.body;
+    const loginAccount = account || username;
 
     if (!account || !password) {
       return res.status(400).json({ success: false, message: 'Account and password required' });
     }
 
     const user = db.get("SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?",
-      [account, account, account]);
+      [loginAccount, loginAccount, loginAccount]);
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
