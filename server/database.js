@@ -1,429 +1,340 @@
-// PetPaw - Database Module using PostgreSQL
-const { Pool } = require('pg');
+﻿// PetPaw - Pet Service Platform
+// Database Module using sql.js (pure JavaScript SQLite - no native compilation needed)
+const initSqlJs = require('sql.js');
+const path = require('path');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-// Use environment variable or fallback to local
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://petpaw_user:jZA0M1oBANb5r89apc3eUanwaeimd2W3@dpg-d75s75m3jp1c73dj1ng0-a/petpaw';
+// Database path - use /data on Render/Railway, local otherwise
+const IS_CLOUD = process.env.RENDER || process.env.RAILWAY_ENVIRONMENT;
+const DATA_DIR = IS_CLOUD $1 '/data' : path.join(__dirname);
+const DB_PATH = path.join(DATA_DIR, 'database.sqlite');
+const UPLOAD_DIR = IS_CLOUD $2 '/data/uploads' : path.join(__dirname, '../public/uploads');
 
-const pool = new Pool({
-  connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-});
+// Ensure directories exist
+if (!fs.existsSync(DATA_DIR)) {
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+}
+if (!fs.existsSync(UPLOAD_DIR)) {
+  try { fs.mkdirSync(UPLOAD_DIR, { recursive: true }); } catch (e) {}
+}
 
-let poolReady = false;
+let db = null;
+let dbBuffer = null;
+
+// Save database to file
+function saveDb() {
+  if (db && DB_PATH) {
+    try {
+      const data = db.export();
+      const buffer = Buffer.from(data);
+      fs.writeFileSync(DB_PATH, buffer);
+    } catch (e) {
+      console.error('Failed to save database:', e.message);
+    }
+  }
+}
+
+// Auto-save every 30 seconds
+setInterval(saveDb, 30000);
+
+// Graceful shutdown
+process.on('exit', saveDb);
+process.on('SIGINT', () => { saveDb(); process.exit(); });
+process.on('SIGTERM', () => { saveDb(); process.exit(); });
 
 async function init() {
+  // Initialize SQL.js
+  const SQL = await initSqlJs();
+
+  // Load existing database or create new one
   try {
-    // Test connection
-    const client = await pool.connect();
-    console.log('PostgreSQL connected successfully');
-
-    // Create tables
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(100) UNIQUE NOT NULL,
-        email VARCHAR(255) UNIQUE,
-        phone VARCHAR(50) UNIQUE,
-        password VARCHAR(255) NOT NULL,
-        avatar TEXT,
-        balance REAL DEFAULT 0,
-        invite_code VARCHAR(20) UNIQUE,
-        parent_id INTEGER,
-        level INTEGER DEFAULT 0,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS balance_logs (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        type VARCHAR(20) NOT NULL,
-        amount REAL NOT NULL,
-        before_balance REAL NOT NULL,
-        after_balance REAL NOT NULL,
-        reason TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS products (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        price REAL NOT NULL DEFAULT 0,
-        original_price REAL,
-        image TEXT,
-        category VARCHAR(100),
-        stock INTEGER DEFAULT 0,
-        sales INTEGER DEFAULT 0,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS orders (
-        id SERIAL PRIMARY KEY,
-        order_no VARCHAR(50) UNIQUE NOT NULL,
-        user_id INTEGER NOT NULL,
-        total_amount REAL NOT NULL DEFAULT 0,
-        pay_amount REAL NOT NULL DEFAULT 0,
-        balance_used REAL DEFAULT 0,
-        status INTEGER DEFAULT 1,
-        receiver_name TEXT,
-        receiver_phone TEXT,
-        receiver_address TEXT,
-        remark TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS order_items (
-        id SERIAL PRIMARY KEY,
-        order_id INTEGER NOT NULL,
-        product_id INTEGER,
-        product_name TEXT,
-        product_image TEXT,
-        price REAL NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 1,
-        specification TEXT
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS cart (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
-        quantity INTEGER DEFAULT 1,
-        specification TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS articles (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        content TEXT,
-        excerpt TEXT,
-        image TEXT,
-        category VARCHAR(100),
-        views INTEGER DEFAULT 0,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS services (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        description TEXT,
-        icon VARCHAR(50),
-        price REAL DEFAULT 0,
-        features TEXT,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS uploaded_files (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        original_name TEXT NOT NULL,
-        stored_name TEXT NOT NULL,
-        file_path TEXT NOT NULL,
-        file_type VARCHAR(100),
-        file_size INTEGER NOT NULL,
-        description TEXT,
-        status INTEGER DEFAULT 0,
-        admin_remark TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS admin_users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(100) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS vet_discount_plans (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        description TEXT,
-        price REAL NOT NULL DEFAULT 0,
-        features TEXT,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS wellness_plans (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        description TEXT,
-        price REAL NOT NULL DEFAULT 0,
-        duration_days INTEGER DEFAULT 365,
-        reimbursement_amount REAL DEFAULT 0,
-        features TEXT,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS vet_transactions (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        clinic_id INTEGER,
-        amount REAL NOT NULL,
-        savings REAL DEFAULT 0,
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS vet_clinics (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        address TEXT,
-        phone VARCHAR(50),
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS pets (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        type VARCHAR(50),
-        breed VARCHAR(100),
-        age REAL DEFAULT 0,
-        gender VARCHAR(20),
-        neutered VARCHAR(10),
-        status INTEGER DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Create indexes
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_users_invite_code ON users(invite_code)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_users_parent_id ON users(parent_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_pets_user_id ON pets(user_id)`);
-
-    // Seed admin user
-    const adminResult = await client.query("SELECT id FROM admin_users WHERE username = 'admin'");
-    if (adminResult.rows.length === 0) {
-      const hashed = bcrypt.hashSync('123456', 10);
-      await client.query("INSERT INTO admin_users (username, password) VALUES ('admin', $1)", [hashed]);
-      console.log('Admin user created: admin / 123456');
+    if (fs.existsSync(DB_PATH)) {
+      const fileBuffer = fs.readFileSync(DB_PATH);
+      dbBuffer = new Uint8Array(fileBuffer);
+      db = new SQL.Database(dbBuffer);
+      console.log('Database loaded from file');
+    } else {
+      db = new SQL.Database();
+      console.log('New database created');
     }
-
-    // Seed products if empty
-    const productCount = await client.query("SELECT COUNT(*) FROM products");
-    if (parseInt(productCount.rows[0].count) === 0) {
-      const products = [
-        ['Premium Dog Food', 'High-quality nutrition for your dog', 45.99, 59.99, 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=400&fit=crop', 'food', 100],
-        ['Organic Cat Food', 'Natural and healthy cat food', 38.99, 49.99, 'https://images.unsplash.com/photo-1615497001839-b0a0eac3274c?w=400&h=400&fit=crop', 'food', 80],
-        ['Dental Treats', "Keep your pet's teeth clean", 12.99, 15.99, 'https://images.unsplash.com/photo-1585562126204-35d5791d3edc?w=400&h=400&fit=crop', 'treats', 200],
-        ['Training Treats', 'Perfect for obedience training', 15.99, 19.99, 'https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?w=400&h=400&fit=crop', 'treats', 150],
-        ['Pet Water Fountain', 'Continuous fresh water for pets', 35.99, 45.99, 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=400&h=400&fit=crop', 'supplies', 50],
-        ['Automatic Feeder', 'Programmable pet food dispenser', 65.99, 79.99, 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=400&fit=crop', 'supplies', 40],
-        ['Interactive Toy Set', 'Keep your pet entertained', 24.99, 29.99, 'https://images.unsplash.com/photo-1535294435445-d7249524ef2e?w=400&h=400&fit=crop', 'toys', 120],
-        ['Squeaky Ball Set', 'Fun and engaging dog toys', 18.99, 22.99, 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&h=400&fit=crop', 'toys', 100],
-        ['Flea & Tick Prevention', 'Monthly protection for pets', 32.99, 39.99, 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=400&fit=crop', 'medicine', 60],
-        ['Pet Vitamins', 'Essential vitamins for pet health', 22.99, 27.99, 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop', 'health', 90],
-      ];
-      for (const p of products) {
-        await client.query(
-          "INSERT INTO products (name, description, price, original_price, image, category, stock) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-          p
-        );
-      }
-      console.log('Seeded ' + products.length + ' products');
-    }
-
-    // Seed articles if empty
-    const articleCount = await client.query("SELECT COUNT(*) FROM articles");
-    if (parseInt(articleCount.rows[0].count) === 0) {
-      const articles = [
-        ['10 Tips for Keeping Your Pet Healthy', 'Regular vet checkups, proper nutrition, and exercise are key to keeping your pet healthy and happy.', 'Learn the best practices for maintaining your pet's health and happiness.', 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop', 'health'],
-        ['Understanding Pet Nutrition', 'A balanced diet is essential for your pet's wellbeing. Discover the right nutrients for different pets.', 'Everything you need to know about feeding your furry friend.', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=200&fit=crop', 'nutrition'],
-        ['Basic Dog Training Commands', 'Start with sit, stay, and come - the foundation of good behavior.', 'Master these essential commands for a well-behaved dog.', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=200&fit=crop', 'training'],
-        ['Pet Grooming at Home', 'Regular grooming keeps your pet clean and comfortable. Tips for home grooming.', 'Tips for grooming your pet without leaving home.', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&h=200&fit=crop', 'grooming'],
-        ['Common Pet Health Issues', 'Be aware of these common health problems. Early detection saves lives.', 'Early detection can save your pet's life.', 'https://images.unsplash.com/photo-1583500178450-e59e4309b57d?w=400&h=200&fit=crop', 'health'],
-      ];
-      for (const a of articles) {
-        await client.query(
-          "INSERT INTO articles (title, content, excerpt, image, category) VALUES ($1,$2,$3,$4,$5)",
-          a
-        );
-      }
-      console.log('Seeded ' + articles.length + ' articles');
-    }
-
-    // Seed services if empty
-    const serviceCount = await client.query("SELECT COUNT(*) FROM services");
-    if (parseInt(serviceCount.rows[0].count) === 0) {
-      const services = [
-        ['Vet Discount Program', 'Get up to 25% off at participating veterinarians', 'stethoscope', 9.99, JSON.stringify(['Up to 25% discount', '5000+ partner vets', 'No claim forms needed'])],
-        ['Annual Health Checkup', 'Comprehensive wellness exams for early detection', 'heartbeat', 19.99, JSON.stringify(['Full body exam', 'Vaccination updates', 'Dental check'])],
-        ['Pet Insurance', 'Complete coverage for accidents and illnesses', 'shield-alt', 29.99, JSON.stringify(['Accident coverage', 'Illness coverage', '24/7 support'])],
-        ['Grooming Services', 'Professional grooming to keep pets looking great', 'cut', 15.99, JSON.stringify(['Bath & dry', 'Nail trimming', 'Ear cleaning'])],
-      ];
-      for (const s of services) {
-        await client.query(
-          "INSERT INTO services (name, description, icon, price, features) VALUES ($1,$2,$3,$4,$5)",
-          s
-        );
-      }
-      console.log('Seeded ' + services.length + ' services');
-    }
-
-    // Seed vet discount plans if empty
-    const vetPlanCount = await client.query("SELECT COUNT(*) FROM vet_discount_plans");
-    if (parseInt(vetPlanCount.rows[0].count) === 0) {
-      const vetPlans = [
-        ['Basic Vet Discount', '25% off all vet services at network vets', 9.99, JSON.stringify(['25% off vet bills', '5000+ network vets', 'No waiting period', 'No claim forms'])],
-        ['Premium Vet Discount', '35% off + unlimited vet teleconsultations', 19.99, JSON.stringify(['35% off vet bills', 'Unlimited teleconsultations', 'Priority booking', 'Dental coverage'])],
-        ['Family Vet Plan', '25% off for up to 4 pets', 24.99, JSON.stringify(['25% off for 4 pets', 'Covers dogs, cats & more', 'Nationwide coverage', '24/7 support'])],
-      ];
-      for (const p of vetPlans) {
-        await client.query(
-          "INSERT INTO vet_discount_plans (name, description, price, features) VALUES ($1,$2,$3,$4)",
-          p
-        );
-      }
-      console.log('Seeded ' + vetPlans.length + ' vet discount plans');
-    }
-
-    // Seed wellness plans if empty
-    const wellnessCount = await client.query("SELECT COUNT(*) FROM wellness_plans");
-    if (parseInt(wellnessCount.rows[0].count) === 0) {
-      const wellnessPlans = [
-        ['Basic Wellness', 'Essential routine care coverage', 14.99, 365, 500, JSON.stringify(['$500 annual reimbursement', 'Annual checkups', 'Vaccinations', 'Dental cleaning'])],
-        ['Plus Wellness', 'Comprehensive wellness coverage', 29.99, 365, 1500, JSON.stringify(['$1500 annual reimbursement', 'Everything in Basic', 'Spay/neuter', 'Flea & tick prevention', 'Grooming'])],
-        ['Premium Wellness', 'Full-spectrum wellness protection', 49.99, 365, 3000, JSON.stringify(['$3000 annual reimbursement', 'Everything in Plus', 'Acupuncture/physio', 'Behavioral therapy', 'Premium support'])],
-      ];
-      for (const p of wellnessPlans) {
-        await client.query(
-          "INSERT INTO wellness_plans (name, description, price, duration_days, reimbursement_amount, features) VALUES ($1,$2,$3,$4,$5,$6)",
-          p
-        );
-      }
-      console.log('Seeded ' + wellnessPlans.length + ' wellness plans');
-    }
-
-    // Seed vet clinics if empty
-    const clinicCount = await client.query("SELECT COUNT(*) FROM vet_clinics");
-    if (parseInt(clinicCount.rows[0].count) === 0) {
-      const clinics = [
-        ['Happy Paws Veterinary Clinic', '123 Pet Street, New York, NY 10001', '(555) 123-4567'],
-        ['City Pet Hospital', '456 Animal Ave, Los Angeles, CA 90001', '(555) 234-5678'],
-        ['Animal Care Center', '789 Vet Blvd, Chicago, IL 60601', '(555) 345-6789'],
-        ['Furry Friends Vet', '321 Pet Lane, Houston, TX 77001', '(555) 456-7890'],
-        ['Pet Wellness Clinic', '654 Care Road, Phoenix, AZ 85001', '(555) 567-8901'],
-      ];
-      for (const c of clinics) {
-        await client.query(
-          "INSERT INTO vet_clinics (name, address, phone) VALUES ($1,$2,$3)",
-          c
-        );
-      }
-      console.log('Seeded ' + clinics.length + ' vet clinics');
-    }
-
-    client.release();
-    poolReady = true;
-    console.log('Database initialized successfully');
-    return pool;
   } catch (e) {
-    console.error('Database initialization error:', e.message);
+    db = new SQL.Database();
+    console.log('Database created (fallback):', e.message);
+  }
+
+  // Enable foreign keys
+  db.run('PRAGMA foreign_keys = ON');
+
+  // Create tables
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE,
+      phone TEXT UNIQUE,
+      password TEXT NOT NULL,
+      avatar TEXT,
+      balance REAL DEFAULT 0,
+      invite_code TEXT UNIQUE,
+      parent_id INTEGER,
+      level INTEGER DEFAULT 0,
+      status INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS balance_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      amount REAL NOT NULL,
+      before_balance REAL NOT NULL,
+      after_balance REAL NOT NULL,
+      reason TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      price REAL NOT NULL DEFAULT 0,
+      original_price REAL,
+      image TEXT,
+      category TEXT,
+      stock INTEGER DEFAULT 0,
+      sales INTEGER DEFAULT 0,
+      status INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_no TEXT UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL,
+      total_amount REAL NOT NULL DEFAULT 0,
+      pay_amount REAL NOT NULL DEFAULT 0,
+      balance_used REAL DEFAULT 0,
+      status INTEGER DEFAULT 1,
+      receiver_name TEXT,
+      receiver_phone TEXT,
+      receiver_address TEXT,
+      remark TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS order_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      order_id INTEGER NOT NULL,
+      product_id INTEGER,
+      product_name TEXT,
+      product_image TEXT,
+      price REAL NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      specification TEXT
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS cart (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER DEFAULT 1,
+      specification TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS articles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT,
+      excerpt TEXT,
+      image TEXT,
+      category TEXT,
+      views INTEGER DEFAULT 0,
+      status INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS services (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      icon TEXT,
+      price REAL DEFAULT 0,
+      features TEXT,
+      status INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS uploaded_files (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      original_name TEXT NOT NULL,
+      stored_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      file_type TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      description TEXT,
+      status INTEGER DEFAULT 0,
+      admin_remark TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Create indexes
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_invite_code ON users(invite_code)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_users_parent_id ON users(parent_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id)');
+  db.run('CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id)');
+
+  // Seed admin user
+  const adminExists = db.exec("SELECT id FROM admin_users WHERE username = 'admin'");
+  if (adminExists.length === 0 || adminExists[0].values.length === 0) {
+    const hashedPassword = bcrypt.hashSync('123456', 10);
+    db.run("INSERT INTO admin_users (username, password) VALUES ('admin', ?)", [hashedPassword]);
+    console.log('Admin user created: admin / 123456');
+  }
+
+  // Seed products if empty
+  const productCount = db.exec("SELECT COUNT(*) as count FROM products");
+  if (productCount.length === 0 || productCount[0].values[0][0] === 0) {
+    const products = [
+      ['Premium Dog Food', 'High-quality nutrition for your dog', 45.99, 59.99, 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=400&fit=crop', 'food', 100],
+      ['Organic Cat Food', 'Natural and healthy cat food', 38.99, 49.99, 'https://images.unsplash.com/photo-1615497001839-b0a0eac3274c?w=400&h=400&fit=crop', 'food', 80],
+      ['Dental Treats', "Keep your pet's teeth clean", 12.99, 15.99, 'https://images.unsplash.com/photo-1585562126204-35d5791d3edc?w=400&h=400&fit=crop', 'treats', 200],
+      ['Training Treats', 'Perfect for obedience training', 15.99, 19.99, 'https://images.unsplash.com/photo-1568640347023-a616a30bc3bd?w=400&h=400&fit=crop', 'treats', 150],
+      ['Pet Water Fountain', 'Continuous fresh water for pets', 35.99, 45.99, 'https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=400&h=400&fit=crop', 'supplies', 50],
+      ['Automatic Feeder', 'Programmable pet food dispenser', 65.99, 79.99, 'https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&h=400&fit=crop', 'supplies', 40],
+      ['Interactive Toy Set', 'Keep your pet entertained', 24.99, 29.99, 'https://images.unsplash.com/photo-1535294435445-d7249524ef2e?w=400&h=400&fit=crop', 'toys', 120],
+      ['Squeaky Ball Set', 'Fun and engaging dog toys', 18.99, 22.99, 'https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&h=400&fit=crop', 'toys', 100],
+      ['Flea & Tick Prevention', 'Monthly protection for pets', 32.99, 39.99, 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&h=400&fit=crop', 'medicine', 60],
+      ['Pet Vitamins', 'Essential vitamins for pet health', 22.99, 27.99, 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop', 'health', 90],
+    ];
+    for (const p of products) {
+      db.run("INSERT INTO products (name, description, price, original_price, image, category, stock) VALUES (?, ?, ?, ?, ?, ?, ?)", p);
+    }
+    console.log(`Seeded ${products.length} products`);
+  }
+
+  // Seed articles if empty
+  const articleCount = db.exec("SELECT COUNT(*) FROM articles");
+  if (articleCount.length === 0 || articleCount[0].values[0][0] === 0) {
+    const articles = [
+      ['10 Tips for Keeping Your Pet Healthy', 'Regular vet checkups, proper nutrition, and exercise are key to keeping your pet healthy and happy. Learn about the best practices for pet wellness.', 'Learn the best practices for maintaining your pet\'s health and happiness.', 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop', 'health'],
+      ['Understanding Pet Nutrition', 'A balanced diet is essential for your pet\'s wellbeing. Discover the right nutrients for different pets.', 'Everything you need to know about feeding your furry friend.', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=200&fit=crop', 'nutrition'],
+      ['Basic Dog Training Commands', 'Start with sit, stay, and come - the foundation of good behavior.', 'Master these essential commands for a well-behaved dog.', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=200&fit=crop', 'training'],
+      ['Pet Grooming at Home', 'Regular grooming keeps your pet clean and comfortable. Tips for home grooming.', 'Tips for grooming your pet without leaving home.', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&h=200&fit=crop', 'grooming'],
+      ['Common Pet Health Issues', 'Be aware of these common health problems. Early detection saves lives.', 'Early detection can save your pet\'s life.', 'https://images.unsplash.com/photo-1583500178450-e59e4309b57d?w=400&h=200&fit=crop', 'health'],
+    ];
+    for (const a of articles) {
+      db.run("INSERT INTO articles (title, content, excerpt, image, category) VALUES (?, ?, ?, ?, ?)", a);
+    }
+    console.log(`Seeded ${articles.length} articles`);
+  }
+
+  // Seed services if empty
+  const serviceCount = db.exec("SELECT COUNT(*) FROM services");
+  if (serviceCount.length === 0 || serviceCount[0].values[0][0] === 0) {
+    const services = [
+      ['Vet Discount Program', 'Get up to 50% off at participating veterinarians', 'stethoscope', 9.99, JSON.stringify(['Up to 50% discount', '1000+ partner vets', 'No paperwork needed'])],
+      ['Annual Health Checkup', 'Comprehensive wellness exams for early detection', 'heartbeat', 19.99, JSON.stringify(['Full body exam', 'Vaccination updates', 'Dental check'])],
+      ['Pet Insurance', 'Complete coverage for accidents and illnesses', 'shield-alt', 29.99, JSON.stringify(['Accident coverage', 'Illness coverage', '24/7 support'])],
+      ['Grooming Services', 'Professional grooming to keep pets looking great', 'cut', 15.99, JSON.stringify(['Bath & dry', 'Nail trimming', 'Ear cleaning'])],
+    ];
+    for (const s of services) {
+      db.run("INSERT INTO services (name, description, icon, price, features) VALUES (?, ?, ?, ?, ?)", s);
+    }
+    console.log(`Seeded ${services.length} services`);
+  }
+
+  saveDb();
+  console.log('Database initialized successfully');
+  return db;
+}
+
+// Helper function to run queries
+// Helper function to run INSERT/UPDATE/DELETE with $3 placeholders
+// sql.js db.run() supports $4 with an array of params
+function run(sql, params = []) {
+  try {
+    db.run(sql, params);
+    saveDb();
+    // Get last insert rowid
+    const result = db.exec("SELECT last_insert_rowid()");
+    const lastId = (result.length > 0 && result[0].values.length > 0) $5 result[0].values[0][0] : 0;
+    return { changes: 1, lastInsertRowid: lastId };
+  } catch (e) {
+    throw e;
+  }
+}function get(sql, params = []) {
+  try {
+    const stmt = db.prepare(sql);
+    if (params.length > 0) stmt.bind(params);
+    if (stmt.step()) {
+      const row = stmt.getAsObject();
+      stmt.free();
+      return row;
+    }
+    stmt.free();
+    return null;
+  } catch (e) {
     throw e;
   }
 }
 
-// Run INSERT/UPDATE/DELETE
-async function run(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
-  const client = await pool.connect();
+function all(sql, params = []) {
   try {
-    const result = await client.query(sql, safeParams);
-    return {
-      changes: result.rowCount,
-      lastInsertRowid: result.rows[0] ? result.rows[0].id : 0
-    };
-  } finally {
-    client.release();
+    const stmt = db.prepare(sql);
+    if (params.length > 0) stmt.bind(params);
+    const results = [];
+    while (stmt.step()) {
+      results.push(stmt.getAsObject());
+    }
+    stmt.free();
+    return results;
+  } catch (e) {
+    throw e;
   }
 }
 
-// Get single row
-async function get(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
-  const client = await pool.connect();
+function exec(sql) {
   try {
-    const result = await client.query(sql, safeParams);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
+    db.run(sql);
+    saveDb();
+    return { changes: db.getRowsModified() };
+  } catch (e) {
+    throw e;
   }
 }
 
-// Get all rows
-async function all(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
-  const client = await pool.connect();
-  try {
-    const result = await client.query(sql, safeParams);
-    return result.rows;
-  } finally {
-    client.release();
-  }
-}
-
-// Execute raw SQL (no params)
-async function exec(sql) {
-  const client = await pool.connect();
-  try {
-    const result = await client.query(sql);
-    return { changes: result.rowCount };
-  } finally {
-    client.release();
-  }
-}
-
-// Get the pool directly for transactions
-function getDb() {
-  return pool;
-}
-
-module.exports = { init, run, get, all, exec, getDb };
+module.exports = { init, run, get, all, exec, getDb: () => db, saveDb, UPLOAD_DIR };
