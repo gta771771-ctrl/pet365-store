@@ -1,7 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
 const db = require('../database');
 
 const router = express.Router();
@@ -9,6 +8,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'pet-service-platform-secret-key-20
 const INVITE_REWARD_LEVEL1 = 10;
 const INVITE_REWARD_LEVEL2 = 5;
 
+// Middleware to verify JWT token
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -34,62 +34,59 @@ router.post('/register', async (req, res) => {
     }
 
     // Check existing user
-    const existingUser = await db.get(
-      "SELECT id FROM users WHERE username = $1 OR email = $2 OR phone = $3",
-      [username, email || '', phone || '']
-    );
+    const existingUser = db.get("SELECT id FROM users WHERE username = ? OR email = ? OR phone = ?", 
+      [username, email || '', phone || '']);
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
+    // Hash password
     const hashedPassword = bcrypt.hashSync(password, 10);
+
+    // Generate invite code
     const userInviteCode = uuidv4().substring(0, 8).toUpperCase();
 
+    // Find inviter
     let parentId = null;
     if (invite_code) {
-      const inviter = await db.get("SELECT id FROM users WHERE invite_code = $1", [invite_code]);
-      if (inviter) parentId = inviter.id;
+      const inviter = db.get("SELECT id, level FROM users WHERE invite_code = ?", [invite_code]);
+      if (inviter) {
+        parentId = inviter.id;
+      }
     }
 
-    // Insert user
-    await db.run(
-      "INSERT INTO users (username, email, phone, password, invite_code, parent_id, level) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-      [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId ? 1 : 0]
+    // Create user
+    const result = db.run(
+      "INSERT INTO users (username, email, phone, password, invite_code, parent_id, level) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [username, email || null, phone || null, hashedPassword, userInviteCode, parentId, parentId $1 1 : 0]
     );
 
-    // Get created user
-    const createdUser = await db.get(
-      "SELECT id, username, email, phone, balance, invite_code FROM users WHERE username = $1",
-      [username]
-    );
-    const userId = createdUser ? createdUser.id : 0;
+    const userId = result.lastInsertRowid;
 
     // Award invite rewards
     if (parentId) {
-      const parent = await db.get("SELECT balance FROM users WHERE id = $1", [parentId]);
+      const parent = db.get("SELECT parent_id, balance FROM users WHERE id = ?", [parentId]);
       if (parent) {
-        const newBalance = (parent.balance || 0) + INVITE_REWARD_LEVEL1;
-        await db.run("UPDATE users SET balance = $1 WHERE id = $2", [newBalance, parentId]);
-        await db.run(
-          "INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES ($1,'add',$2,$3,$4,$5)",
-          [parentId, INVITE_REWARD_LEVEL1, parent.balance || 0, newBalance, 'Invite reward (Level 1)']
-        );
+        const newBalance = parent.balance + INVITE_REWARD_LEVEL1;
+        db.run("UPDATE users SET balance = ? WHERE id = ?", [newBalance, parentId]);
+        db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'add', ?, ?, ?, ?)",
+          [parentId, INVITE_REWARD_LEVEL1, parent.balance, newBalance, 'Invite reward (Level 1)']);
 
-        if (parentId) {
-          const gp = await db.get("SELECT parent_id, balance FROM users WHERE id = $1", [parentId]);
-          if (gp && gp.parent_id) {
-            const ggNew = (gp.balance || 0) + INVITE_REWARD_LEVEL2;
-            await db.run("UPDATE users SET balance = $1 WHERE id = $2", [ggNew, gp.parent_id]);
-            await db.run(
-              "INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES ($1,'add',$2,$3,$4,$5)",
-              [gp.parent_id, INVITE_REWARD_LEVEL2, gp.balance || 0, ggNew, 'Invite reward (Level 2)']
-            );
+        // Level 2 reward
+        if (parent.parent_id) {
+          const grandparent = db.get("SELECT balance FROM users WHERE id = ?", [parent.parent_id]);
+          if (grandparent) {
+            const ggNewBalance = grandparent.balance + INVITE_REWARD_LEVEL2;
+            db.run("UPDATE users SET balance = ? WHERE id = ?", [ggNewBalance, parent.parent_id]);
+            db.run("INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES (?, 'add', ?, ?, ?, ?)",
+              [parent.parent_id, INVITE_REWARD_LEVEL2, grandparent.balance, ggNewBalance, 'Invite reward (Level 2)']);
           }
         }
       }
     }
 
-    const token = jwt.sign({ id: userId, username, level: parentId ? 1 : 0 }, JWT_SECRET, { expiresIn: '7d' });
+    // Generate token
+    const token = jwt.sign({ id: userId, username, level: parentId $2 1 : 0 }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       success: true,
@@ -100,24 +97,21 @@ router.post('/register', async (req, res) => {
     });
   } catch (e) {
     console.error('Register error:', e);
-    res.status(500).json({ success: false, message: 'Registration failed: ' + e.message });
+    res.status(500).json({ success: false, message: 'Registration failed' });
   }
 });
 
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { account, username, password } = req.body;
-    const loginAccount = account || username;
+    const { account, password } = req.body;
 
-    if (!loginAccount || !password) {
-      return res.status(400).json({ success: false, message: 'Username/email and password required' });
+    if (!account || !password) {
+      return res.status(400).json({ success: false, message: 'Account and password required' });
     }
 
-    const user = await db.get(
-      "SELECT * FROM users WHERE username = $1 OR email = $2 OR phone = $3",
-      [loginAccount, loginAccount, loginAccount]
-    );
+    const user = db.get("SELECT * FROM users WHERE username = ? OR email = ? OR phone = ?",
+      [account, account, account]);
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -134,24 +128,25 @@ router.post('/login', async (req, res) => {
       data: {
         token,
         user: {
-          id: user.id, username: user.username, email: user.email,
-          phone: user.phone, balance: user.balance, invite_code: user.invite_code
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          balance: user.balance,
+          invite_code: user.invite_code
         }
       }
     });
   } catch (e) {
     console.error('Login error:', e);
-    res.status(500).json({ success: false, message: 'Login failed: ' + e.message });
+    res.status(500).json({ success: false, message: 'Login failed' });
   }
 });
 
-// Get profile
-router.get('/profile', authMiddleware, async (req, res) => {
+// Get user profile
+router.get('/profile', authMiddleware, (req, res) => {
   try {
-    const user = await db.get(
-      "SELECT id, username, email, phone, balance, invite_code, created_at FROM users WHERE id = $1",
-      [req.user.id]
-    );
+    const user = db.get("SELECT id, username, email, phone, balance, invite_code, created_at FROM users WHERE id = ?", [req.user.id]);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -163,42 +158,45 @@ router.get('/profile', authMiddleware, async (req, res) => {
 });
 
 // Get balance logs
-router.get('/balance-logs', authMiddleware, async (req, res) => {
+router.get('/balance-logs', authMiddleware, (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
     const page = parseInt(req.query.page) || 1;
     const offset = (page - 1) * limit;
 
-    const logs = await db.all(
-      "SELECT * FROM balance_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3",
+    const logs = db.all(
+      "SELECT * FROM balance_logs WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
       [req.user.id, limit, offset]
     );
-    const total = await db.get("SELECT COUNT(*) as count FROM balance_logs WHERE user_id = $1", [req.user.id]);
 
-    res.json({ success: true, data: logs, pagination: { total: parseInt(total.count), page, limit } });
+    const total = db.get("SELECT COUNT(*) as count FROM balance_logs WHERE user_id = ?", [req.user.id]);
+
+    res.json({ success: true, data: logs, pagination: { total: total.count, page, limit } });
   } catch (e) {
     console.error('Balance logs error:', e);
     res.status(500).json({ success: false, message: 'Failed to get balance logs' });
   }
 });
 
-// Get team
-router.get('/team', authMiddleware, async (req, res) => {
+// Get team (referrals)
+router.get('/team', authMiddleware, (req, res) => {
   try {
-    const level1 = await db.all(
-      "SELECT u.username, u.created_at as invite_time, bl.amount as reward_amount FROM users u LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 1%' WHERE u.parent_id = $1",
+    const level1 = db.all(
+      "SELECT u.username, u.created_at as invite_time, bl.amount as reward_amount FROM users u LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 1%' WHERE u.parent_id = ?",
       [req.user.id]
     );
-    const level2 = await db.all(
-      "SELECT u.username, u.parent_id, p.username as parent_name, u.created_at, bl.amount as reward_amount FROM users u LEFT JOIN users p ON p.id = u.parent_id LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 2%' WHERE u.parent_id IN (SELECT id FROM users WHERE parent_id = $1)",
+    const level2 = db.all(
+      "SELECT u.username, u.parent_id, p.username as parent_name, u.created_at, bl.amount as reward_amount FROM users u LEFT JOIN users p ON p.id = u.parent_id LEFT JOIN balance_logs bl ON bl.user_id = u.id AND bl.reason LIKE '%Level 2%' WHERE u.parent_id IN (SELECT id FROM users WHERE parent_id = ?)",
       [req.user.id]
     );
+
     const stats = {
       level1_count: level1.length,
       level2_count: level2.length,
       level1_reward: level1.reduce((sum, u) => sum + (u.reward_amount || 0), 0),
       level2_reward: level2.reduce((sum, u) => sum + (u.reward_amount || 0), 0)
     };
+
     res.json({ success: true, data: { level1, level2, stats } });
   } catch (e) {
     console.error('Team error:', e);
