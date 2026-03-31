@@ -3,29 +3,33 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://petpaw_user:jZA0M1oBANb5r89apc3eUanwaeimd2W3@dpg-d75s75m3jp1c73dj1ng0-a/petpaw';
+const DATABASE_URL = process.env.DATABASE_URL ||
+  'postgresql://petpaw_user:jZA0M1oBANb5r89apc3eUanwaeimd2W3@dpg-d75s75m3jp1c73dj1ng0-a.oregon-postgres.render.com/petpaw';
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
 });
 
-let poolReady = false;
+pool.on('error', (err) => {
+  console.error('Unexpected pool error:', err.message);
+});
 
 async function init() {
+  let client;
   try {
-    const client = await pool.connect();
+    client = await pool.connect();
     console.log('PostgreSQL connected successfully');
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(100) UNIQUE NOT NULL,
-        email VARCHAR(255) UNIQUE,
-        phone VARCHAR(50) UNIQUE,
+        email VARCHAR(255),
+        phone VARCHAR(50),
         password VARCHAR(255) NOT NULL,
         avatar TEXT,
         balance REAL DEFAULT 0,
@@ -226,21 +230,21 @@ async function init() {
     `);
 
     await client.query(`CREATE INDEX IF NOT EXISTS idx_users_invite_code ON users(invite_code)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_users_parent_id ON users(parent_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart(user_id)`);
-    await client.query(`CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id)`);
     await client.query(`CREATE INDEX IF NOT EXISTS idx_pets_user_id ON pets(user_id)`);
 
+    // Seed admin
     const adminResult = await client.query("SELECT id FROM admin_users WHERE username = 'admin'");
     if (adminResult.rows.length === 0) {
       const hashed = bcrypt.hashSync('123456', 10);
       await client.query("INSERT INTO admin_users (username, password) VALUES ($1, $2)", ['admin', hashed]);
-      console.log('Admin user created: admin / 123456');
+      console.log('Admin created: admin / 123456');
     }
 
-    const productCount = await client.query("SELECT COUNT(*) FROM products");
-    if (parseInt(productCount.rows[0].count) === 0) {
+    // Seed products
+    const pc = await client.query("SELECT COUNT(*) FROM products");
+    if (parseInt(pc.rows[0].count) === 0) {
       const products = [
         ['Premium Dog Food', 'High-quality nutrition for your dog', 45.99, 59.99, 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=400&fit=crop', 'food', 100],
         ['Organic Cat Food', 'Natural and healthy cat food', 38.99, 49.99, 'https://images.unsplash.com/photo-1615497001839-b0a0eac3274c?w=400&h=400&fit=crop', 'food', 80],
@@ -256,40 +260,12 @@ async function init() {
       for (const p of products) {
         await client.query("INSERT INTO products (name, description, price, original_price, image, category, stock) VALUES ($1,$2,$3,$4,$5,$6,$7)", p);
       }
-      console.log('Seeded ' + products.length + ' products');
+      console.log('Seeded products');
     }
 
-    const articleCount = await client.query("SELECT COUNT(*) FROM articles");
-    if (parseInt(articleCount.rows[0].count) === 0) {
-      const articles = [
-        ['10 Tips for Keeping Your Pet Healthy', 'Regular vet checkups, proper nutrition, and exercise are key to keeping your pet healthy and happy.', 'Learn the best practices for maintaining your pet\'s health and happiness.', 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop', 'health'],
-        ['Understanding Pet Nutrition', 'A balanced diet is essential for your pet\'s wellbeing.', 'Everything you need to know about feeding your furry friend.', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=200&fit=crop', 'nutrition'],
-        ['Basic Dog Training Commands', 'Start with sit, stay, and come - the foundation of good behavior.', 'Master these essential commands for a well-behaved dog.', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=200&fit=crop', 'training'],
-        ['Pet Grooming at Home', 'Regular grooming keeps your pet clean and comfortable.', 'Tips for grooming your pet without leaving home.', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&h=200&fit=crop', 'grooming'],
-        ['Common Pet Health Issues', 'Be aware of these common health problems. Early detection saves lives.', 'Early detection can save your pet\'s life.', 'https://images.unsplash.com/photo-1583500178450-e59e4309b57d?w=400&h=200&fit=crop', 'health'],
-      ];
-      for (const a of articles) {
-        await client.query("INSERT INTO articles (title, content, excerpt, image, category) VALUES ($1,$2,$3,$4,$5)", a);
-      }
-      console.log('Seeded ' + articles.length + ' articles');
-    }
-
-    const serviceCount = await client.query("SELECT COUNT(*) FROM services");
-    if (parseInt(serviceCount.rows[0].count) === 0) {
-      const services = [
-        ['Vet Discount Program', 'Get up to 25% off at participating veterinarians', 'stethoscope', 9.99, JSON.stringify(['Up to 25% discount', '5000+ partner vets', 'No claim forms needed'])],
-        ['Annual Health Checkup', 'Comprehensive wellness exams for early detection', 'heartbeat', 19.99, JSON.stringify(['Full body exam', 'Vaccination updates', 'Dental check'])],
-        ['Pet Insurance', 'Complete coverage for accidents and illnesses', 'shield-alt', 29.99, JSON.stringify(['Accident coverage', 'Illness coverage', '24/7 support'])],
-        ['Grooming Services', 'Professional grooming to keep pets looking great', 'cut', 15.99, JSON.stringify(['Bath & dry', 'Nail trimming', 'Ear cleaning'])],
-      ];
-      for (const s of services) {
-        await client.query("INSERT INTO services (name, description, icon, price, features) VALUES ($1,$2,$3,$4,$5)", s);
-      }
-      console.log('Seeded ' + services.length + ' services');
-    }
-
-    const vetPlanCount = await client.query("SELECT COUNT(*) FROM vet_discount_plans");
-    if (parseInt(vetPlanCount.rows[0].count) === 0) {
+    // Seed vet discount plans
+    const vdc = await client.query("SELECT COUNT(*) FROM vet_discount_plans");
+    if (parseInt(vdc.rows[0].count) === 0) {
       const vetPlans = [
         ['Basic Vet Discount', '25% off all vet services at network vets', 9.99, JSON.stringify(['25% off vet bills', '5000+ network vets', 'No waiting period', 'No claim forms'])],
         ['Premium Vet Discount', '35% off + unlimited vet teleconsultations', 19.99, JSON.stringify(['35% off vet bills', 'Unlimited teleconsultations', 'Priority booking', 'Dental coverage'])],
@@ -298,24 +274,26 @@ async function init() {
       for (const p of vetPlans) {
         await client.query("INSERT INTO vet_discount_plans (name, description, price, features) VALUES ($1,$2,$3,$4)", p);
       }
-      console.log('Seeded ' + vetPlans.length + ' vet discount plans');
+      console.log('Seeded vet discount plans');
     }
 
-    const wellnessCount = await client.query("SELECT COUNT(*) FROM wellness_plans");
-    if (parseInt(wellnessCount.rows[0].count) === 0) {
+    // Seed wellness plans
+    const wc = await client.query("SELECT COUNT(*) FROM wellness_plans");
+    if (parseInt(wc.rows[0].count) === 0) {
       const wellnessPlans = [
         ['Basic Wellness', 'Essential routine care coverage', 14.99, 365, 500, JSON.stringify(['$500 annual reimbursement', 'Annual checkups', 'Vaccinations', 'Dental cleaning'])],
-        ['Plus Wellness', 'Comprehensive wellness coverage', 29.99, 365, 1500, JSON.stringify(['$1500 annual reimbursement', 'Everything in Basic', 'Spay/neuter', 'Flea & tick prevention', 'Grooming'])],
-        ['Premium Wellness', 'Full-spectrum wellness protection', 49.99, 365, 3000, JSON.stringify(['$3000 annual reimbursement', 'Everything in Plus', 'Acupuncture/physio', 'Behavioral therapy', 'Premium support'])],
+        ['Plus Wellness', 'Comprehensive wellness coverage', 29.99, 365, 1500, JSON.stringify(['$1500 annual reimbursement', 'Everything in Basic', 'Spay/neuter', 'Flea & tick prevention'])],
+        ['Premium Wellness', 'Full-spectrum wellness protection', 49.99, 365, 3000, JSON.stringify(['$3000 annual reimbursement', 'Everything in Plus', 'Acupuncture/physio', 'Behavioral therapy'])],
       ];
       for (const p of wellnessPlans) {
         await client.query("INSERT INTO wellness_plans (name, description, price, duration_days, reimbursement_amount, features) VALUES ($1,$2,$3,$4,$5,$6)", p);
       }
-      console.log('Seeded ' + wellnessPlans.length + ' wellness plans');
+      console.log('Seeded wellness plans');
     }
 
-    const clinicCount = await client.query("SELECT COUNT(*) FROM vet_clinics");
-    if (parseInt(clinicCount.rows[0].count) === 0) {
+    // Seed vet clinics
+    const cc = await client.query("SELECT COUNT(*) FROM vet_clinics");
+    if (parseInt(cc.rows[0].count) === 0) {
       const clinics = [
         ['Happy Paws Veterinary Clinic', '123 Pet Street, New York, NY 10001', '(555) 123-4567'],
         ['City Pet Hospital', '456 Animal Ave, Los Angeles, CA 90001', '(555) 234-5678'],
@@ -326,22 +304,50 @@ async function init() {
       for (const c of clinics) {
         await client.query("INSERT INTO vet_clinics (name, address, phone) VALUES ($1,$2,$3)", c);
       }
-      console.log('Seeded ' + clinics.length + ' vet clinics');
+      console.log('Seeded vet clinics');
     }
 
-    client.release();
-    poolReady = true;
+    // Seed articles
+    const ac = await client.query("SELECT COUNT(*) FROM articles");
+    if (parseInt(ac.rows[0].count) === 0) {
+      const articles = [
+        ['10 Tips for Keeping Your Pet Healthy', 'Regular vet checkups, proper nutrition, and exercise are key.', 'Learn the best practices for maintaining your pet\'s health.', 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=200&fit=crop', 'health'],
+        ['Understanding Pet Nutrition', 'A balanced diet is essential for your pet\'s wellbeing.', 'Everything you need to know about feeding your furry friend.', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=400&h=200&fit=crop', 'nutrition'],
+        ['Basic Dog Training Commands', 'Start with sit, stay, and come.', 'Master these essential commands for a well-behaved dog.', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=200&fit=crop', 'training'],
+      ];
+      for (const a of articles) {
+        await client.query("INSERT INTO articles (title, content, excerpt, image, category) VALUES ($1,$2,$3,$4,$5)", a);
+      }
+      console.log('Seeded articles');
+    }
+
+    // Seed services
+    const sc = await client.query("SELECT COUNT(*) FROM services");
+    if (parseInt(sc.rows[0].count) === 0) {
+      const services = [
+        ['Vet Discount Program', 'Get up to 25% off at participating veterinarians', 'stethoscope', 9.99, JSON.stringify(['Up to 25% discount', '5000+ partner vets', 'No claim forms needed'])],
+        ['Annual Health Checkup', 'Comprehensive wellness exams for early detection', 'heartbeat', 19.99, JSON.stringify(['Full body exam', 'Vaccination updates', 'Dental check'])],
+        ['Pet Insurance', 'Complete coverage for accidents and illnesses', 'shield-alt', 29.99, JSON.stringify(['Accident coverage', 'Illness coverage', '24/7 support'])],
+        ['Grooming Services', 'Professional grooming to keep pets looking great', 'cut', 15.99, JSON.stringify(['Bath & dry', 'Nail trimming', 'Ear cleaning'])],
+      ];
+      for (const s of services) {
+        await client.query("INSERT INTO services (name, description, icon, price, features) VALUES ($1,$2,$3,$4,$5)", s);
+      }
+      console.log('Seeded services');
+    }
+
     console.log('Database initialized successfully');
     return pool;
   } catch (e) {
-    console.error('Database initialization error:', e.message);
+    console.error('Database init error:', e.message);
     throw e;
+  } finally {
+    if (client) client.release();
   }
 }
 
 async function run(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
+  const safeParams = (params || []).map(p => (p === null || p === undefined) ? null : p);
   const client = await pool.connect();
   try {
     const result = await client.query(sql, safeParams);
@@ -352,8 +358,7 @@ async function run(sql, params) {
 }
 
 async function get(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
+  const safeParams = (params || []).map(p => (p === null || p === undefined) ? null : p);
   const client = await pool.connect();
   try {
     const result = await client.query(sql, safeParams);
@@ -364,8 +369,7 @@ async function get(sql, params) {
 }
 
 async function all(sql, params) {
-  if (params === undefined) params = [];
-  const safeParams = params.map(p => (p === null || p === undefined) ? '' : p);
+  const safeParams = (params || []).map(p => (p === null || p === undefined) ? null : p);
   const client = await pool.connect();
   try {
     const result = await client.query(sql, safeParams);
@@ -378,8 +382,8 @@ async function all(sql, params) {
 async function exec(sql) {
   const client = await pool.connect();
   try {
-    const result = await client.query(sql);
-    return { changes: result.rowCount };
+    await client.query(sql);
+    return { changes: 0 };
   } finally {
     client.release();
   }
