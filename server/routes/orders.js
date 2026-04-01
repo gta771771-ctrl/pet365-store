@@ -39,11 +39,24 @@ router.post('/', auth, async (req, res) => {
     let totalAmount = 0;
     const orderItems = [];
     for (const item of items) {
-      const product = await db.get("SELECT * FROM products WHERE id = $1 AND status = 1", [item.product_id]);
-      if (!product) return res.status(400).json({ success: false, message: 'Product not found: ' + item.product_id });
+      // Check if it's a product, wellness plan, or vet discount
+      let product = null;
+      let itemType = item.product_type || 'product';
+      
+      if (itemType === 'wellness_plan') {
+        product = await db.get("SELECT id, name as product_name, image, price, description as product_description FROM wellness_plans WHERE id = $1 AND status = 1", [item.product_id]);
+        if (product) product.image = '';
+      } else if (itemType === 'vet_discount') {
+        product = await db.get("SELECT id, name as product_name, image, price, description as product_description FROM vet_discount_plans WHERE id = $1 AND status = 1", [item.product_id]);
+        if (product) product.image = '';
+      } else {
+        product = await db.get("SELECT * FROM products WHERE id = $1 AND status = 1", [item.product_id]);
+      }
+      
+      if (!product) return res.status(400).json({ success: false, message: 'Product/Plan not found: ' + item.product_id });
       if (product.stock < item.quantity) return res.status(400).json({ success: false, message: 'Insufficient stock: ' + product.name });
       totalAmount += product.price * item.quantity;
-      orderItems.push({ product_id: product.id, product_name: product.name, product_image: product.image, price: product.price, quantity: item.quantity, specification: item.specification || '' });
+      orderItems.push({ product_id: product.id, product_name: product.name, product_image: product.image || '', price: product.price, quantity: item.quantity, specification: itemType, product_type: itemType });
     }
     const user = await db.get("SELECT balance FROM users WHERE id = $1", [req.user.id]);
     let balanceUsed = 0;
