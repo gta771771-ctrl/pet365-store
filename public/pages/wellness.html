@@ -267,9 +267,9 @@
                   </div>
                 `).join('')}
               </div>
-              <a href="/register?plan=wellness_${p.id}" class="block w-full ${t.popular ? 'gradient-bg' : 'bg-gray-100 hover:bg-gray-200'} text-white text-center py-2.5 rounded-xl font-semibold text-sm transition">
-                Get Started
-              </a>
+              <button onclick="subscribePlan(${p.id}, '${p.name}', ${p.price})" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2.5 rounded-xl font-semibold text-sm transition">
+                Subscribe Now
+              </button>
             </div>`;
           }).join('');
         }
