@@ -772,26 +772,32 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
 
 function loadWellnessPage() {
   var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"><p>Loading...</p></div></div>';
   if (!token) {
-    document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><div class="text-red-500">Please login first</div></div>';
+    document.getElementById('wellness-list').innerHTML = '<div class="text-red-500">Please login first</div>';
     return;
   }
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"><p>Loading...</p></div></div>';
   fetch('/api/admin/wellness-plans', {headers: {'Authorization': 'Bearer ' + token}})
     .then(function(r) { return r.json(); })
     .then(function(res) {
-      console.log('Wellness API response:', res);
       if (res.success && res.data) {
         var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
         res.data.forEach(function(p) {
-          html += '<tr class="border-b"><td class="px-4 py-3">' + p.name + '</td><td class="px-4 py-3">$' + p.price + '</td><td class="px-4 py-3">' + (p.discount||'0') + '%</td><td class="px-4 py-3"><button onclick="editWellness(' + p.id + ','' + (p.name||'').replace(/'/g,"\\'") + '',' + p.price + ',' + (p.discount||0) + ')" class="text-blue-500 hover:text-blue-700">Edit</button></td></tr>';
+          var discount = p.discount || 0;
+          var name = p.name || '';
+          var btnId = p.id;
+          html += '<tr class="border-b"><td class="px-4 py-3">' + name + '</td><td class="px-4 py-3">$' + p.price + '</td><td class="px-4 py-3">' + discount + '%</td><td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700" data-id="' + btnId + '" data-name="' + name.replace(/"/g,'&quot;') + '" data-price="' + p.price + '" data-discount="' + discount + '">Edit</button></td></tr>';
         });
         html += '</tbody></table>';
         document.getElementById('wellness-list').innerHTML = html;
+        document.querySelectorAll('#wellness-list button').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            editWellness(this.dataset.id, this.dataset.name, parseFloat(this.dataset.price), parseInt(this.dataset.discount));
+          });
+        });
       }
     });
 }
-
 function editWellness(id, name, price, discount) {
   var token = localStorage.getItem('adminToken');
   document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Wellness Plan</h2><form id="edit-wellness-form" class="max-w-lg">' +
@@ -811,25 +817,32 @@ function editWellness(id, name, price, discount) {
 
 function loadVetPlansPage() {
   var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"><p>Loading...</p></div></div>';
   if (!token) {
-    document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><div class="text-red-500">Please login first</div></div>';
+    document.getElementById('vetplans-list').innerHTML = '<div class="text-red-500">Please login first</div>';
     return;
   }
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"><p>Loading...</p></div></div>';
   fetch('/api/admin/discount-plans', {headers: {'Authorization': 'Bearer ' + token}})
     .then(function(r) { return r.json(); })
     .then(function(res) {
       if (res.success && res.data) {
         var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Description</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
         res.data.forEach(function(p) {
-          html += '<tr class="border-b"><td class="px-4 py-3">' + p.name + '</td><td class="px-4 py-3">' + p.discount + '%</td><td class="px-4 py-3">' + (p.description||'').substring(0,50) + '</td><td class="px-4 py-3"><button onclick="editVetPlan(' + p.id + ','' + (p.name||'').replace(/'/g,"\\'") + '',' + p.discount + ')" class="text-blue-500 hover:text-blue-700">Edit</button></td></tr>';
+          var name = p.name || '';
+          var desc = (p.description || '').substring(0,50);
+          var btnId = p.id;
+          html += '<tr class="border-b"><td class="px-4 py-3">' + name + '</td><td class="px-4 py-3">' + p.discount + '%</td><td class="px-4 py-3">' + desc + '</td><td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700" data-id="' + btnId + '" data-name="' + name.replace(/"/g,'&quot;') + '">Edit</button></td></tr>';
         });
         html += '</tbody></table>';
         document.getElementById('vetplans-list').innerHTML = html;
+        document.querySelectorAll('#vetplans-list button').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            editVetPlan(this.dataset.id, this.dataset.name);
+          });
+        });
       }
     });
 }
-
 function editVetPlan(id, name, discount) {
   var token = localStorage.getItem('adminToken');
   document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Vet Discount Plan</h2><form id="edit-vetplan-form" class="max-w-lg">' +
