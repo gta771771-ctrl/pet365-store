@@ -291,6 +291,36 @@
     }
 
     loadPlans();
-  </script>
+  
+  async function subscribePlan(planId, planName, price) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login first to subscribe');
+      window.location.href = '/login';
+      return;
+    }
+    if (!confirm('Subscribe to ' + planName + ' for $' + price + '?')) return;
+    try {
+      const res = await fetch('/api/orders/create', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          items: [{ product_id: planId, product_type: 'wellness_plan', quantity: 1, price: price }],
+          total: price,
+          type: 'wellness'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Subscription successful!');
+        window.location.href = '/orders';
+      } else {
+        alert('Error: ' + (data.message || 'Failed to subscribe'));
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
+</script>
 </body>
 </html>
