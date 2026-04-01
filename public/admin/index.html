@@ -771,11 +771,16 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
 </script>
 
 function loadWellnessPage() {
-  var token = localStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"></div></div>';
+  var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+  if (!token) {
+    document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><div class="text-red-500">Please login first</div></div>';
+    return;
+  }
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"><p>Loading...</p></div></div>';
   fetch('/api/admin/wellness-plans', {headers: {'Authorization': 'Bearer ' + token}})
     .then(function(r) { return r.json(); })
     .then(function(res) {
+      console.log('Wellness API response:', res);
       if (res.success && res.data) {
         var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
         res.data.forEach(function(p) {
@@ -805,8 +810,12 @@ function editWellness(id, name, price, discount) {
 }
 
 function loadVetPlansPage() {
-  var token = localStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"></div></div>';
+  var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
+  if (!token) {
+    document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><div class="text-red-500">Please login first</div></div>';
+    return;
+  }
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"><p>Loading...</p></div></div>';
   fetch('/api/admin/discount-plans', {headers: {'Authorization': 'Bearer ' + token}})
     .then(function(r) { return r.json(); })
     .then(function(res) {
