@@ -205,7 +205,7 @@
 
 <script>
 let adminToken = null;
-const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review' };
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans' };
 
 function checkAdminLogin() {
   adminToken = localStorage.getItem('adminToken');
@@ -277,6 +277,8 @@ async function loadPage(page) {
     case 'articles': await loadArticlesPage(); break;
     case 'balance': await loadBalancePage(); break;
     case 'files': await loadFilesPage(); break;
+    case 'wellness': await loadWellnessPage(); break;
+    case 'vetplans': await loadVetPlansPage(); break;
   }
 }
 
