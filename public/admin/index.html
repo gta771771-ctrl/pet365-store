@@ -767,5 +767,72 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
   });
 }
 </script>
+
+function loadWellnessPage() {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"></div></div>';
+  fetch('/api/admin/wellness-plans', {headers: {'Authorization': 'Bearer ' + token}})
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.success && res.data) {
+        var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
+        res.data.forEach(function(p) {
+          html += '<tr class="border-b"><td class="px-4 py-3">' + p.name + '</td><td class="px-4 py-3">$' + p.price + '</td><td class="px-4 py-3">' + (p.discount||'0') + '%</td><td class="px-4 py-3"><button onclick="editWellness(' + p.id + ','' + (p.name||'').replace(/'/g,"\\'") + '',' + p.price + ',' + (p.discount||0) + ')" class="text-blue-500 hover:text-blue-700">Edit</button></td></tr>';
+        });
+        html += '</tbody></table>';
+        document.getElementById('wellness-list').innerHTML = html;
+      }
+    });
+}
+
+function editWellness(id, name, price, discount) {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Wellness Plan</h2><form id="edit-wellness-form" class="max-w-lg">' +
+    '<input type="hidden" id="wellness-id" value="' + id + '">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="wellness-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Price ($)</label><input type="number" step="0.01" id="wellness-price" value="' + price + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Discount (%)</label><input type="number" id="wellness-discount" value="' + discount + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="flex gap-2"><button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button><button type="button" onclick="loadWellnessPage()" class="bg-gray-300 px-4 py-2 rounded">Cancel</button></div></form></div>';
+  document.getElementById('edit-wellness-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var plan = { name: document.getElementById('wellness-name').value, price: parseFloat(document.getElementById('wellness-price').value), discount: parseInt(document.getElementById('wellness-discount').value) };
+    var res = await fetch('/api/admin/wellness-plans/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
+    var data = await res.json();
+    if (data.success) { alert('Updated!'); loadWellnessPage(); } else { alert('Error: ' + data.message); }
+  });
+}
+
+function loadVetPlansPage() {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"></div></div>';
+  fetch('/api/admin/discount-plans', {headers: {'Authorization': 'Bearer ' + token}})
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.success && res.data) {
+        var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Description</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
+        res.data.forEach(function(p) {
+          html += '<tr class="border-b"><td class="px-4 py-3">' + p.name + '</td><td class="px-4 py-3">' + p.discount + '%</td><td class="px-4 py-3">' + (p.description||'').substring(0,50) + '</td><td class="px-4 py-3"><button onclick="editVetPlan(' + p.id + ','' + (p.name||'').replace(/'/g,"\\'") + '',' + p.discount + ')" class="text-blue-500 hover:text-blue-700">Edit</button></td></tr>';
+        });
+        html += '</tbody></table>';
+        document.getElementById('vetplans-list').innerHTML = html;
+      }
+    });
+}
+
+function editVetPlan(id, name, discount) {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Vet Discount Plan</h2><form id="edit-vetplan-form" class="max-w-lg">' +
+    '<input type="hidden" id="vetplan-id" value="' + id + '">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="vetplan-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Discount (%)</label><input type="number" id="vetplan-discount" value="' + discount + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="flex gap-2"><button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button><button type="button" onclick="loadVetPlansPage()" class="bg-gray-300 px-4 py-2 rounded">Cancel</button></div></form></div>';
+  document.getElementById('edit-vetplan-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var plan = { name: document.getElementById('vetplan-name').value, discount: parseInt(document.getElementById('vetplan-discount').value) };
+    var res = await fetch('/api/admin/discount-plans/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
+    var data = await res.json();
+    if (data.success) { alert('Updated!'); loadVetPlansPage(); } else { alert('Error: ' + data.message); }
+  });
+}
 </body>
 </html>
