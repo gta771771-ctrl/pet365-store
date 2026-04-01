@@ -301,7 +301,7 @@
     }
     if (!confirm('Subscribe to ' + planName + ' for $' + price + '?')) return;
     try {
-      const res = await fetch('/api/orders/create', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
