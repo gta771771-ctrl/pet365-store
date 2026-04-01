@@ -768,6 +768,34 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
     }
   });
 }
+
+  async function saveProduct(id) {
+    const name = document.getElementById('edit-name').value;
+    const description = document.getElementById('edit-desc').value;
+    const price = parseFloat(document.getElementById('edit-price').value);
+    const original_price = parseFloat(document.getElementById('edit-orig-price').value) || price;
+    const image = document.getElementById('edit-image').value;
+    const category = document.getElementById('edit-category').value;
+    const stock = parseInt(document.getElementById('edit-stock').value) || 0;
+    const status = parseInt(document.getElementById('edit-status').value) || 1;
+
+    try {
+      const res = await fetch(API + '/api/admin/products/' + id, {
+        method: 'PUT',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ name, description, price, original_price, image, category, stock, status })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Product updated successfully');
+        loadProducts();
+      } else {
+        alert('Error: ' + (data.message || 'Failed to update'));
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
 </script>
 
 function loadWellnessPage() {
