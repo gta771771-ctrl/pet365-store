@@ -387,6 +387,33 @@
         <a href="/profile" class="gradient-bg text-white text-sm px-4 py-2 rounded-lg font-medium hover:opacity-90 transition">My Account</a>
       `;
     }
-  </script>
+  
+  function enrollVetPlan() {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login first to enroll');
+      window.location.href = '/login';
+      return;
+    }
+    if (!confirm('Enroll in the Vet Discount Plan?')) return;
+    // For now, create a simple order
+    fetch('/api/orders/create', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        items: [{ product_id: 1, product_type: 'vet_discount', quantity: 1, price: 9.99 }],
+        total: 9.99,
+        type: 'vet_discount'
+      })
+    }).then(r => r.json()).then(data => {
+      if (data.success) {
+        alert('Enrollment successful!');
+        window.location.href = '/orders';
+      } else {
+        alert('Error: ' + (data.message || 'Failed to enroll'));
+      }
+    }).catch(e => alert('Error: ' + e.message));
+  }
+</script>
 </body>
 </html>
