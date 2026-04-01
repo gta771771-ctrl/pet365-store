@@ -44,11 +44,11 @@ router.post('/', auth, async (req, res) => {
       let itemType = item.product_type || 'product';
       
       if (itemType === 'wellness_plan') {
-        product = await db.get("SELECT id, name as product_name, image, price, description as product_description FROM wellness_plans WHERE id = $1 AND status = 1", [item.product_id]);
-        if (product) product.image = '';
+        product = await db.get("SELECT id, name as product_name, price, description as product_description FROM wellness_plans WHERE id = $1 AND status = 1", [item.product_id]);
+        if (product) product.image = 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200';
       } else if (itemType === 'vet_discount') {
-        product = await db.get("SELECT id, name as product_name, image, price, description as product_description FROM vet_discount_plans WHERE id = $1 AND status = 1", [item.product_id]);
-        if (product) product.image = '';
+        product = await db.get("SELECT id, name as product_name, price, description as product_description FROM vet_discount_plans WHERE id = $1 AND status = 1", [item.product_id]);
+        if (product) product.image = 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=200';
       } else {
         product = await db.get("SELECT * FROM products WHERE id = $1 AND status = 1", [item.product_id]);
       }
