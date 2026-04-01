@@ -717,69 +717,54 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
 </script>
 
 <script>
-function editProduct(id) {
-  var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
-  if (!token) {
-    alert('Please login first');
-    return;
-  }
-  fetch('/api/admin/products', {headers: {'Authorization': 'Bearer ' + token}})
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.success) {
-        var p = res.data.data.find(function(x) { return x.id === id; });
-        if (p) {
-          document.getElementById('page-content').innerHTML = `
-            <div class="bg-white rounded-xl shadow-sm p-6">
-              <h2 class="text-xl font-semibold mb-4">Edit Product: ` + p.name + `</h2>
-              <form id="edit-product-form" class="max-w-lg">
-                <input type="hidden" id="edit-id" value="` + p.id + `">
-                <div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="edit-name" value="` + (p.name || '') + `" class="w-full px-3 py-2 border rounded" required></div>
-                <div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="edit-desc" class="w-full px-3 py-2 border rounded">` + (p.description || '') + `</textarea></div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  <div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="` + p.price + `" class="w-full px-3 py-2 border rounded"></div>
-                  <div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-orig-price" value="` + (p.original_price || '') + `" class="w-full px-3 py-2 border rounded"></div>
-                </div>
-                <div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="edit-image" value="` + (p.image || '') + `" class="w-full px-3 py-2 border rounded"></div>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                  <div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="edit-category" value="` + (p.category || '') + `" class="w-full px-3 py-2 border rounded"></div>
-                  <div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="edit-stock" value="` + p.stock + `" class="w-full px-3 py-2 border rounded"></div>
-                </div>
-                <div class="mb-4"><label class="flex items-center"><input type="checkbox" id="edit-status" ` + (p.status === 1 ? 'checked' : '') + ` class="mr-2">Active</label></div>
-                <div class="flex gap-2">
-                  <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>
-                  <button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
-                </div>
-              </form>
-            </div>`;
-          document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            var product = {
-              name: document.getElementById('edit-name').value,
-              description: document.getElementById('edit-desc').value,
-              price: parseFloat(document.getElementById('edit-price').value) || 0,
-              original_price: parseFloat(document.getElementById('edit-orig-price').value) || null,
-              image: document.getElementById('edit-image').value,
-              category: document.getElementById('edit-category').value,
-              stock: parseInt(document.getElementById('edit-stock').value) || 0,
-              status: document.getElementById('edit-status').checked ? 1 : 0
-            };
-            var res = await fetch('/api/admin/products/' + id, {
-              method: 'PUT',
-              headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-              body: JSON.stringify(product)
-            });
-            var data = await res.json();
-            if (data.success) {
-              alert('Product updated!');
-              loadProductsPage();
-            } else {
-              alert('Error: ' + data.message);
-            }
-          });
-        }
-      }
+function editProduct(id, name, desc, price, origPrice, image, category, stock, status) {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-semibold mb-4">Edit Product: ' + name + '</h2>' +
+    '<form id="edit-product-form" class="max-w-lg">' +
+    '<input type="hidden" id="edit-id" value="' + id + '">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="edit-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="edit-desc" class="w-full px-3 py-2 border rounded">' + (desc||'') + '</textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="' + price + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-orig-price" value="' + (origPrice||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="edit-image" value="' + (image||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="edit-category" value="' + (category||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="edit-stock" value="' + stock + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="edit-status" ' + (status===1?'checked':'') + ' class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div></form></div>';
+  
+  document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('edit-name').value,
+      description: document.getElementById('edit-desc').value,
+      price: parseFloat(document.getElementById('edit-price').value) || 0,
+      original_price: parseFloat(document.getElementById('edit-orig-price').value) || null,
+      image: document.getElementById('edit-image').value,
+      category: document.getElementById('edit-category').value,
+      stock: parseInt(document.getElementById('edit-stock').value) || 0,
+      status: document.getElementById('edit-status').checked ? 1 : 0
+    };
+    var res = await fetch('/api/admin/products/' + id, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
     });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product updated!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
 }
 </script>
 </body>
