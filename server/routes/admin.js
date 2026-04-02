@@ -318,4 +318,21 @@ router.delete('/discount-plans/:id', adminAuth, async (req, res) => {
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
+
+// PayPal Settings
+router.get('/settings/paypal', adminAuth, async (req, res) => {
+  try {
+    const row = await db.get('SELECT value FROM settings WHERE key = "paypal_email"');
+    res.json({ success: true, data: { paypal_email: row ? row.value : '' } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+router.put('/settings/paypal', adminAuth, async (req, res) => {
+  try {
+    const { paypal_email } = req.body;
+    await db.run('INSERT OR REPLACE INTO settings (key, value) VALUES ("paypal_email", $1)', [paypal_email || '']);
+    res.json({ success: true, message: 'PayPal email updated' });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 module.exports = router;
