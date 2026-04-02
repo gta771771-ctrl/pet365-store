@@ -946,6 +946,8 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
     }
 
     function showWellnessModal(plan) {
+      console.log('showWellnessModal called, plan:', plan);
+      alert('Opening wellness plan modal...');
       document.getElementById('wellness-id').value = '';
       document.getElementById('wellness-name').value = '';
       document.getElementById('wellness-desc').value = '';
@@ -1028,6 +1030,8 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
     }
 
     function showVetPlanModal() {
+      console.log('showVetPlanModal called');
+      alert('Opening vet plan modal...');
       document.getElementById('vetplan-id').value = '';
       document.getElementById('vetplan-name').value = '';
       document.getElementById('vetplan-desc').value = '';
