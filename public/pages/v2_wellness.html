@@ -212,27 +212,40 @@
     }
 
     // Open PayPal payment modal
-    function openPayPalModal(amount, planName, planId, type) {
-      const modal = document.createElement('div');
-      modal.id = 'paypal-modal';
-      modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
-      modal.innerHTML = `
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold">Pay with PayPal</h3>
-            <button onclick="this.closest('#paypal-modal').remove()" class="text-gray-400 text-2xl">&times;</button>
-          </div>
-          <div class="text-center mb-4">
-            <div class="text-3xl font-bold text-sky-500">$$${amount.toFixed(2)}</div>
-            <div class="text-gray-500">${planName}</div>
-          </div>
-          <button id="paypal-pay-btn" onclick="processPayPalPayment($${amount}, '${planId}', '${type}')" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 mb-2">
-            <i class="fab fa-paypal mr-2"></i>Pay Now via PayPal
-          </button>
-          <button onclick="confirmWellnessEnroll()" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg">Use Account Balance</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
+    // Direct PayPal transfer
+    async function openPayPalModal(amount, planName, planId, type) {
+      try {
+        const res = await fetch('/api/vet/settings/paypal');
+        const data = await res.json();
+        const paypalEmail = data.paypal_email || 'not set';
+        
+        if (!data.paypal_email) {
+          alert('PayPal not configured. Please use balance or contact support.');
+          return;
+        }
+        
+        const confirmed = confirm('To pay via PayPal:
+
+1. Send \$' + amount + ' to: ' + paypalEmail + '
+
+2. Click OK to confirm payment after sending');
+        
+        if (confirmed) {
+          // Mark as paid
+          const res2 = await fetch('/api/vet/enroll-wellness', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan_id: planId, payment_method: 'paypal' })
+          });
+          const data2 = await res2.json();
+          if (data2.success) {
+            alert('Payment confirmed! Enrolled in ' + planName);
+            loadMyWellness();
+          } else { alert(data2.message || 'Failed'); }
+        }
+      } catch(e) {
+        alert('Error: ' + e);
+      }
     }
 
     async function processPayPalPayment(amount, planId, type) {
