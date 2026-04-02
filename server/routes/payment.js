@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { auth } = require('./auth');
+const db = require('../database');
+
+// Simple auth middleware
+function auth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  next();
+}
 
 // Create PayPal payment order
 router.post('/paypal/create', auth, async (req, res) => {
