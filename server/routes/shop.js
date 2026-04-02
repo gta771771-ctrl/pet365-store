@@ -42,7 +42,7 @@ router.get('/categories', async (req, res) => {
 router.get('/cart', auth, async (req, res) => {
   try {
     const items = await db.all(
-      "SELECT c.*, p.name, p.price, p.image, p.stock as product_stock FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = $1",
+      "SELECT c.*, p.name, p.price, p.image, p.stock as product_stock, p.status as product_status FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = $1",
       [req.user.id]
     );
     const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
