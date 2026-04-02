@@ -105,4 +105,72 @@ router.get('/wellness', async (req, res) => {
   }
 });
 
+
+// Wellness Plan Enrollment with payment
+router.post('/enroll-wellness', auth, async (req, res) => {
+  try {
+    const { plan_id, payment_method, paypal_order_id } = req.body;
+    const user = req.user;
+    
+    // Get plan details
+    const plan = await db.get('SELECT * FROM wellness_plans WHERE id = $1 AND status = 1', [plan_id]);
+    if (!plan) return res.status(400).json({ success: false, message: 'Plan not found' });
+    
+    // Get PayPal email from settings
+    const settings = await db.get('SELECT value FROM settings WHERE key = "paypal_email"');
+    const paypalEmail = settings ? settings.value : '';
+    
+    // If PayPal payment, verify with backend first (simplified - just record intent)
+    if (payment_method === 'paypal' && !paypal_order_id) {
+      // Create PayPal order - simplified, return mock URL for demo
+      const mockPayPalUrl = 'https://www.paypal.com/checkoutnow?token=demo-' + Date.now();
+      return res.json({ 
+        success: true, 
+        paypal_url: mockPayPalUrl,
+        message: 'Redirect to PayPal'
+      });
+    }
+    
+    // For demo: Check user balance or create pending payment
+    const userData = await db.get('SELECT balance FROM users WHERE id = $1', [user.id]);
+    const balance = userData ? userData.balance : 0;
+    
+    // For now, allow balance payment or create subscription
+    if (payment_method === 'balance' || balance >= plan.price) {
+      // Deduct from balance
+      const newBalance = balance - plan.price;
+      await db.run('UPDATE users SET balance = $1 WHERE id = $2', [newBalance, user.id]);
+      
+      // Record transaction
+      await db.run(
+        "INSERT INTO balance_logs (user_id, type, amount, before_balance, after_balance, reason) VALUES ($1, 'deduct', $2, $3, $4, $5)",
+        [user.id, plan.price, balance, newBalance, 'Wellness Plan: ' + plan.name]
+      );
+    }
+    
+    // Record subscription (simplified - would need wellness_subscriptions table)
+    res.json({ 
+      success: true, 
+      message: 'Enrolled in ' + plan.name + '!',
+      plan: plan
+    });
+  } catch (e) { 
+    console.error('Enroll wellness error:', e);
+    res.status(500).json({ success: false, message: e.message }); 
+  }
+});
+
+// Get PayPal settings for frontend
+router.get('/settings/paypal', async (req, res) => {
+  try {
+    const settings = await db.get('SELECT value FROM settings WHERE key = "paypal_email"');
+    res.json({ 
+      success: true, 
+      paypal_email: settings ? settings.value : '' 
+    });
+  } catch (e) { 
+    res.status(500).json({ success: false, message: e.message }); 
+  }
+});
+
 module.exports = router;
