@@ -300,7 +300,7 @@ async function savePet(){
   const name=document.getElementById('pet-name').value.trim();
   if(!name){toast('Please enter pet name');return;}
   try{
-    const r=await fetch(API+'/api/pets',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name,pet_type:document.getElementById('pet-type').value,breed:document.getElementById('pet-breed').value,age:document.getElementById('pet-age').value})});
+    const r=await fetch(API+'/api/pets',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name,type:document.getElementById('pet-type').value,breed:document.getElementById('pet-breed').value,age:document.getElementById('pet-age').value})});
     const d=await r.json();
     if(d.success){toast('Pet added!');hideAddPet();document.getElementById('pet-name').value='';document.getElementById('pet-breed').value='';document.getElementById('pet-age').value='';await loadPets();}else{toast(d.message||'Failed');}
   }catch(e){toast('Error');}
