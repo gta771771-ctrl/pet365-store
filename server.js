@@ -23,6 +23,7 @@ app.use('/api/files', require('./server/routes/files'));
 app.use('/api/admin', require('./server/routes/admin'));
 app.use('/api/vet', require('./server/routes/vet'));
 app.use('/api/pets', require('./server/routes/pets'));
+app.use('/api/payment', require('./server/routes/payment'));
 
 // Pages
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public/index.html')));
@@ -41,20 +42,21 @@ app.get('/wellness', (req, res) => res.sendFile(path.join(__dirname, 'public/pag
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(500).json({ success: false, message: 'Server error' });
 });
 
+// 404 handler
 app.use((req, res) => {
-app.use('/api/payment', require('./server/routes/payment'));
   res.status(404).json({ success: false, message: 'Not found' });
 });
 
-// Start server immediately
+// Start server
 app.listen(PORT, () => {
   console.log('PetPaw server started on port ' + PORT);
-  // Init DB in background with full safety net
+  // Init DB in background
   process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
