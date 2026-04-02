@@ -1,13 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - PetPaw</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+// Edit/Delete Products
+function editProduct(id, name, desc, price, original_price, image, category, stock, status) {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-bold mb-4">Edit Product: ' + name + '</h2>' +
+    '<form id="edit-product-form" class="max-w-lg">' +
+    '<input type="hidden" id="edit-id" value="' + id + '">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="edit-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="edit-desc" class="w-full px-3 py-2 border rounded">' + (desc||'') + '</textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="' + price + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-original-price" value="' + (original_price||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="edit-image" value="' + (image||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="edit-category" value="' + (category||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="edit-stock" value="' + stock + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="edit-status" ' + (status===1?'checked':'') + ' class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div>' +
+    '</form></div>';
+
+  document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('edit-name').value,
+      description: document.getElementById('edit-desc').value,
+      price: parseFloat(document.getElementById('edit-price').value) || 0,
+      original_price: parseFloat(document.getElementById('edit-original-price').value) || null,
+      image: document.getElementById('edit-image').value,
+      category: document.getElementById('edit-category').value,
+      stock: parseInt(document.getElementById('edit-stock').value) || 0,
+      status: document.getElementById('edit-status').checked ? 1 : 0
+    };
+    var res = await fetch('/api/admin/products/' + id, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product updated!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  var token = localStorage.getItem('adminToken');
+  var res = await fetch('/api/admin/products/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  var data = await res.json();
+  if (data.success) {
+    loadProductsPage();
+  } else {
+    alert('Error: ' + data.message);
+  }
+}
+</script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}</script>
+  <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}
+// Edit/Delete Products
+function editProduct(id, name, desc, price, original_price, image, category, stock, status) {
+  var token = localStorage.getItem('adminToken');
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-bold mb-4">Edit Product: ' + name + '</h2>' +
+    '<form id="edit-product-form" class="max-w-lg">' +
+    '<input type="hidden" id="edit-id" value="' + id + '">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="edit-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="edit-desc" class="w-full px-3 py-2 border rounded">' + (desc||'') + '</textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="' + price + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-original-price" value="' + (original_price||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="edit-image" value="' + (image||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="edit-category" value="' + (category||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="edit-stock" value="' + stock + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="edit-status" ' + (status===1?'checked':'') + ' class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div>' +
+    '</form></div>';
+
+  document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('edit-name').value,
+      description: document.getElementById('edit-desc').value,
+      price: parseFloat(document.getElementById('edit-price').value) || 0,
+      original_price: parseFloat(document.getElementById('edit-original-price').value) || null,
+      image: document.getElementById('edit-image').value,
+      category: document.getElementById('edit-category').value,
+      stock: parseInt(document.getElementById('edit-stock').value) || 0,
+      status: document.getElementById('edit-status').checked ? 1 : 0
+    };
+    var res = await fetch('/api/admin/products/' + id, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product updated!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  var token = localStorage.getItem('adminToken');
+  var res = await fetch('/api/admin/products/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  var data = await res.json();
+  if (data.success) {
+    loadProductsPage();
+  } else {
+    alert('Error: ' + data.message);
+  }
+}
+</script>
   <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.sidebar-link{transition:all .2s}.sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:#0ea5e9}</style>
 </head>
 <body class="bg-gray-100">
@@ -206,7 +339,7 @@
 
 <script>
 let adminToken = null;
-const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans' };
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review' };
 
 function checkAdminLogin() {
   adminToken = localStorage.getItem('adminToken');
@@ -278,8 +411,6 @@ async function loadPage(page) {
     case 'articles': await loadArticlesPage(); break;
     case 'balance': await loadBalancePage(); break;
     case 'files': await loadFilesPage(); break;
-    case 'wellness': await loadWellnessPage(); break;
-    case 'vetplans': await loadVetPlansPage(); break;
   }
 }
 
@@ -385,7 +516,7 @@ async function submitBalance(id) {
 }
 
 async function loadProductsPage() {
-  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><input type="text" id="product-search" placeholder="Search products..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Image</th><th class="px-4 py-3 text-left text-gray-500">Name</th><th class="px-4 py-3 text-left text-gray-500">Price</th><th class="px-4 py-3 text-left text-gray-500">Stock</th><th class="px-4 py-3 text-left text-gray-500">Sales</th><th class="px-4 py-3 text-left text-gray-500">Actions</th><th class="px-4 py-3 text-left text-gray-500">Status</th></tr></thead><tbody id="products-tbody"></tbody></table></div></div>`;
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><input type="text" id="product-search" placeholder="Search products..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Image</th><th class="px-4 py-3 text-left text-gray-500">Name</th><th class="px-4 py-3 text-left text-gray-500">Price</th><th class="px-4 py-3 text-left text-gray-500">Stock</th><th class="px-4 py-3 text-left text-gray-500">Sales</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="products-tbody"></tbody></table></div></div>`;
   await loadProducts();
   document.getElementById('product-search').addEventListener('input', function() { loadProducts(1, this.value); });
 }
@@ -405,6 +536,10 @@ async function loadProducts(page = 1, keyword = '') {
       <td class="px-4 py-3">${p.stock}</td>
       <td class="px-4 py-3">${p.sales}</td>
       <td class="px-4 py-3"><span class="px-2 py-1 rounded-full text-xs ${p.status === 1 ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}">${p.status === 1 ? 'Active' : 'Inactive'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick="editProduct(${p.id}, '${p.name}', '${p.description || ''}', ${p.price}, ${p.original_price || null}, '${p.image}', '${p.category}', ${p.stock}, ${p.status})" class="text-blue-500 hover:text-blue-700 mr-2 text-xs font-medium">Edit</button>
+        <button onclick="deleteProduct(${p.id})" class="text-red-400 hover:text-red-600 text-xs font-medium">Delete</button>
+      </td>
     </tr>
   `).join('');
 }
@@ -717,20 +852,19 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
     function closeModal(id) {
       document.getElementById(id).classList.add('hidden');
     }
-</script>
 
-<script>
-function editProduct(id, name, desc, price, origPrice, image, category, stock, status) {
+// Edit/Delete Products
+function editProduct(id, name, desc, price, original_price, image, category, stock, status) {
   var token = localStorage.getItem('adminToken');
   document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
-    '<h2 class="text-xl font-semibold mb-4">Edit Product: ' + name + '</h2>' +
+    '<h2 class="text-xl font-bold mb-4">Edit Product: ' + name + '</h2>' +
     '<form id="edit-product-form" class="max-w-lg">' +
     '<input type="hidden" id="edit-id" value="' + id + '">' +
     '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="edit-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded" required></div>' +
     '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="edit-desc" class="w-full px-3 py-2 border rounded">' + (desc||'') + '</textarea></div>' +
     '<div class="grid grid-cols-2 gap-4 mb-4">' +
-    '<div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="' + price + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-orig-price" value="' + (origPrice||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Price</label><input type="number" step="0.01" id="edit-price" value="' + price + '" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="edit-original-price" value="' + (original_price||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
     '</div>' +
     '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="edit-image" value="' + (image||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
     '<div class="grid grid-cols-2 gap-4 mb-4">' +
@@ -741,15 +875,16 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
     '<div class="flex gap-2">' +
     '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Changes</button>' +
     '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
-    '</div></form></div>';
-  
+    '</div>' +
+    '</form></div>';
+
   document.getElementById('edit-product-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     var product = {
       name: document.getElementById('edit-name').value,
       description: document.getElementById('edit-desc').value,
       price: parseFloat(document.getElementById('edit-price').value) || 0,
-      original_price: parseFloat(document.getElementById('edit-orig-price').value) || null,
+      original_price: parseFloat(document.getElementById('edit-original-price').value) || null,
       image: document.getElementById('edit-image').value,
       category: document.getElementById('edit-category').value,
       stock: parseInt(document.getElementById('edit-stock').value) || 0,
@@ -770,122 +905,20 @@ function editProduct(id, name, desc, price, origPrice, image, category, stock, s
   });
 }
 
-  async function saveProduct(id) {
-    const name = document.getElementById('edit-name').value;
-    const description = document.getElementById('edit-desc').value;
-    const price = parseFloat(document.getElementById('edit-price').value);
-    const original_price = parseFloat(document.getElementById('edit-orig-price').value) || price;
-    const image = document.getElementById('edit-image').value;
-    const category = document.getElementById('edit-category').value;
-    const stock = parseInt(document.getElementById('edit-stock').value) || 0;
-    const status = parseInt(document.getElementById('edit-status').value) || 1;
-
-    try {
-      const res = await fetch(API + '/api/admin/products/' + id, {
-        method: 'PUT',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ name, description, price, original_price, image, category, stock, status })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Product updated successfully');
-        loadProducts();
-      } else {
-        alert('Error: ' + (data.message || 'Failed to update'));
-      }
-    } catch(e) {
-      alert('Error: ' + e.message);
-    }
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  var token = localStorage.getItem('adminToken');
+  var res = await fetch('/api/admin/products/' + id, {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  var data = await res.json();
+  if (data.success) {
+    loadProductsPage();
+  } else {
+    alert('Error: ' + data.message);
   }
+}
 </script>
-
-function loadWellnessPage() {
-  var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Wellness Plans</h2><div id="wellness-list"><p>Loading...</p></div></div>';
-  if (!token) {
-    document.getElementById('wellness-list').innerHTML = '<div class="text-red-500">Please login first</div>';
-    return;
-  }
-  fetch('/api/admin/wellness-plans', {headers: {'Authorization': 'Bearer ' + token}})
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.success && res.data) {
-        var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Price</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
-        res.data.forEach(function(p) {
-          var discount = p.discount || 0;
-          var name = p.name || '';
-          var btnId = p.id;
-          html += '<tr class="border-b"><td class="px-4 py-3">' + name + '</td><td class="px-4 py-3">$' + p.price + '</td><td class="px-4 py-3">' + discount + '%</td><td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700" data-id="' + btnId + '" data-name="' + name.replace(/"/g,'&quot;') + '" data-price="' + p.price + '" data-discount="' + discount + '">Edit</button></td></tr>';
-        });
-        html += '</tbody></table>';
-        document.getElementById('wellness-list').innerHTML = html;
-        document.querySelectorAll('#wellness-list button').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            editWellness(this.dataset.id, this.dataset.name, parseFloat(this.dataset.price), parseInt(this.dataset.discount));
-          });
-        });
-      }
-    });
-}
-function editWellness(id, name, price, discount) {
-  var token = localStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Wellness Plan</h2><form id="edit-wellness-form" class="max-w-lg">' +
-    '<input type="hidden" id="wellness-id" value="' + id + '">' +
-    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="wellness-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Price ($)</label><input type="number" step="0.01" id="wellness-price" value="' + price + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Discount (%)</label><input type="number" id="wellness-discount" value="' + discount + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div class="flex gap-2"><button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button><button type="button" onclick="loadWellnessPage()" class="bg-gray-300 px-4 py-2 rounded">Cancel</button></div></form></div>';
-  document.getElementById('edit-wellness-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var plan = { name: document.getElementById('wellness-name').value, price: parseFloat(document.getElementById('wellness-price').value), discount: parseInt(document.getElementById('wellness-discount').value) };
-    var res = await fetch('/api/admin/wellness-plans/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
-    var data = await res.json();
-    if (data.success) { alert('Updated!'); loadWellnessPage(); } else { alert('Error: ' + data.message); }
-  });
-}
-
-function loadVetPlansPage() {
-  var token = localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Vet Discount Plans</h2><div id="vetplans-list"><p>Loading...</p></div></div>';
-  if (!token) {
-    document.getElementById('vetplans-list').innerHTML = '<div class="text-red-500">Please login first</div>';
-    return;
-  }
-  fetch('/api/admin/discount-plans', {headers: {'Authorization': 'Bearer ' + token}})
-    .then(function(r) { return r.json(); })
-    .then(function(res) {
-      if (res.success && res.data) {
-        var html = '<table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3">Name</th><th class="px-4 py-3">Discount</th><th class="px-4 py-3">Description</th><th class="px-4 py-3">Actions</th></tr></thead><tbody>';
-        res.data.forEach(function(p) {
-          var name = p.name || '';
-          var desc = (p.description || '').substring(0,50);
-          var btnId = p.id;
-          html += '<tr class="border-b"><td class="px-4 py-3">' + name + '</td><td class="px-4 py-3">' + p.discount + '%</td><td class="px-4 py-3">' + desc + '</td><td class="px-4 py-3"><button class="text-blue-500 hover:text-blue-700" data-id="' + btnId + '" data-name="' + name.replace(/"/g,'&quot;') + '">Edit</button></td></tr>';
-        });
-        html += '</tbody></table>';
-        document.getElementById('vetplans-list').innerHTML = html;
-        document.querySelectorAll('#vetplans-list button').forEach(function(btn) {
-          btn.addEventListener('click', function() {
-            editVetPlan(this.dataset.id, this.dataset.name);
-          });
-        });
-      }
-    });
-}
-function editVetPlan(id, name, discount) {
-  var token = localStorage.getItem('adminToken');
-  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6"><h2 class="text-xl font-semibold mb-4">Edit Vet Discount Plan</h2><form id="edit-vetplan-form" class="max-w-lg">' +
-    '<input type="hidden" id="vetplan-id" value="' + id + '">' +
-    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Name</label><input type="text" id="vetplan-name" value="' + (name||'') + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Discount (%)</label><input type="number" id="vetplan-discount" value="' + discount + '" class="w-full px-3 py-2 border rounded"></div>' +
-    '<div class="flex gap-2"><button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button><button type="button" onclick="loadVetPlansPage()" class="bg-gray-300 px-4 py-2 rounded">Cancel</button></div></form></div>';
-  document.getElementById('edit-vetplan-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    var plan = { name: document.getElementById('vetplan-name').value, discount: parseInt(document.getElementById('vetplan-discount').value) };
-    var res = await fetch('/api/admin/discount-plans/' + id, { method: 'PUT', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(plan) });
-    var data = await res.json();
-    if (data.success) { alert('Updated!'); loadVetPlansPage(); } else { alert('Error: ' + data.message); }
-  });
-}
 </body>
 </html>
