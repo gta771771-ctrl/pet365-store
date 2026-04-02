@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vet Discount Plans - PetPaw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .gradient-blue { background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <i class="fas fa-paw text-blue-600 text-xl"></i>
+        <span class="font-bold text-gray-800 text-lg">PetPaw</span>
+      </a>
+      <a href="/profile" class="text-gray-500 hover:text-blue-600"><i class="fas fa-user"></i></a>
+    </div>
+  </header>
+
+  <div class="gradient-blue text-white py-10 px-4 text-center">
+    <h1 class="text-3xl font-bold mb-2">Vet Discount Plans</h1>
+    <p class="text-blue-200">Save on veterinary visits with our discount plans</p>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <div id="plans-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="text-center py-12 col-span-3 text-gray-400">
+        <i class="fas fa-spinner fa-spin text-3xl mb-3"></i>
+        <p>Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div id="checkout-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+      <div class="gradient-blue text-white p-5 rounded-t-2xl">
+        <h3 class="text-xl font-bold">Complete Your Order</h3>
+        <p id="modal-plan-name" class="text-blue-200 text-sm mt-1"></p>
+      </div>
+      <div class="p-5">
+        <div class="bg-gray-50 rounded-xl p-4 mb-4">
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-500">Plan</span>
+            <span id="modal-plan-title" class="font-semibold"></span>
+          </div>
+          <div class="flex justify-between border-t pt-2 mt-2">
+            <span class="font-bold">Total</span>
+            <span id="modal-price" class="font-bold text-blue-600 text-lg"></span>
+          </div>
+        </div>
+
+        <div id="paypal-info" class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 hidden">
+          <p class="text-sm font-semibold text-blue-800 mb-1"><i class="fab fa-paypal mr-1"></i>Pay via PayPal</p>
+          <p class="text-sm text-gray-600 mb-2">Send payment to:</p>
+          <div class="flex items-center gap-2">
+            <input id="paypal-email-show" type="text" readonly class="flex-1 bg-white border rounded-lg px-3 py-2 text-sm font-mono">
+            <button onclick="copyPayPal()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700">Copy</button>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <button id="btn-paypal" onclick="payWithPayPal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 flex items-center justify-center gap-2">
+            <i class="fab fa-paypal"></i> Pay with PayPal
+          </button>
+          <button id="btn-paid" onclick="confirmPaid()" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 hidden">
+            <i class="fas fa-check mr-2"></i>I've Paid - Confirm
+          </button>
+          <button onclick="closeModal()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-200">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="success-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl text-center p-8">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i class="fas fa-check text-green-600 text-2xl"></i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 mb-2">Enrollment Successful!</h3>
+      <p id="success-msg" class="text-gray-500 mb-6"></p>
+      <a href="/profile" class="block w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700">View My Plans</a>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    let selectedPlan = null;
+    let paypalEmail = '';
+
+    async function loadPlans() {
+      try {
+        const res = await fetch('/api/vet/discount-plans');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        const plans = data.data;
+        if (!plans.length) {
+          document.getElementById('plans-container').innerHTML = '<p class="text-center text-gray-400 col-span-3 py-12">No plans available</p>';
+          return;
+        }
+
+        document.getElementById('plans-container').innerHTML = plans.map(p => {
+          let features = [];
+          try { features = typeof p.features === 'string' ? JSON.parse(p.features) : p.features; } catch(e) {}
+          return `
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div class="gradient-blue p-6 text-white text-center">
+                <h3 class="text-xl font-bold mb-1">${p.name}</h3>
+                <div class="text-3xl font-bold mt-2">$${parseFloat(p.price).toFixed(2)}<span class="text-sm font-normal">/yr</span></div>
+              </div>
+              <div class="p-5">
+                ${p.description ? `<p class="text-gray-500 text-sm mb-4">${p.description}</p>` : ''}
+                <ul class="space-y-2 mb-5">
+                  ${features.map(f => `<li class="flex items-start gap-2 text-sm text-gray-600"><i class="fas fa-check-circle text-green-500 mt-0.5"></i>${f}</li>`).join('')}
+                </ul>
+                <button onclick='selectPlan(${JSON.stringify(p).replace(/'/g, "\\'")})' class="w-full gradient-blue text-white py-3 rounded-xl font-semibold hover:opacity-90">Select Plan</button>
+              </div>
+            </div>`;
+        }).join('');
+      } catch(e) {
+        document.getElementById('plans-container').innerHTML = `<p class="text-center text-red-400 col-span-3 py-12">Error: ${e.message}</p>`;
+      }
+    }
+
+    async function loadPayPalEmail() {
+      try {
+        const res = await fetch('/api/vet/settings/paypal');
+        const data = await res.json();
+        paypalEmail = data.paypal_email || '';
+      } catch(e) {}
+    }
+
+    function selectPlan(plan) {
+      if (!token) { window.location.href = '/login'; return; }
+      selectedPlan = plan;
+      document.getElementById('modal-plan-name').textContent = plan.name;
+      document.getElementById('modal-plan-title').textContent = plan.name;
+      document.getElementById('modal-price').textContent = '$' + parseFloat(plan.price).toFixed(2);
+      document.getElementById('paypal-info').classList.add('hidden');
+      document.getElementById('btn-paid').classList.add('hidden');
+      document.getElementById('btn-paypal').classList.remove('hidden');
+      document.getElementById('checkout-modal').classList.remove('hidden');
+    }
+
+    function closeModal() { document.getElementById('checkout-modal').classList.add('hidden'); }
+
+    function copyPayPal() {
+      const input = document.getElementById('paypal-email-show');
+      input.select();
+      document.execCommand('copy');
+      alert('PayPal email copied!');
+    }
+
+    function payWithPayPal() {
+      if (!paypalEmail) { alert('PayPal not configured.'); return; }
+      document.getElementById('paypal-email-show').value = paypalEmail;
+      document.getElementById('paypal-info').classList.remove('hidden');
+      document.getElementById('btn-paypal').classList.add('hidden');
+      document.getElementById('btn-paid').classList.remove('hidden');
+    }
+
+    async function confirmPaid() {
+      const btn = document.getElementById('btn-paid');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+      try {
+        const res = await fetch('/api/vet/enroll-vet', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan_id: selectedPlan.id, payment_method: 'paypal' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeModal();
+          document.getElementById('success-msg').textContent = 'You are now enrolled in ' + selectedPlan.name + '!';
+          document.getElementById('success-modal').classList.remove('hidden');
+        } else {
+          alert('Error: ' + data.message);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-check mr-2"></i>I\'ve Paid - Confirm';
+        }
+      } catch(e) {
+        alert('Error: ' + e.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check mr-2"></i>I\'ve Paid - Confirm';
+      }
+    }
+
+    loadPlans();
+    loadPayPalEmail();
+  </script>
+</body>
+</html>
