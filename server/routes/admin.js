@@ -330,7 +330,7 @@ router.get('/settings/paypal', adminAuth, async (req, res) => {
 router.put('/settings/paypal', adminAuth, async (req, res) => {
   try {
     const { paypal_email } = req.body;
-    await db.run('INSERT OR REPLACE INTO settings (key, value) VALUES ("paypal_email", $1)', [paypal_email || '']);
+    await db.run('INSERT INTO settings (key, value) VALUES ("paypal_email", $1) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', [paypal_email || '']);
     res.json({ success: true, message: 'PayPal email updated' });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
