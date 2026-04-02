@@ -47,6 +47,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((req, res) => {
+app.use('/api/payment', require('./server/routes/payment'));
   res.status(404).json({ success: false, message: 'Not found' });
 });
 
