@@ -83,6 +83,58 @@ async function loadVetPlansPage() {
   await loadVetPlans();
   document.getElementById('page-vetplans').remove();
 }
+
+
+// Add Product Modal functions
+function showAddProductModal() {
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-bold mb-4">Add New Product</h2>' +
+    '<form id="add-product-form" class="max-w-lg">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Product Name *</label><input type="text" id="add-name" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="add-desc" class="w-full px-3 py-2 border rounded" rows="3"></textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price *</label><input type="number" step="0.01" id="add-price" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="add-original-price" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="add-image" placeholder="https://..." class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="add-category" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="add-stock" value="0" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="add-status" checked class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Product</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div>' +
+    '</form></div>';
+
+  document.getElementById('add-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('add-name').value,
+      description: document.getElementById('add-desc').value,
+      price: parseFloat(document.getElementById('add-price').value) || 0,
+      original_price: parseFloat(document.getElementById('add-original-price').value) || null,
+      image: document.getElementById('add-image').value || 'https://placehold.co/400x400?text=Product',
+      category: document.getElementById('add-category').value || 'General',
+      stock: parseInt(document.getElementById('add-stock').value) || 0,
+      status: document.getElementById('add-status').checked ? 1 : 0
+    };
+    var token = localStorage.getItem('adminToken');
+    var res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product added!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
+}
 </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}
@@ -163,6 +215,58 @@ async function loadVetPlansPage() {
   document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
   await loadVetPlans();
   document.getElementById('page-vetplans').remove();
+}
+
+
+// Add Product Modal functions
+function showAddProductModal() {
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-bold mb-4">Add New Product</h2>' +
+    '<form id="add-product-form" class="max-w-lg">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Product Name *</label><input type="text" id="add-name" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="add-desc" class="w-full px-3 py-2 border rounded" rows="3"></textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price *</label><input type="number" step="0.01" id="add-price" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="add-original-price" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="add-image" placeholder="https://..." class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="add-category" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="add-stock" value="0" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="add-status" checked class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Product</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div>' +
+    '</form></div>';
+
+  document.getElementById('add-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('add-name').value,
+      description: document.getElementById('add-desc').value,
+      price: parseFloat(document.getElementById('add-price').value) || 0,
+      original_price: parseFloat(document.getElementById('add-original-price').value) || null,
+      image: document.getElementById('add-image').value || 'https://placehold.co/400x400?text=Product',
+      category: document.getElementById('add-category').value || 'General',
+      stock: parseInt(document.getElementById('add-stock').value) || 0,
+      status: document.getElementById('add-status').checked ? 1 : 0
+    };
+    var token = localStorage.getItem('adminToken');
+    var res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product added!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
 }
 </script>
   <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.sidebar-link{transition:all .2s}.sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:#0ea5e9}</style>
@@ -542,7 +646,7 @@ async function submitBalance(id) {
 }
 
 async function loadProductsPage() {
-  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><input type="text" id="product-search" placeholder="Search products..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Image</th><th class="px-4 py-3 text-left text-gray-500">Name</th><th class="px-4 py-3 text-left text-gray-500">Price</th><th class="px-4 py-3 text-left text-gray-500">Stock</th><th class="px-4 py-3 text-left text-gray-500">Sales</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="products-tbody"></tbody></table></div></div>`;
+  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><div class="flex items-center justify-between mb-6"><button onclick="showAddProductModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"><i class="fas fa-plus mr-1"></i> Add Product</button><input type="text" id="product-search" placeholder="Search products..." class="px-4 py-2 border rounded-lg w-64"></div><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">Image</th><th class="px-4 py-3 text-left text-gray-500">Name</th><th class="px-4 py-3 text-left text-gray-500">Price</th><th class="px-4 py-3 text-left text-gray-500">Stock</th><th class="px-4 py-3 text-left text-gray-500">Sales</th><th class="px-4 py-3 text-left text-gray-500">Status</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="products-tbody"></tbody></table></div></div>`;
   await loadProducts();
   document.getElementById('product-search').addEventListener('input', function() { loadProducts(1, this.value); });
 }
@@ -956,6 +1060,58 @@ async function loadVetPlansPage() {
   document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
   await loadVetPlans();
   document.getElementById('page-vetplans').remove();
+}
+
+
+// Add Product Modal functions
+function showAddProductModal() {
+  document.getElementById('page-content').innerHTML = '<div class="bg-white rounded-xl shadow-sm p-6">' +
+    '<h2 class="text-xl font-bold mb-4">Add New Product</h2>' +
+    '<form id="add-product-form" class="max-w-lg">' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Product Name *</label><input type="text" id="add-name" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Description</label><textarea id="add-desc" class="w-full px-3 py-2 border rounded" rows="3"></textarea></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Price *</label><input type="number" step="0.01" id="add-price" class="w-full px-3 py-2 border rounded" required></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Original Price</label><input type="number" step="0.01" id="add-original-price" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="block text-sm font-medium mb-1">Image URL</label><input type="text" id="add-image" placeholder="https://..." class="w-full px-3 py-2 border rounded"></div>' +
+    '<div class="grid grid-cols-2 gap-4 mb-4">' +
+    '<div><label class="block text-sm font-medium mb-1">Category</label><input type="text" id="add-category" class="w-full px-3 py-2 border rounded"></div>' +
+    '<div><label class="block text-sm font-medium mb-1">Stock</label><input type="number" id="add-stock" value="0" class="w-full px-3 py-2 border rounded"></div>' +
+    '</div>' +
+    '<div class="mb-4"><label class="flex items-center"><input type="checkbox" id="add-status" checked class="mr-2">Active</label></div>' +
+    '<div class="flex gap-2">' +
+    '<button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add Product</button>' +
+    '<button type="button" onclick="loadProductsPage()" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>' +
+    '</div>' +
+    '</form></div>';
+
+  document.getElementById('add-product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var product = {
+      name: document.getElementById('add-name').value,
+      description: document.getElementById('add-desc').value,
+      price: parseFloat(document.getElementById('add-price').value) || 0,
+      original_price: parseFloat(document.getElementById('add-original-price').value) || null,
+      image: document.getElementById('add-image').value || 'https://placehold.co/400x400?text=Product',
+      category: document.getElementById('add-category').value || 'General',
+      stock: parseInt(document.getElementById('add-stock').value) || 0,
+      status: document.getElementById('add-status').checked ? 1 : 0
+    };
+    var token = localStorage.getItem('adminToken');
+    var res = await fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify(product)
+    });
+    var data = await res.json();
+    if (data.success) {
+      alert('Product added!');
+      loadProductsPage();
+    } else {
+      alert('Error: ' + data.message);
+    }
+  });
 }
 </script>
 </body>
