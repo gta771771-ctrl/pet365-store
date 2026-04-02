@@ -22,6 +22,8 @@ async function init() {
   try {
     console.log('PostgreSQL connected');
 
+    await client.query(`CREATE TABLE IF NOT EXISTS settings (id SERIAL PRIMARY KEY, key VARCHAR(100) UNIQUE NOT NULL, value TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+    
     await client.query(`CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, username VARCHAR(100) UNIQUE NOT NULL, email VARCHAR(255), phone VARCHAR(50), password VARCHAR(255) NOT NULL, avatar TEXT, balance REAL DEFAULT 0, invite_code VARCHAR(20) UNIQUE, parent_id INTEGER, level INTEGER DEFAULT 0, status INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
     await client.query(`CREATE TABLE IF NOT EXISTS balance_logs (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, type VARCHAR(20) NOT NULL, amount REAL NOT NULL, before_balance REAL NOT NULL, after_balance REAL NOT NULL, reason TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
     await client.query(`CREATE TABLE IF NOT EXISTS products (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price REAL NOT NULL DEFAULT 0, original_price REAL, image TEXT, category VARCHAR(100), stock INTEGER DEFAULT 0, sales INTEGER DEFAULT 0, status INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
