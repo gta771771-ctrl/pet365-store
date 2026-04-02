@@ -71,6 +71,18 @@ async function deleteProduct(id) {
     alert('Error: ' + data.message);
   }
 }
+
+async function loadWellnessPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-wellness').innerHTML;
+  await loadWellness();
+  document.getElementById('page-wellness').remove();
+}
+
+async function loadVetPlansPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
+  await loadVetPlans();
+  document.getElementById('page-vetplans').remove();
+}
 </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}
@@ -139,6 +151,18 @@ async function deleteProduct(id) {
   } else {
     alert('Error: ' + data.message);
   }
+}
+
+async function loadWellnessPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-wellness').innerHTML;
+  await loadWellness();
+  document.getElementById('page-wellness').remove();
+}
+
+async function loadVetPlansPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
+  await loadVetPlans();
+  document.getElementById('page-vetplans').remove();
 }
 </script>
   <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.sidebar-link{transition:all .2s}.sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:#0ea5e9}</style>
@@ -339,7 +363,7 @@ async function deleteProduct(id) {
 
 <script>
 let adminToken = null;
-const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review' };
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans' };
 
 function checkAdminLogin() {
   adminToken = localStorage.getItem('adminToken');
@@ -411,6 +435,8 @@ async function loadPage(page) {
     case 'articles': await loadArticlesPage(); break;
     case 'balance': await loadBalancePage(); break;
     case 'files': await loadFilesPage(); break;
+    case 'wellness': await loadWellnessPage(); break;
+    case 'vetplans': await loadVetPlansPage(); break;
   }
 }
 
@@ -918,6 +944,18 @@ async function deleteProduct(id) {
   } else {
     alert('Error: ' + data.message);
   }
+}
+
+async function loadWellnessPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-wellness').innerHTML;
+  await loadWellness();
+  document.getElementById('page-wellness').remove();
+}
+
+async function loadVetPlansPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
+  await loadVetPlans();
+  document.getElementById('page-vetplans').remove();
 }
 </script>
 </body>
