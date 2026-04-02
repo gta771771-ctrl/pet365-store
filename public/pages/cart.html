@@ -232,6 +232,14 @@
       const useBalance = document.getElementById('use-balance').checked;
       const usePayPal = document.getElementById('use-paypal')?.checked;
 
+      // Must select a payment method
+      if (!useBalance && !usePayPal) {
+        alert('Please select a payment method (Balance or PayPal)');
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+        return;
+      }
+
       // If PayPal selected, show payment info
       if (usePayPal) {
         const total = parseFloat(document.getElementById('total-amount').textContent.replace('$', '')) || 0;
