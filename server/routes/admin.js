@@ -322,17 +322,40 @@ router.delete('/discount-plans/:id', adminAuth, async (req, res) => {
 // PayPal Settings
 router.get('/settings/paypal', adminAuth, async (req, res) => {
   try {
-    const row = await db.get('SELECT value FROM settings WHERE key = "paypal_email"');
+    const row = await db.get('SELECT value FROM settings WHERE key = $1', ['paypal_email']);
     res.json({ success: true, data: { paypal_email: row ? row.value : '' } });
-  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { 
+    // If table doesn't exist, try to create it
+    if (e.message.includes('does not exist')) {
+      try {
+        await db.run('CREATE TABLE IF NOT EXISTS settings (id SERIAL PRIMARY KEY, key VARCHAR(100) UNIQUE NOT NULL, value TEXT)');
+        return res.json({ success: true, data: { paypal_email: '' } });
+      } catch (e2) {
+        return res.status(500).json({ success: false, message: e2.message });
+      }
+    }
+    res.status(500).json({ success: false, message: e.message }); 
+  }
 });
 
 router.put('/settings/paypal', adminAuth, async (req, res) => {
   try {
     const { paypal_email } = req.body;
-    await db.run('INSERT INTO settings (key, value) VALUES ("paypal_email", $1) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', [paypal_email || '']);
+    await db.run('INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value', ['paypal_email', paypal_email || '']);
     res.json({ success: true, message: 'PayPal email updated' });
-  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+  } catch (e) { 
+    // If table doesn't exist, try to create it
+    if (e.message.includes('does not exist')) {
+      try {
+        await db.run('CREATE TABLE IF NOT EXISTS settings (id SERIAL PRIMARY KEY, key VARCHAR(100) UNIQUE NOT NULL, value TEXT)');
+        await db.run('INSERT INTO settings (key, value) VALUES ($1, $2)', ['paypal_email', paypal_email || '']);
+        return res.json({ success: true, message: 'PayPal email updated' });
+      } catch (e2) {
+        return res.status(500).json({ success: false, message: e2.message });
+      }
+    }
+    res.status(500).json({ success: false, message: e.message }); 
+  }
 });
 
 module.exports = router;
