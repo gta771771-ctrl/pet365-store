@@ -230,6 +230,36 @@
       btn.textContent = 'Processing...';
 
       const useBalance = document.getElementById('use-balance').checked;
+      const usePayPal = document.getElementById('use-paypal')?.checked;
+
+      // If PayPal selected, show payment info
+      if (usePayPal) {
+        const total = parseFloat(document.getElementById('total-amount').textContent.replace('$', '')) || 0;
+        if (total <= 0) { alert('No items to checkout'); return; }
+        
+        try {
+          const payRes = await fetch('/api/vet/settings/paypal');
+          const payData = await payRes.json();
+          
+          if (!payData.paypal_email) {
+            alert('PayPal not configured. Please use balance.');
+            return;
+          }
+          
+          const confirmed = confirm('To pay via PayPal:\nSend $' + total.toFixed(2) + ' to:\n' + payData.paypal_email + '\n\nAfter sending, click OK');
+          
+          if (!confirmed) {
+            btn.disabled = false;
+            btn.textContent = 'Place Order';
+            return;
+          }
+        } catch(e) {
+          alert('Error loading PayPal info');
+          btn.disabled = false;
+          btn.textContent = 'Place Order';
+          return;
+        }
+      }
 
       try {
         const res = await fetch('/api/orders', {
