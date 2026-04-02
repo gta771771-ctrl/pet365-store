@@ -6,11 +6,9 @@
     "start": "node server.js"
   },
   "description": "PetPaw",
-  "engines": {
-    "node": ">=18.0.0"
-  },
   "dependencies": {
-    "pg": "^8.11.3",
+    "pg": "^8.11.0",
+    "sql.js": "^1.10.2",
     "uuid": "^9.0.0",
     "jsonwebtoken": "^9.0.2",
     "express": "^4.18.2",
