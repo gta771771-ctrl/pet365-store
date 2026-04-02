@@ -60,7 +60,7 @@ router.get('/clinics', async (req, res) => {
 // Get PayPal settings
 router.get('/settings/paypal', async (req, res) => {
   try {
-    const settings = await db.get('SELECT value FROM settings WHERE key = "paypal_email"');
+    const settings = await db.get('SELECT value FROM settings WHERE key = $1', ['paypal_email']);
     res.json({ 
       success: true, 
       paypal_email: settings ? settings.value : '' 
