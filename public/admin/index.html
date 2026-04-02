@@ -135,6 +135,37 @@ function showAddProductModal() {
     }
   });
 }
+
+
+async function loadPayPalPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-paypal').innerHTML;
+  document.getElementById('page-paypal').remove();
+  
+  // Load current PayPal email
+  const res = await fetch('/api/admin/settings/paypal', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (data.success && data.data.paypal_email) {
+    document.getElementById('paypal-email').value = data.data.paypal_email;
+  }
+}
+
+async function savePayPalSettings() {
+  const email = document.getElementById('paypal-email').value.trim();
+  const status = document.getElementById('paypal-status');
+  
+  const res = await fetch('/api/admin/settings/paypal', {
+    method: 'PUT',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ paypal_email: email })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    status.innerHTML = '<span class="text-green-600">PayPal email saved successfully!</span>';
+  } else {
+    status.innerHTML = '<span class="text-red-600">Error: ' + data.message + '</span>';
+  }
+}
 </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script>tailwind.config={theme:{extend:{colors:{primary:'#0ea5e9',secondary:'#10b981'}}}}
@@ -268,6 +299,37 @@ function showAddProductModal() {
     }
   });
 }
+
+
+async function loadPayPalPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-paypal').innerHTML;
+  document.getElementById('page-paypal').remove();
+  
+  // Load current PayPal email
+  const res = await fetch('/api/admin/settings/paypal', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (data.success && data.data.paypal_email) {
+    document.getElementById('paypal-email').value = data.data.paypal_email;
+  }
+}
+
+async function savePayPalSettings() {
+  const email = document.getElementById('paypal-email').value.trim();
+  const status = document.getElementById('paypal-status');
+  
+  const res = await fetch('/api/admin/settings/paypal', {
+    method: 'PUT',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ paypal_email: email })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    status.innerHTML = '<span class="text-green-600">PayPal email saved successfully!</span>';
+  } else {
+    status.innerHTML = '<span class="text-red-600">Error: ' + data.message + '</span>';
+  }
+}
 </script>
   <style>.gradient-bg{background:linear-gradient(135deg,#0ea5e9 0%,#10b981 100%);}.sidebar-link{transition:all .2s}.sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:#0ea5e9}</style>
 </head>
@@ -315,6 +377,7 @@ function showAddProductModal() {
           <a href="#" data-page="files" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-file-alt w-5 mr-3"></i>File Review</a>
           <a href="#" data-page="wellness" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-leaf w-5 mr-3"></i>Wellness Plans</a>
           <a href="#" data-page="vetplans" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-hospital w-5 mr-3"></i>Vet Discount Plans</a>
+          <a href="#" data-page="paypal" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fab fa-paypal w-5 mr-3"></i>PayPal Settings</a>
         </div>
       </nav>
     </aside>
@@ -461,13 +524,31 @@ function showAddProductModal() {
       </div>
     </div>
 
-    </main>
+    
+    <!-- PayPal Settings Page -->
+    <div id="page-paypal" class="hidden">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">PayPal Settings</h2>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl">
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">PayPal Business Email</label>
+          <input type="email" id="paypal-email" placeholder="your-email@business.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <p class="text-sm text-gray-500 mt-1">Enter your PayPal email to receive payments for wellness plans and vet discount plans.</p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="savePayPalSettings()" class="bg-sky-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-600">Save PayPal Email</button>
+        </div>
+        <div id="paypal-status" class="mt-4 text-sm"></div>
+      </div>
+    </div>
+</main>
   </div>
 </div>
 
 <script>
 let adminToken = null;
-const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans' };
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans', paypal:'PayPal Settings' };
 
 function checkAdminLogin() {
   adminToken = localStorage.getItem('adminToken');
@@ -541,6 +622,7 @@ async function loadPage(page) {
     case 'files': await loadFilesPage(); break;
     case 'wellness': await loadWellnessPage(); break;
     case 'vetplans': await loadVetPlansPage(); break;
+    case 'paypal': await loadPayPalPage(); break;
   }
 }
 
@@ -1112,6 +1194,37 @@ function showAddProductModal() {
       alert('Error: ' + data.message);
     }
   });
+}
+
+
+async function loadPayPalPage() {
+  document.getElementById('page-content').innerHTML = document.getElementById('page-paypal').innerHTML;
+  document.getElementById('page-paypal').remove();
+  
+  // Load current PayPal email
+  const res = await fetch('/api/admin/settings/paypal', { headers: getAdminHeaders() });
+  const data = await res.json();
+  if (data.success && data.data.paypal_email) {
+    document.getElementById('paypal-email').value = data.data.paypal_email;
+  }
+}
+
+async function savePayPalSettings() {
+  const email = document.getElementById('paypal-email').value.trim();
+  const status = document.getElementById('paypal-status');
+  
+  const res = await fetch('/api/admin/settings/paypal', {
+    method: 'PUT',
+    headers: getAdminHeaders(),
+    body: JSON.stringify({ paypal_email: email })
+  });
+  const data = await res.json();
+  
+  if (data.success) {
+    status.innerHTML = '<span class="text-green-600">PayPal email saved successfully!</span>';
+  } else {
+    status.innerHTML = '<span class="text-red-600">Error: ' + data.message + '</span>';
+  }
 }
 </script>
 </body>
