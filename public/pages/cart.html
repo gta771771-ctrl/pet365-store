@@ -152,7 +152,7 @@
     }
 
     function updateSummary() {
-      const valid = cartItems.filter(i => i.product_status === 1 && i.stock > 0);
+      const valid = cartItems.filter(i => i.product_status === 1 && i.product_stock > 0);
       document.getElementById('checkout-items').innerHTML = valid.map(i => `
         <div class="flex justify-between text-sm">
           <span class="text-gray-600 line-clamp-1">${i.name} x${i.quantity}</span>
@@ -209,7 +209,7 @@
     }
 
     function openCheckout() {
-      const valid = cartItems.filter(i => i.product_status === 1 && i.stock > 0);
+      const valid = cartItems.filter(i => i.product_status === 1 && i.product_stock > 0);
       if (valid.length === 0) {
         alert('No items available for checkout');
         return;
@@ -266,7 +266,7 @@
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify({
-            items: cartItems.filter(i => i.product_status === 1 && i.stock > 0).map(i => ({
+            items: cartItems.filter(i => i.product_status === 1 && i.product_stock > 0).map(i => ({
               product_id: i.product_id,
               quantity: i.quantity,
               specification: i.specification
