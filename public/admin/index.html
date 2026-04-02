@@ -992,8 +992,13 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
       const method = id ? 'PUT' : 'POST';
       const r = await adminFetch(url, { method, body: JSON.stringify(body) });
       const d = await r.json();
-      if (d.success) { closeModal('wellness-modal'); loadWellness(); }
-      else alert(d.message || 'Failed to save');
+      if (d.success) { 
+        alert('Plan saved successfully!');
+        closeModal('wellness-modal'); 
+        loadWellness(); 
+      } else { 
+        alert('Error: ' + (d.message || 'Failed to save')); 
+      }
     }
 
     async function deleteWellness(id) {
