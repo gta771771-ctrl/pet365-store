@@ -121,8 +121,14 @@ async function run(sql, params) {
   const safeParams = (params || []).map(p => (p === null || p === undefined) ? null : p);
   const client = await pool.connect();
   try {
-    const result = await client.query(sql, safeParams);
-    return { changes: result.rowCount, lastInsertRowid: result.rows[0] ? result.rows[0].id : 0 };
+    // Add RETURNING id if it's an INSERT without RETURNING
+    let finalSql = sql;
+    if (sql.trim().toUpperCase().startsWith('INSERT') && !sql.toUpperCase().includes('RETURNING')) {
+      finalSql = sql + ' RETURNING id';
+    }
+    const result = await client.query(finalSql, safeParams);
+    const lastInsertRowid = result.rows[0] ? result.rows[0].id : 0;
+    return { changes: result.rowCount, lastInsertRowid };
   } finally {
     client.release();
   }
