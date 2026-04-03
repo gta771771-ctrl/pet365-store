@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -78,11 +78,6 @@ async function loadWellnessPage() {
   document.getElementById('page-wellness').remove();
 }
 
-async function loadVetPlansPage() {
-  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
-  await loadVetPlans();
-  document.getElementById('page-vetplans').remove();
-}
 
 
 // Add Product Modal functions
@@ -242,11 +237,6 @@ async function loadWellnessPage() {
   document.getElementById('page-wellness').remove();
 }
 
-async function loadVetPlansPage() {
-  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
-  await loadVetPlans();
-  document.getElementById('page-vetplans').remove();
-}
 
 
 // Add Product Modal functions
@@ -376,7 +366,6 @@ async function savePayPalSettings() {
           <a href="#" data-page="balance" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-wallet w-5 mr-3"></i>Balance Logs</a>
           <a href="#" data-page="files" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-file-alt w-5 mr-3"></i>File Review</a>
           <a href="#" data-page="wellness" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-leaf w-5 mr-3"></i>Wellness Plans</a>
-          <a href="#" data-page="vetplans" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fas fa-hospital w-5 mr-3"></i>Vet Discount Plans</a>
           <a href="#" data-page="paypal" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700"><i class="fab fa-paypal w-5 mr-3"></i>PayPal Settings</a>
         </div>
       </nav>
@@ -412,30 +401,6 @@ async function savePayPalSettings() {
             </tr>
           </thead>
           <tbody id="wellness-table"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Vet Discount Plans Page -->
-    <div id="page-vetplans" class="hidden">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">Vet Discount Plans</h2>
-        <button onclick="showVetPlanModal()" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-medium">
-          <i class="fas fa-plus mr-1"></i> Add Plan
-        </button>
-      </div>
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-gray-600">Name</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-600">Price/mo</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-600">Description</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-600">Status</th>
-              <th class="px-4 py-3 text-left font-semibold text-gray-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="vetplans-table"></tbody>
         </table>
       </div>
     </div>
@@ -487,44 +452,6 @@ async function savePayPalSettings() {
       </div>
     </div>
 
-    <!-- Vet Plan Modal -->
-    <div id="vetplan-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-2xl p-6 w-full max-w-lg mx-4">
-        <h3 class="text-lg font-bold mb-4" id="vetplan-modal-title">Add Vet Discount Plan</h3>
-        <input type="hidden" id="vetplan-id">
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Plan Name *</label>
-            <input type="text" id="vetplan-name" placeholder="e.g. Basic Vet Discount" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Description</label>
-            <textarea id="vetplan-desc" rows="2" placeholder="Plan description" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Price ($/mo) *</label>
-            <input type="number" id="vetplan-price" placeholder="9.99" step="0.01" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Features (one per line)</label>
-            <textarea id="vetplan-features" rows="4" placeholder="25% off vet bills&#10;5000+ network vets&#10;No waiting period" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
-            <select id="vetplan-status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
-            </select>
-          </div>
-        </div>
-        <div class="flex gap-3 mt-5">
-          <button onclick="saveVetPlan()" class="flex-1 bg-sky-500 text-white py-2 rounded-lg font-semibold text-sm hover:bg-sky-600">Save</button>
-          <button onclick="closeModal('vetplan-modal')" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold text-sm hover:bg-gray-300">Cancel</button>
-        </div>
-      </div>
-    </div>
-
-    
     <!-- PayPal Settings Page -->
     <div id="page-paypal" class="hidden">
       <div class="flex justify-between items-center mb-6">
@@ -534,7 +461,7 @@ async function savePayPalSettings() {
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-2">PayPal Business Email</label>
           <input type="email" id="paypal-email" placeholder="your-email@business.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-          <p class="text-sm text-gray-500 mt-1">Enter your PayPal email to receive payments for wellness plans and vet discount plans.</p>
+          <p class="text-sm text-gray-500 mt-1">Enter your PayPal email to receive payments for wellness plans.</p>
         </div>
         <div class="flex gap-3">
           <button onclick="savePayPalSettings()" class="bg-sky-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-600">Save PayPal Email</button>
@@ -548,7 +475,7 @@ async function savePayPalSettings() {
 
 <script>
 let adminToken = null;
-const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', vetplans:'Vet Discount Plans', paypal:'PayPal Settings' };
+const pageTitles = { dashboard:'Dashboard', users:'Users', products:'Products', orders:'Orders', articles:'Articles', balance:'Balance Logs', files:'File Review', wellness:'Wellness Plans', paypal:'PayPal Settings' };
 
 function checkAdminLogin() {
   adminToken = localStorage.getItem('adminToken');
@@ -621,7 +548,6 @@ async function loadPage(page) {
     case 'balance': await loadBalancePage(); break;
     case 'files': await loadFilesPage(); break;
     case 'wellness': await loadWellnessPage(); break;
-    case 'vetplans': await loadVetPlansPage(); break;
     case 'paypal': await loadPayPalPage(); break;
   }
 }
@@ -792,7 +718,30 @@ async function shipOrder(id) {
 }
 
 async function loadArticlesPage() {
-  document.getElementById('page-content').innerHTML = `<div class="bg-white rounded-xl shadow-sm p-6"><h3 class="font-bold mb-4">Articles</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-gray-50"><tr><th class="px-4 py-3 text-left text-gray-500">ID</th><th class="px-4 py-3 text-left text-gray-500">Title</th><th class="px-4 py-3 text-left text-gray-500">Category</th><th class="px-4 py-3 text-left text-gray-500">Views</th><th class="px-4 py-3 text-left text-gray-500">Actions</th></tr></thead><tbody id="articles-tbody"></tbody></table></div></div>`;
+  document.getElementById('page-content').innerHTML = `
+    <div class="bg-white rounded-xl shadow-sm p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-xl">Articles</h3>
+        <button onclick="showArticleModal()" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 text-sm font-medium">
+          <i class="fas fa-plus mr-1"></i> Add Article
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-gray-500">ID</th>
+              <th class="px-4 py-3 text-left text-gray-500">Title</th>
+              <th class="px-4 py-3 text-left text-gray-500">Category</th>
+              <th class="px-4 py-3 text-left text-gray-500">Views</th>
+              <th class="px-4 py-3 text-left text-gray-500">Status</th>
+              <th class="px-4 py-3 text-left text-gray-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="articles-tbody"></tbody>
+        </table>
+      </div>
+    </div>`;
   await loadArticles();
 }
 
@@ -807,9 +756,121 @@ async function loadArticles() {
       <td class="px-4 py-3 font-medium">${a.title}</td>
       <td class="px-4 py-3">${a.category || '-'}</td>
       <td class="px-4 py-3">${a.views}</td>
-      <td class="px-4 py-3"><button onclick="deleteArticle(${a.id})" class="text-red-500 hover:underline">Delete</button></td>
+      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs ${a.status==1?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${a.status==1?'Active':'Inactive'}</span></td>
+      <td class="px-4 py-3">
+        <button onclick='editArticle(${JSON.stringify(a).replace(/'/g, "\\'")})' class="text-sky-500 hover:text-sky-700 mr-3 text-xs font-medium">Edit</button>
+        <button onclick="deleteArticle(${a.id})" class="text-red-500 hover:text-red-700 text-xs font-medium">Delete</button>
+      </td>
     </tr>
-  `).join('');
+  `).join('') || '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No articles yet</td></tr>';
+}
+
+function showArticleModal(article = null) {
+  const isEdit = article !== null;
+  const modalHtml = `
+    <div id="article-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">${isEdit ? 'Edit Article' : 'Add New Article'}</h3>
+          <button onclick="closeArticleModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="article-form" class="space-y-4">
+          <input type="hidden" id="article-id" value="${isEdit ? article.id : ''}">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+            <input type="text" id="article-title" value="${isEdit ? article.title.replace(/"/g, '&quot;') : ''}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <input type="text" id="article-category" value="${isEdit ? (article.category || '') : ''}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="e.g. health, nutrition, tips">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+            <input type="text" id="article-image" value="${isEdit ? (article.image || '') : ''}" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="https://...">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Excerpt</label>
+            <textarea id="article-excerpt" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Brief summary...">${isEdit ? (article.excerpt || '') : ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Content *</label>
+            <textarea id="article-content" rows="10" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" placeholder="Full article content (supports HTML)">${isEdit ? (article.content || '') : ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select id="article-status" class="w-full px-3 py-2 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+              <option value="1" ${!isEdit || article.status==1 ? 'selected' : ''}>Active</option>
+              <option value="0" ${isEdit && article.status==0 ? 'selected' : ''}>Inactive</option>
+            </select>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="submit" class="flex-1 bg-sky-500 text-white py-2 rounded-lg font-semibold hover:bg-sky-600">
+              <i class="fas fa-save mr-1"></i> ${isEdit ? 'Update' : 'Create'}
+            </button>
+            <button type="button" onclick="closeArticleModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>`;
+  
+  // Remove existing modal if any
+  const existingModal = document.getElementById('article-modal');
+  if (existingModal) existingModal.remove();
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  
+  // Setup form submission
+  document.getElementById('article-form').addEventListener('submit', saveArticle);
+}
+
+function editArticle(article) {
+  showArticleModal(article);
+}
+
+function closeArticleModal() {
+  const modal = document.getElementById('article-modal');
+  if (modal) modal.remove();
+}
+
+async function saveArticle(e) {
+  e.preventDefault();
+  
+  const id = document.getElementById('article-id').value;
+  const article = {
+    title: document.getElementById('article-title').value.trim(),
+    category: document.getElementById('article-category').value.trim(),
+    image: document.getElementById('article-image').value.trim(),
+    excerpt: document.getElementById('article-excerpt').value.trim(),
+    content: document.getElementById('article-content').value.trim(),
+    status: parseInt(document.getElementById('article-status').value)
+  };
+  
+  if (!article.title) {
+    alert('Title is required');
+    return;
+  }
+  
+  const url = id ? `/api/admin/articles/${id}` : '/api/admin/articles';
+  const method = id ? 'PUT' : 'POST';
+  
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: getAdminHeaders(),
+      body: JSON.stringify(article)
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      closeArticleModal();
+      loadArticles();
+      alert(id ? 'Article updated!' : 'Article created!');
+    } else {
+      alert('Error: ' + (data.message || 'Failed to save'));
+    }
+  } catch (err) {
+    alert('Network error');
+  }
 }
 
 async function deleteArticle(id) {
@@ -1011,88 +1072,6 @@ document.addEventListener('DOMContentLoaded', checkAdminLogin);
       else alert(d.message || 'Failed to delete');
     }
 
-    // ===== VET DISCOUNT PLANS =====
-    async function loadVetPlans() {
-      const r = await adminFetch('/api/admin/discount-plans');
-      const d = await r.json();
-      const plans = d.data || [];
-      document.getElementById('vetplans-table').innerHTML = plans.map(p => `
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-          <td class="px-4 py-3 font-medium text-gray-900">${p.name}</td>
-          <td class="px-4 py-3 text-sky-600 font-bold">$${p.price}</td>
-          <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">${p.description || '-'}</td>
-          <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium ${p.status==1?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}">${p.status==1?'Active':'Inactive'}</span></td>
-          <td class="px-4 py-3">
-            <button onclick="editVetPlan(${JSON.stringify(p).replace(/"/g,'&quot;')})" class="text-sky-500 hover:text-sky-700 mr-3 text-xs font-medium">Edit</button>
-            <button onclick="deleteVetPlan(${p.id})" class="text-red-400 hover:text-red-600 text-xs font-medium">Delete</button>
-          </td>
-        </tr>`).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No plans yet</td></tr>';
-    }
-
-    function showVetPlanModal() {
-      console.log('showVetPlanModal called');
-      alert('Opening vet plan modal...');
-      document.getElementById('vetplan-id').value = '';
-      document.getElementById('vetplan-name').value = '';
-      document.getElementById('vetplan-desc').value = '';
-      document.getElementById('vetplan-price').value = '';
-      document.getElementById('vetplan-features').value = '';
-      document.getElementById('vetplan-status').value = '1';
-      document.getElementById('vetplan-modal-title').textContent = 'Add Vet Discount Plan';
-      document.getElementById('vetplan-modal').classList.remove('hidden');
-    }
-
-    function editVetPlan(p) {
-      document.getElementById('vetplan-id').value = p.id;
-      document.getElementById('vetplan-name').value = p.name;
-      document.getElementById('vetplan-desc').value = p.description || '';
-      document.getElementById('vetplan-price').value = p.price;
-      const features = Array.isArray(p.features) ? p.features.join('\n') : (p.features || '');
-      document.getElementById('vetplan-features').value = features;
-      document.getElementById('vetplan-status').value = p.status;
-      document.getElementById('vetplan-modal-title').textContent = 'Edit Vet Discount Plan';
-      document.getElementById('vetplan-modal').classList.remove('hidden');
-    }
-
-    async function saveVetPlan() {
-      const id = document.getElementById('vetplan-id').value;
-      const name = document.getElementById('vetplan-name').value.trim();
-      const price = parseFloat(document.getElementById('vetplan-price').value);
-      if (!name || !price) { alert('Name and price are required'); return; }
-      const featuresRaw = document.getElementById('vetplan-features').value.trim();
-      const features = featuresRaw ? featuresRaw.split('\n').map(f=>f.trim()).filter(Boolean) : [];
-      const body = {
-        name,
-        description: document.getElementById('vetplan-desc').value.trim(),
-        price,
-        features: JSON.stringify(features),
-        status: parseInt(document.getElementById('vetplan-status').value)
-      };
-      const url = id ? '/api/admin/discount-plans/' + id : '/api/admin/discount-plans';
-      const method = id ? 'PUT' : 'POST';
-      const r = await adminFetch(url, { method, body: JSON.stringify(body) });
-      const d = await r.json();
-      if (d.success) { 
-        alert('Plan saved successfully!');
-        closeModal('vetplan-modal'); 
-        loadVetPlans(); 
-      } else { 
-        alert('Error: ' + (d.message || 'Failed to save')); 
-      }
-    }
-
-    async function deleteVetPlan(id) {
-      if (!confirm('Delete this plan?')) return;
-      const r = await adminFetch('/api/admin/discount-plans/' + id, { method: 'DELETE' });
-      const d = await r.json();
-      if (d.success) loadVetPlans();
-      else alert(d.message || 'Failed to delete');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
 // Edit/Delete Products
 function editProduct(id, name, desc, price, original_price, image, category, stock, status) {
   var token = localStorage.getItem('adminToken');
@@ -1166,11 +1145,6 @@ async function loadWellnessPage() {
   document.getElementById('page-wellness').remove();
 }
 
-async function loadVetPlansPage() {
-  document.getElementById('page-content').innerHTML = document.getElementById('page-vetplans').innerHTML;
-  await loadVetPlans();
-  document.getElementById('page-vetplans').remove();
-}
 
 
 // Add Product Modal functions
