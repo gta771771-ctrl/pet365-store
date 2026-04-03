@@ -41,6 +41,8 @@ async function init() {
     await client.query(`CREATE TABLE IF NOT EXISTS vet_transactions (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, clinic_id INTEGER, amount REAL NOT NULL, savings REAL DEFAULT 0, status INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
     await client.query(`CREATE TABLE IF NOT EXISTS vet_clinics (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, address TEXT, phone VARCHAR(50), status INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
     await client.query(`CREATE TABLE IF NOT EXISTS pets (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, name VARCHAR(100) NOT NULL, type VARCHAR(50), breed VARCHAR(100), age REAL DEFAULT 0, gender VARCHAR(20), neutered VARCHAR(10), status INTEGER DEFAULT 1, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+    await client.query(`CREATE TABLE IF NOT EXISTS wellness_enrollments (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, plan_id INTEGER NOT NULL, pet_id INTEGER, payment_method VARCHAR(20), status INTEGER DEFAULT 1, enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+    await client.query(`CREATE TABLE IF NOT EXISTS vet_enrollments (id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, plan_id INTEGER NOT NULL, pet_id INTEGER, payment_method VARCHAR(20), status INTEGER DEFAULT 1, enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
 
     // Seed admin
     const adminResult = await client.query("SELECT id FROM admin_users WHERE username = 'admin'");
