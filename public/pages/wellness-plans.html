@@ -154,7 +154,10 @@
         const res = await fetch('/api/vet/settings/paypal');
         const data = await res.json();
         paypalEmail = data.paypal_email || '';
-      } catch(e) {}
+        console.log('PayPal email loaded:', paypalEmail);
+      } catch(e) {
+        console.error('Failed to load PayPal email:', e);
+      }
     }
 
     function selectPlan(plan) {
@@ -182,7 +185,17 @@
 
     function payWithPayPal() {
       if (!paypalEmail) {
-        alert('PayPal not configured. Please contact support.');
+        // Try to reload
+        loadPayPalEmail().then(() => {
+          if (!paypalEmail) {
+            alert('PayPal not configured. Please contact support.');
+          } else {
+            document.getElementById('paypal-email-show').value = paypalEmail;
+            document.getElementById('paypal-info').classList.remove('hidden');
+            document.getElementById('btn-paypal').classList.add('hidden');
+            document.getElementById('btn-paid').classList.remove('hidden');
+          }
+        });
         return;
       }
       document.getElementById('paypal-email-show').value = paypalEmail;
