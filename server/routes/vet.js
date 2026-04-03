@@ -73,10 +73,21 @@ router.get('/settings/paypal', async (req, res) => {
 // Wellness Plan Enrollment
 router.post('/enroll-wellness', auth, async (req, res) => {
   try {
-    const { plan_id, payment_method } = req.body;
+    const { plan_id, payment_method, pet_id } = req.body;
     const plan = await db.get('SELECT * FROM wellness_plans WHERE id = $1 AND status = 1', [plan_id]);
     if (!plan) return res.status(400).json({ success: false, message: 'Plan not found' });
-    res.json({ success: true, message: 'Enrolled successfully', plan });
+
+    // Check if user already enrolled
+    const existing = await db.get('SELECT id FROM wellness_enrollments WHERE user_id = $1 AND status = 1', [req.user.id]);
+    if (existing) return res.status(400).json({ success: false, message: 'You already have an active wellness plan' });
+
+    // Create enrollment
+    const result = await db.run(
+      'INSERT INTO wellness_enrollments (user_id, plan_id, pet_id, payment_method, status, enrolled_at) VALUES ($1, $2, $3, $4, 1, CURRENT_TIMESTAMP) RETURNING id',
+      [req.user.id, plan_id, pet_id || null, payment_method || 'paypal']
+    );
+
+    res.json({ success: true, message: 'Enrolled successfully', plan, enrollment_id: result.lastID });
   } catch (e) { 
     res.status(500).json({ success: false, message: e.message }); 
   }
@@ -85,10 +96,21 @@ router.post('/enroll-wellness', auth, async (req, res) => {
 // Vet Discount Plan Enrollment
 router.post('/enroll-vet', auth, async (req, res) => {
   try {
-    const { plan_id, payment_method } = req.body;
+    const { plan_id, payment_method, pet_id } = req.body;
     const plan = await db.get('SELECT * FROM vet_discount_plans WHERE id = $1 AND status = 1', [plan_id]);
     if (!plan) return res.status(400).json({ success: false, message: 'Plan not found' });
-    res.json({ success: true, message: 'Enrolled successfully', plan });
+
+    // Check if user already enrolled
+    const existing = await db.get('SELECT id FROM vet_enrollments WHERE user_id = $1 AND status = 1', [req.user.id]);
+    if (existing) return res.status(400).json({ success: false, message: 'You already have an active vet discount plan' });
+
+    // Create enrollment
+    const result = await db.run(
+      'INSERT INTO vet_enrollments (user_id, plan_id, pet_id, payment_method, status, enrolled_at) VALUES ($1, $2, $3, $4, 1, CURRENT_TIMESTAMP) RETURNING id',
+      [req.user.id, plan_id, pet_id || null, payment_method || 'paypal']
+    );
+
+    res.json({ success: true, message: 'Enrolled successfully', plan, enrollment_id: result.lastID });
   } catch (e) { 
     res.status(500).json({ success: false, message: e.message }); 
   }
