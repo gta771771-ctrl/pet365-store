@@ -37,8 +37,8 @@ app.get('/cart', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/c
 app.get('/orders', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/orders.html')));
 app.get('/team', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/team.html')));
 app.get('/upload', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/upload.html')));
-app.get('/vet-discount', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/vet-plans.html')));
-app.get('/wellness', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/wellness-plans.html')));
+app.get('/vet-discount', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/v2_wellness.html')));
+app.get('/wellness', (req, res) => res.sendFile(path.join(__dirname, 'public/pages/wellness.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public/admin/index.html')));
 
