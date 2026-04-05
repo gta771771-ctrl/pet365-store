@@ -232,7 +232,7 @@
   </footer>
 
   <script>
-    const API = 'https://pet365.store';
+    const API = 'https://pet365-store.onrender.com';
 
     async function loadPlans() {
       try {
@@ -250,6 +250,7 @@
             return `
             <div class="bg-white rounded-2xl shadow-lg border-2 ${t.popular ? 'border-sky-500' : 'border-gray-100'} p-6 plan-card relative">
               ${t.popular ? '<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-sky-500 text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>' : ''}
+              <div class="absolute -top-2 right-4 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">First Month Free!</div>
               <div class="text-center mb-5">
                 <div class="text-4xl mb-2">${t.icon}</div>
                 <h3 class="text-xl font-bold text-gray-900">${p.name}</h3>
@@ -267,9 +268,9 @@
                   </div>
                 `).join('')}
               </div>
-              <button onclick="subscribePlan(${p.id}, '${p.name}', ${p.price})" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center py-2.5 rounded-xl font-semibold text-sm transition">
-                Subscribe Now
-              </button>
+              <a href="/register?plan=wellness_${p.id}" class="block w-full ${t.popular ? 'gradient-bg' : 'bg-gray-100 hover:bg-gray-200'} text-white text-center py-2.5 rounded-xl font-semibold text-sm transition">
+                Get Started
+              </a>
             </div>`;
           }).join('');
         }
@@ -291,36 +292,6 @@
     }
 
     loadPlans();
-  
-  async function subscribePlan(planId, planName, price) {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Please login first to subscribe');
-      window.location.href = '/login';
-      return;
-    }
-    if (!confirm('Subscribe to ' + planName + ' for $' + price + '?')) return;
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          items: [{ product_id: planId, product_type: 'wellness_plan', quantity: 1, price: price }],
-          total: price,
-          type: 'wellness'
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('Subscription successful!');
-        window.location.href = '/orders';
-      } else {
-        alert('Error: ' + (data.message || 'Failed to subscribe'));
-      }
-    } catch(e) {
-      alert('Error: ' + e.message);
-    }
-  }
-</script>
+  </script>
 </body>
 </html>
